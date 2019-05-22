@@ -38,7 +38,7 @@ export default {
   plugins: [
     {
       src: '~plugins/AntDesign',
-      ssr: false
+      ssr: true
     }
   ],
 
