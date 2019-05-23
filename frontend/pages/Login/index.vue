@@ -8,17 +8,17 @@
               <a-form :form="form_login" @submit="login">
                 <a-form-item label="用户名" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
                   <a-input v-decorator="[
-                    'username',
-                    { rules: [{ required: true, message: '请输入邮箱/手机号'}] }
+                      'email',
+                      { rules: [{ required: true, message: '请输入邮箱'}] }
                     ]"
-                    placeholder="请输入邮箱/手机号">
+                    placeholder="请输入邮箱">
                     <a-icon slot="prefix" type="user" style="color:rgba(0,0,0,.25)" />
                   </a-input>
                 </a-form-item>
                 <a-form-item label="密码" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
                   <a-input v-decorator="[
-                    'password',
-                    { rules: [{ required: true, message: '请输入密码'}] }
+                      'password',
+                      { rules: [{ required: true, message: '请输入密码'}] }
                     ]"
                     type="password" 
                     placeholder="请输入密码">
@@ -40,8 +40,8 @@
                 <a-form :form="form_SMS" @submit="sendSMS">
                     <a-form-item label="手机号" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
                         <a-input v-decorator="[
-                            'phone',
-                            { rules: [{ required: true, message: '请输入手机号'}] }
+                              'phone',
+                              { rules: [{ required: true, message: '请输入手机号'}] }
                             ]" 
                             type="number"
                             placeholder="请输入手机号">
@@ -62,8 +62,7 @@
 
 <script>
   import qs from "qs";
-  //import md5 from 'js-md5'
-  //import Cookies from 'js-cookie'
+  import md5 from 'js-md5'
 
   export default {
     name: "Login",
@@ -76,31 +75,24 @@
     },
     methods: {
       login(e) {
-        e.preventDefault();
+        e.preventDefault()
         this.form_login.validateFields((err, values) => {
           if (!err) {
             this.$axios.post('/login', qs.stringify({
-                'username': this.username,
-                'password': md5(this.password)
-              }))
-              .then((response) => {
-                if (response.data == 0) {
-                  this.$message({
-                    message: '用户名不存在',
-                    type: 'error'
-                  })
-                } else if (response.data == 1) {
-                  this.$message({
-                    message: '密码错误',
-                    type: 'error'
-                  })
-                } else {
-                  Cookies.set('token', response.data)
-                  this.$router.push({
-                    path: '/'
-                  })
-                }
-              })
+              email: this.form_login.getFieldValue('email'),
+              password: md5(this.form_login.getFieldValue('password'))
+            }))
+            .then((response) => {
+              if (response.data == 1) {
+                this.$message.error('用户名不存在')
+              }
+              else if (response.data == 2) {
+                this.$message.error('密码错误')
+              } 
+              else {
+                this.$router.push({ path: '/' })
+              }
+            })
           }
         })
       },

@@ -14,11 +14,11 @@
         <a-menu-item key="whisper">
           <a-icon type="star" /> 悄悄话
         </a-menu-item>
-        <!-- login/register -->
-        <template v-if="username">
-          <a-avatar :src="avatar" />
+        <!-- auth -->
+        <template v-if="nickname">
+          <a-avatar :src="baseUrl + avatar" />
           <a-dropdown>
-            <a> {{ username }} <a-icon type="down" /></a>
+            <a> {{ nickname }} <a-icon type="down" /></a>
             <a-menu slot="overlay">
               <a-menu-item>
                 <router-link to="/profile">个人信息</router-link>
@@ -102,6 +102,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 const listData = []
 for (let i = 0; i < 5; i++) {
   listData.push({
@@ -118,7 +120,8 @@ export default {
   data() {
     return {
       navbar: null,
-      username: null,
+      nickname: null,
+      avatar: null,
 
       listData,
       actions: [
@@ -126,10 +129,27 @@ export default {
         { type: 'message', text: '2' },
       ],
     }
-  }
+  },
+  async asyncData({ $axios }) {
+    let nickname = null
+    let avatar = null
+
+    await $axios.get('getUserBaseInfo')
+    .then((response) => {
+      nickname = response.data.nickname,
+      avatar = response.data.avatar
+    })
+
+    return {
+      nickname: nickname,
+      avatar: avatar
+    }
+  },
+  computed: mapState({
+    baseUrl: state => state.baseUrl
+  })
 }
 </script>
 
 <style>
-
 </style>

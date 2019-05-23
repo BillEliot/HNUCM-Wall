@@ -30,7 +30,7 @@
                                             required: true, message: '请输入密码',
                                         },
                                         {
-                                            validator: validateToNextPassword,
+                                            validator: validator_password2,
                                         }],
                                     }
                                 ]"
@@ -42,17 +42,17 @@
                         <a-form-item v-bind="formItemLayout" label="确认密码">
                             <a-input
                                 v-decorator="[
-                                    'confirm',
+                                    'password2',
                                     {
                                         rules: [{
                                             required: true, message: '请输入密码',
                                         }, {
-                                            validator: compareToFirstPassword,
+                                            validator: validator_password,
                                         }],
                                     }
                                 ]"
                                 type="password"
-                                @blur="handleConfirmBlur"
+                                @blur="blur_password2"
                             >
                                 <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)" />
                             </a-input>
@@ -96,7 +96,7 @@
                         <a-form-item v-bind="formItemLayout" label="班级">
                             <a-cascader
                                 v-decorator="[
-                                    'residence',
+                                    'class',
                                     {
                                         initialValue: ['zhongyi', 'wuyi'],
                                         rules: [{ type: 'array', required: true, message: '请选择您的班级' }],
@@ -108,9 +108,12 @@
                         <a-form-item v-bind="formItemLayout" label="手机" extra="可以和TA更密切的交流">
                             <a-input
                                 v-decorator="[
-                                'phone',
-                                {
-                                }
+                                    'phone',
+                                    {
+                                        rules: [{
+                                            validator: validator_phone
+                                        }]
+                                    }
                                 ]"
                                 type="number"
                             >
@@ -120,9 +123,7 @@
                         <a-form-item v-bind="formItemLayout" label="QQ" extra="可以和TA更密切的交流">
                             <a-input
                                 v-decorator="[
-                                'qq',
-                                {
-                                }
+                                    'qq'
                                 ]"
                                 type="number"
                             >
@@ -132,9 +133,7 @@
                         <a-form-item v-bind="formItemLayout" label="微信" extra="可以和TA更密切的交流">
                             <a-input
                                 v-decorator="[
-                                'wechat',
-                                {
-                                }
+                                    'wechat',
                                 ]"
                             >
                                 <a-icon slot="prefix" type="wechat" style="color:rgba(0,0,0,.25)" />
@@ -145,13 +144,13 @@
                                 <a-col :span="12">
                                     <a-input
                                         v-decorator="[
-                                        'captcha',
-                                        { rules: [{ required: true, message: '请输入验证码' }] }
+                                            'captcha',
+                                            { rules: [{ required: true, message: '请输入验证码' }] }
                                         ]"
                                     />
                                     </a-col>
                                     <a-col :span="12">
-                                    <a-button>获取</a-button>
+                                    <a-button @click="getCaptcha">获取</a-button>
                                 </a-col>
                             </a-row>
                         </a-form-item>
@@ -177,7 +176,7 @@
                         </a-form-item>
                         <a-form-item v-bind="tailFormItemLayout">
                             <a>已有账号？现在登录～</a>
-                            <a-button type="primary" html-type="submit" style="width: 100%">注册</a-button>
+                            <a-button type="primary" html-type="submit" :disabled="!form_register.getFieldValue('agreement')" style="width: 100%">注册</a-button>
                         </a-form-item>
                     </a-form>
                 </div>
@@ -188,8 +187,7 @@
 
 <script>
 import qs from 'qs'
-//import md5 from 'js-md5'
-//import Cookies from 'js-cookie'
+import md5 from 'js-md5'
 import { mapState } from 'vuex'
 
 
@@ -225,116 +223,84 @@ export default {
     }
   },
   methods: {
-    handleConfirmBlur (e) {
-        const value = e.target.value
+    blur_password2 (e) {
+        var value = e.target.value
         this.confirmDirty = this.confirmDirty || !!value
     },
-    compareToFirstPassword (rule, value, callback) {
-        const form = this.form_register;
-        if (value && value !== form.getFieldValue('password')) {
+    validator_password (rule, value, callback) {
+        if (value && value !== this.form_register.getFieldValue('password')) {
             callback('两次密码不一致')
         } else {
             callback()
         }
     },
-    validateToNextPassword (rule, value, callback) {
-      const form = this.form_register;
+    validator_password2 (rule, value, callback) {
       if (value && this.confirmDirty) {
-          form.validateFields(['confirm'], { force: true })
+          this.form_register.validateFields(['password2'], { force: true })
       }
       callback()
     },
-    register() {
-        var cities = this.cities
-        var city = this.city.map(function (value, index, array) {
-            for (var itm of cities) {
-                if (itm.value == value) { cities = itm.children; return itm; }
-            }
-            return null;
-        })
-
-        this.$axios.post('/register', qs.stringify({
-            'username': this.username,
-            'truename': this.truename,
-            'password': md5(this.password),
-            'email': this.email,
-            'school': this.school,
-            'city': city[0].label + '/' + city[1].label + '/' + city[2].label,
-            'identity': this.identity,
-            'qq': this.qq,
-            'wechat': this.wechat,
-            'phone': this.phone,
-            'smsCode': this.smsCode,
-            'encrySmsCode': Cookies.get('encrySmsCode')
-        }))
-        .then((response) => {
-            this.loding = false
-            if (response.data == 1) {
-                this.$message({
-                    message: '用户名已存在',
-                    type: 'error'
+    validator_phone (rule, value, callback) {
+        var regex_phone = /^1[34578]\d{9}$/
+        if (value && !regex_phone.test(value)) {
+            callback('请输入合法的手机号')
+        }
+        callback()
+    },
+    register(e) {
+        e.preventDefault()
+        this.form_register.validateFields((err, values) => {
+            if (!err) {
+                this.$axios.post('/register', qs.stringify({
+                    email: this.form_register.getFieldValue('email'),
+                    password: md5(this.form_register.getFieldValue('password')),
+                    nickname: this.form_register.getFieldValue('nickname'),
+                    bio: this.form_register.getFieldValue('bio'),
+                    class: this.form_register.getFieldValue('class'),
+                    phone: this.form_register.getFieldValue('phone'),
+                    qq: this.form_register.getFieldValue('qq'),
+                    wechat: this.form_register.getFieldValue('wechat'),
+                    captcha: this.form_register.getFieldValue('captcha')
+                }))
+                .then((response) => {
+                    if (response.data == 1) {
+                        this.$message.error('验证码错误')
+                    }
+                    else if (response.data == 2) {
+                        this.$message.error('电子邮件已存在')
+                    }
+                    else if (response.data == 3) {
+                        this.$message.error('昵称已存在')
+                    }
+                    else if (response.data == 4) {
+                        this.$message.error('未知错误')
+                    }
+                    else if (response.data == 0) {
+                        this.$message.success('注册成功')
+                        this.$router.push({ path: '/login' })
+                    }
                 })
-            }
-            else if (response.data == 2) {
-                this.$message({
-                    message: '电子邮件已存在',
-                    type: 'error'
-                })
-            }
-            else if (response.data == 3) {
-                this.$message({
-                    message: '手机已存在',
-                    type: 'error'
-                })
-            }
-            else if (response.data == 4) {
-                this.$message({
-                    message: '验证码错误',
-                    type: 'error'
-                })
-            }
-            else if (response.data == 0) {
-                this.$message({
-                    message: '注册成功',
-                    type: 'success'
-                })
-                this.$router.push({path: '/login'})
             }
         })
     },
-    getSmsCode() {
-      if (this.phone) {
-        var time = 60
-        this.smsCodeDisabled = true
-        var countDown = window.setInterval(() => {
-            time--
-            this.smsCodeText = time + 's后重新发送'
-            if (time <= 0) {
-                window.clearInterval(countDown)
-                this.smsCodeDisabled = false
-                this.smsCodeText = "获取验证码"
-            }
-            }, 1000)
-        
-        this.$axios.post('/getSmsCode', qs.stringify({
-          'phone': this.phone
-        }))
-        .then((response) => {
-            if (response.data.response != 'OK') {
-                this.$message.error('短信发送失败')
-            }
-            else {
-                this.$message.success('短信已发送')
-                Cookies.set('encrySmsCode', response.data.code)
-            }
-        })
-      }
-      else {
-        this.$message({
-          message: '请输入手机号',
-          type: 'error'
-        })
-      }
+    getCaptcha() {
+        var email = this.form_register.getFieldValue('email')
+        if (email) {
+            this.$axios.post('getCaptcha', qs.stringify({
+                email: email
+            }))
+            .then((response) => {
+                if (response.data == 0) {
+                    this.$message.success('验证码已发往您的邮箱，请查收')
+                }
+                else {
+                    this.$message.error('发送失败, 请稍后重试或联系站长')
+                }
+            })
+        }
+        else {
+            this.$message.error('请输入您的邮箱')
+        }
     }
   },
   computed: mapState({
