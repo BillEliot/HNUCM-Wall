@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from django.conf import settings
 import smtplib, random
 from email.mime.text import MIMEText
 from email.header import Header
-
+import re, hashlib
 
 
 # mail
@@ -12,6 +13,8 @@ mail_host = 'smtp.126.com'
 mail_port = 465
 mail_user="billeliot@126.com"
 mail_pass="hnucmwall"
+# regex
+pattern_email = r'^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$'
 
 def generateCaptcha():
     return ''.join(random.choice('0123456789') for _ in range(6))
@@ -33,3 +36,22 @@ def sendCaptcha(receiver, captcha):
         return True
     except smtplib.SMTPException:
         return False
+
+
+
+def isEmail(email):
+    if (re.match(pattern_email, email)):
+        return True
+    else:
+        return False
+
+
+
+def formatName(name):
+    return hashlib.md5(name.encode('utf-8')).hexdigest() + '.jpg'
+
+
+
+def generateLoveImgPath(name):
+    return settings.MEDIA_ROOT + '/img/loveImg/' + name
+

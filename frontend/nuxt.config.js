@@ -39,6 +39,14 @@ export default {
     {
       src: '~plugins/AntDesign',
       ssr: true
+    },
+    {
+      src: '~plugins/VueInfiniteScroll',
+      ssr: false
+    },
+    {
+      src: '~plugins/VueVirtualScroller',
+      ssr: true
     }
   ],
 

@@ -79,8 +79,8 @@
         this.form_login.validateFields((err, values) => {
           if (!err) {
             this.$axios.post('/login', qs.stringify({
-              email: this.form_login.getFieldValue('email'),
-              password: md5(this.form_login.getFieldValue('password'))
+              email: values.email,
+              password: md5(values.password)
             }))
             .then((response) => {
               if (response.data == 1) {

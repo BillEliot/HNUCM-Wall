@@ -58,43 +58,77 @@
 
     <div class="container">
       <div class="row">
-        <!-- Top -->
-        <a-card hoverable style="width: 100%">
-          <template class="ant-card-actions" slot="actions">
-            <a-icon type="setting" />
-            <a-icon type="edit" />
-            <a-icon type="ellipsis" />
-          </template>
-          <a-card-meta
-            title="Card title"
-            description="This is the description">
-            <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-          </a-card-meta>
-          <img
-            src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
-            slot="cover"
-            style="height: 200px"
-          />
-        </a-card>
-        <!-- List -->
-        <div v-infinite-scroll="handleInfiniteOnLoad" :infinite-scroll-disabled="busy" :infinite-scroll-distance="10">
-          <a-list :dataSource="listData" itemLayout="vertical" size="large">
-            <div slot="footer"><b>ant design vue</b> footer part</div>
-            <a-list-item slot="renderItem" slot-scope="item, index" key="item.title">
-              <template slot="actions" v-for="{type, text} in actions">
-                <span :key="type">
-                  <a-icon :type="type" style="margin-right: 8px" />
-                  {{text}}
+        <div class="col-md-12 col-xs-12">
+          <!-- Top -->
+          <a-card hoverable style="width: 100%; margin-bottom: 20px">
+            <template class="ant-card-actions" slot="actions">
+              <a-icon type="setting" />
+              <a-icon type="edit" />
+              <a-icon type="ellipsis" />
+            </template>
+            <a-card-meta
+              title="Card title"
+              description="This is the description">
+              <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+            </a-card-meta>
+            <img
+              src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
+              slot="cover"
+              style="height: 200px"
+            />
+          </a-card>
+          <!-- List -->
+          <DynamicScroller
+            :items="loveList"
+            :min-item-size="50"
+            v-infinite-scroll="infiniteLoadLoveList"
+            :infinite-scroll-disabled="busy"
+            :infinite-scroll-distance="20"
+            style="width: 100%"
+            class="text-center"
+          >
+            <template v-slot="{ item, index, active }">
+              <DynamicScrollerItem
+                :item="item"
+                :active="active"
+                :size-dependencies="[
+                  item,
+                ]"
+                :data-index="index"
+                slot="renderItem"
+              >
+                <a-row>
+                  <a-col :span="12">
+                    <a-avatar :src="baseUrl + item.userFrom_avatar" />
+                    <div>
+                      <a>{{ item.userFrom_nickname }}</a>
+                      <p style="color: rgba(0, 0, 0, 0.45)">{{ item.userFrom_bio }}</p>
+                    </div>
+                  </a-col>
+                  <a-col :span="12">
+                    <a-avatar :src="baseUrl + item.userTo_avatar"/>
+                    <div>
+                      <a>{{ item.userTo_nickname }}</a>
+                      <p style="color: rgba(0, 0, 0, 0.45)">{{ item.userTo_bio }}</p>
+                    </div>
+                  </a-col>
+                </a-row>
+
+                <p style="padding: 10px; font-size: large">{{ item.content }}</p>
+                <img v-if="item.cover" style="width: 50%; margin-bottom: 10px;" :src="baseUrl + item.cover" />
+                <br />
+
+                <span style="margin-right: 20%">
+                  <a-icon type="like-o" /> 100
                 </span>
-              </template>
-              <img slot="extra" width="272" alt="logo" src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png" />
-              <a-list-item-meta :description="item.description">
-                <a slot="title" :href="item.href">{{item.title}}</a>
-                <a-avatar slot="avatar" :src="item.avatar" />
-              </a-list-item-meta>
-              {{item.content}}
-            </a-list-item>
-          </a-list>
+                <span style="margin-left: 20%">
+                  <a-icon type="message" /> 200
+                </span>
+                <hr />
+              </DynamicScrollerItem>
+            </template>
+          </DynamicScroller>
+          <a-spin v-if="loading" class="loading" />
         </div>
       </div>
     </div>
@@ -102,18 +136,8 @@
 </template>
 
 <script>
+import qs from 'qs'
 import { mapState } from 'vuex'
-
-const listData = []
-for (let i = 0; i < 5; i++) {
-  listData.push({
-    href: 'https://vue.ant.design/',
-    title: `ant design vue part ${i}`,
-    avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
-    description: 'Ant Design, a design language for background applications, is refined by Ant UED Team.',
-    content: 'We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.',
-  })
-}
 
 export default {
   name: 'Home',
@@ -123,16 +147,16 @@ export default {
       nickname: null,
       avatar: null,
 
-      listData,
-      actions: [
-        { type: 'like-o', text: '156' },
-        { type: 'message', text: '2' },
-      ],
+      loading: false,
+      busy: false,
+
+      loveList: []
     }
   },
   async asyncData({ $axios }) {
     let nickname = null
     let avatar = null
+    let loveList = []
 
     await $axios.get('getUserBaseInfo')
     .then((response) => {
@@ -140,9 +164,38 @@ export default {
       avatar = response.data.avatar
     })
 
+    await $axios.post('getLoveList', qs.stringify({
+      index: '0'
+    }))
+    .then((response) => {
+      loveList = response.data.info
+    })
+
     return {
       nickname: nickname,
-      avatar: avatar
+      avatar: avatar,
+      loveList: loveList
+    }
+  },
+  methods: {
+    logout() {
+
+    },
+    infiniteLoadLoveList() {
+      this.loading = true
+      this.$axios.post('getLoveList', qs.stringify({
+        index: this.loveList.length
+      }))
+      .then((response) => {
+        this.loading = false
+        if (response.data == 1) {
+          this.busy = true
+          this.$message.warning('到底啦～')
+        }
+        else {
+          this.loveList = this.loveList.concat(response.data.info)
+        }
+      })
     }
   },
   computed: mapState({
@@ -152,4 +205,10 @@ export default {
 </script>
 
 <style>
+.loading {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  text-align: center;
+}
 </style>

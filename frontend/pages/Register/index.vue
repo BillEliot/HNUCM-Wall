@@ -252,15 +252,15 @@ export default {
         this.form_register.validateFields((err, values) => {
             if (!err) {
                 this.$axios.post('/register', qs.stringify({
-                    email: this.form_register.getFieldValue('email'),
-                    password: md5(this.form_register.getFieldValue('password')),
-                    nickname: this.form_register.getFieldValue('nickname'),
-                    bio: this.form_register.getFieldValue('bio'),
-                    class: this.form_register.getFieldValue('class'),
-                    phone: this.form_register.getFieldValue('phone'),
-                    qq: this.form_register.getFieldValue('qq'),
-                    wechat: this.form_register.getFieldValue('wechat'),
-                    captcha: this.form_register.getFieldValue('captcha')
+                    email: values.email,
+                    password: md5(values.password),
+                    nickname: values.nickname,
+                    bio: values.bio,
+                    class: values.class,
+                    phone: values.phone,
+                    qq: values.qq,
+                    wechat: values.wechat,
+                    captcha: values.captcha
                 }))
                 .then((response) => {
                     if (response.data == 1) {
