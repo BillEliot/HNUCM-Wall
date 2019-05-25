@@ -21,12 +21,9 @@
             <a> {{ nickname }} <a-icon type="down" /></a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <router-link to="/profile">个人信息</router-link>
+                <router-link :to="{ path: 'profile', query: { nickname: nickname } }">个人信息</router-link>
               </a-menu-item>
               <a-menu-item @click="logout">注销</a-menu-item>
-              <a-menu-item>
-                <router-link to="/reserve">立即预约</router-link>
-              </a-menu-item>
             </a-menu>
           </a-dropdown>
         </template>
@@ -40,9 +37,9 @@
         </template>
       </a-menu>
 
-      <a-carousel autoplay>
-        <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1558497293209&di=48b70276e02fd17a558683fd8c62b0e4&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fblog%2F201503%2F07%2F20150307163030_aRPTy.jpeg">
-        <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1558497293209&di=48b70276e02fd17a558683fd8c62b0e4&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fblog%2F201503%2F07%2F20150307163030_aRPTy.jpeg">
+      <a-carousel autoplay style="height: 600px">
+        <img style="height: 600px" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1558497293209&di=48b70276e02fd17a558683fd8c62b0e4&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fblog%2F201503%2F07%2F20150307163030_aRPTy.jpeg">
+        <img style="height: 600px" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1558497293209&di=48b70276e02fd17a558683fd8c62b0e4&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fblog%2F201503%2F07%2F20150307163030_aRPTy.jpeg">
       </a-carousel>
       <!--
       <div class="hero-holder" style="position: relative">
@@ -82,7 +79,7 @@
             :items="loveList"
             :min-item-size="50"
             v-infinite-scroll="infiniteLoadLoveList"
-            :infinite-scroll-disabled="busy"
+            infinite-scroll-disabled="busy"
             :infinite-scroll-distance="20"
             style="width: 100%"
             class="text-center"
@@ -98,32 +95,49 @@
                 slot="renderItem"
               >
                 <a-row>
-                  <a-col :span="12">
-                    <a-avatar :src="baseUrl + item.userFrom_avatar" />
+                  <a-col :span="8">
+                    <a-avatar :size="64" :src="baseUrl + item.userFrom_avatar" />
                     <div>
-                      <a>{{ item.userFrom_nickname }}</a>
-                      <p style="color: rgba(0, 0, 0, 0.45)">{{ item.userFrom_bio }}</p>
+                      <a v-if="item.userFrom_nickname == 'Anony'">匿名</a>
+                      <a v-else @click="$router.push({ path: 'profile', query: { nickname: item.userFrom_nickname } })">{{ item.userFrom_nickname }}</a>
+                      <p class="bio">{{ item.userFrom_bio }}</p>
                     </div>
                   </a-col>
-                  <a-col :span="12">
-                    <a-avatar :src="baseUrl + item.userTo_avatar"/>
+                  <a-col :span="8">
+                    <a-avatar :size="64" src="https://s2.ax1x.com/2019/05/25/Vkx8oR.jpg" />
+                  </a-col>
+                  <a-col :span="8">
+                    <a-avatar :size="64" :src="baseUrl + item.userTo_avatar"/>
                     <div>
-                      <a>{{ item.userTo_nickname }}</a>
-                      <p style="color: rgba(0, 0, 0, 0.45)">{{ item.userTo_bio }}</p>
+                      <a v-if="item.userTo_nickname == 'Anony'">TA</a>
+                      <a v-else @click="$router.push({ path: 'profile', query: { nickname: item.userTo_nickname } })">{{ item.userTo_nickname }}</a>
+                      <p class="bio">{{ item.userTo_bio }}</p>
                     </div>
                   </a-col>
                 </a-row>
 
                 <p style="padding: 10px; font-size: large">{{ item.content }}</p>
-                <img v-if="item.cover" style="width: 50%; margin-bottom: 10px;" :src="baseUrl + item.cover" />
+                <img v-if="item.cover" style="width: 60%; margin-bottom: 10px;" :src="baseUrl + item.cover" @click="previewCover=true" />
+                <a-modal v-model="previewCover" :footer="null">
+                  <img style="width: 100%" :src="baseUrl + item.cover">
+                </a-modal>
                 <br />
 
-                <span style="margin-right: 20%">
-                  <a-icon type="like-o" /> 100
-                </span>
-                <span style="margin-left: 20%">
-                  <a-icon type="message" /> 200
-                </span>
+                <a-row>
+                  <a-col :span="8">
+                    <span>
+                      <a-icon type="like-o" :theme="item.isThumbsUp ? 'filled' : 'outlined'" @click="ThumbsUp(item)" style="cursor: pointer; fontSize: 24px" /> {{ item.thumbsUp }}
+                    </span>
+                  </a-col>
+                  <a-col :span="8">
+                    <a-button style="width: 100%">戳进去</a-button>
+                  </a-col>
+                  <a-col :span="8">
+                    <span>
+                      <a-icon type="message" style="fontSize: 24px" /> {{ item.comments }}
+                    </span>
+                  </a-col>
+                </a-row>
                 <hr />
               </DynamicScrollerItem>
             </template>
@@ -149,6 +163,7 @@ export default {
 
       loading: false,
       busy: false,
+      previewCover: false,
 
       loveList: []
     }
@@ -179,7 +194,9 @@ export default {
   },
   methods: {
     logout() {
-
+      this.$axios.get('logout')
+      this.nickname = null
+      this.avatar = null
     },
     infiniteLoadLoveList() {
       this.loading = true
@@ -196,6 +213,24 @@ export default {
           this.loveList = this.loveList.concat(response.data.info)
         }
       })
+    },
+    ThumbsUp(item) {
+      if (item.isThumbsUp) {
+        item.isThumbsUp = false
+        item.thumbsUp -= 1
+        this.$axios.post('thumbsUp', qs.stringify({
+          id: item.id,
+          isThumbsUp: false
+        }))
+      }
+      else {
+        item.isThumbsUp = true
+        item.thumbsUp += 1
+        this.$axios.post('thumbsUp', qs.stringify({
+          id: item.id,
+          isThumbsUp: true
+        }))
+      }
     }
   },
   computed: mapState({
@@ -204,7 +239,15 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+a {
+  text-decoration: none
+}
+
+.ant-carousel >>> .slick-dots {
+  height: auto
+}
+
 .loading {
   position: absolute;
   bottom: 40px;

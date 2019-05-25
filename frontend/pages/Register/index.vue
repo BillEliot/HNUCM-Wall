@@ -270,9 +270,12 @@ export default {
                         this.$message.error('电子邮件已存在')
                     }
                     else if (response.data == 3) {
-                        this.$message.error('昵称已存在')
+                        this.$message.error('非法昵称')
                     }
                     else if (response.data == 4) {
+                        this.$message.error('昵称已存在')
+                    }
+                    else if (response.data == 5) {
                         this.$message.error('未知错误')
                     }
                     else if (response.data == 0) {

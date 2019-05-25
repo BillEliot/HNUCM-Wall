@@ -26,8 +26,11 @@ class Comment(models.Model):
 
 
 class Love(models.Model):
+    isAnony = models.BooleanField(default=False)
     userFrom = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_from')
     userTo = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='user_to')
     content = models.TextField()
     images = models.ManyToManyField(Image, blank=True)
     comments = models.ManyToManyField(Comment, blank=True)
+    thumbsUpUser = models.ManyToManyField(User, blank=True)
+    

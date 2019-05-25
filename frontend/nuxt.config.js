@@ -28,8 +28,8 @@ export default {
   */
   css: [
     'ant-design-vue/dist/antd.css',
-    "@assets/css/style.css",
-    "@assets/css/bootstrap.min.css"
+    '@assets/css/bootstrap.min.css',
+    '@assets/css/style.css',
   ],
 
   /*
