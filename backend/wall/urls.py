@@ -7,15 +7,18 @@ urlpatterns = [
     path('login', views.login),
     path('logout',views.logout),
     path('getUserBaseInfo', views.getUserBaseInfo),
+    path('getUserProfile', views.getUserProfile),
     path('getCaptcha', views.getCaptcha),
     # Query
     path('searchUser', views.searchUser),
-    path('getUserProfile', views.getUserProfile),
     path('getLoveList', views.getLoveList),
+    path('getLoveDetail', views.getLoveDetail),
     path('thumbsUp', views.thumbsUp),
     # Upload
     path('uploadLoveImg', views.uploadLoveImg),
     path('removeLoveImg', views.removeLoveImg),
-    # Create
-    path('submitLove', views.submitLove)
+    # Submit
+    path('submitLove', views.submitLove),
+    path('submitComment', views.submitComment),
+    path('submitUserComment', views.submitUserComment)
 ]

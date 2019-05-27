@@ -4,70 +4,44 @@
             <div class="row">
                 <div class="col-md-2  col-sm-3 col-xs-6">
                     <div class="footer-logo">
-                        <div class="footer-logo-text">Refugee</div>
-                        <p>Powered By Download Manager</p>
+                        <div class="footer-logo-text">Eliot Drizzle</div>
+                        <p>I love you, but I can't tell you, you know.</p>
                     </div>
                 </div>
                 <div class="col-md-2 col-sm-3 col-xs-6">
-                    <h3>Links</h3>
+                    <h3>友情链接</h3>
                     <ul class="list-unstyled links">
-                        <li>About</li>
-                        <li>Services</li>
-                        <li>History</li>
-                        <li>Contact Us</li>
+                        <li>优敏思-UMS</li>
+                        <li>UMS-OJ</li>
+                        <li>Eliot's Blog</li>
                     </ul>
                 </div>
                 <div class="col-md-2 col-sm-3 col-xs-6">
-                    <h3>Pages</h3>
+                    <h3>HNUCM-Wall</h3>
                     <ul class="list-unstyled links">
-                        <li>About</li>
-                        <li>Services</li>
-                        <li>History</li>
-                        <li>Contact Us</li>
+                        <li>关于墙墙</li>
                     </ul>
                 </div>
                 <div class="col-md-2 col-sm-3 col-xs-6">
-                    <h3>Legal</h3>
+                    <h3>分享</h3>
                     <ul class="list-unstyled links">
-                        <li>About</li>
-                        <li>Services</li>
-                        <li>History</li>
-                        <li>Contact Us</li>
+                        <li>qq</li>
+                        <li>微信</li>
+                        <li>qq空间</li>
+                        <li>朋友圈</li>
                     </ul>
                 </div>
                 <div class="col-md-2 col-sm-3 col-xs-6">
-                    <h3>Social</h3>
+                    <h3>联系我</h3>
                     <ul class="list-unstyled links">
-                        <li><i class="ion ion-social-facebook"></i>facebok</li>
-                        <li><i class="ion ion-social-twitter"></i>Twitter</li>
-                        <li><i class="ion ion-social-linkedin"></i>Linkedin</li>
-                        <li><i class="ion ion-social-googleplus"></i>Google+</li>
-                    </ul>
-                </div>
-                <div class="col-md-2 col-sm-3 col-xs-6">
-                    <h3>Contact</h3>
-                    <ul class="list-unstyled links">
-                        <li>554A, Comflare </li>
-                        <li>Avenue</li>
-                        <li>01234 567 890</li>
-                        <li>hi@comflare.com</li>
+                        <li>2017级 中医学院 四班</li>
+                        <li>eliotwjz@gmail.com</li>
+                        <li>qq: 1161142536</li>
+                        <li>wechat: ieliot</li>
                     </ul>
                 </div>
             </div>
             <hr />
-            <!--
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="copyright">
-                        <p class="pull-left" >&copy;Designed  Scripteden 2016 /  More Templates <a href="http://www.cssmoban.com/" target="_blank" title="模板之家">模板之家</a> - Collect from <a href="http://www.cssmoban.com/" title="网页模板" target="_blank">网页模板</a></p>
-                        <ul class="list-inline pull-right">
-                            <li>Privacy Policy </li>
-                            <li>Terms Of Use</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            -->
         </div>
     </div>
 </template>

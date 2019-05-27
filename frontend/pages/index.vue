@@ -2,55 +2,22 @@
   <div>
     <header>
       <!-- navbar -->
-      <a-menu v-model="navbar" mode="horizontal" theme="dark" class="nav">
-        <a-sub-menu>
-          <span slot="title"><a-icon type="coffee" />表白墙</span>
-          <a-menu-item-group title="I Love U">
-            <a-menu-item key="love:1">表白墙</a-menu-item>
-            <a-menu-item key="love:2">我要表白</a-menu-item>
-          </a-menu-item-group>
-        </a-sub-menu>
+      <navbar :userBaseInfo="userBaseInfo" />
 
-        <a-menu-item key="whisper">
-          <a-icon type="star" /> 悄悄话
-        </a-menu-item>
-        <!-- auth -->
-        <template v-if="nickname">
-          <a-avatar :src="baseUrl + avatar" />
-          <a-dropdown>
-            <a> {{ nickname }} <a-icon type="down" /></a>
-            <a-menu slot="overlay">
-              <a-menu-item>
-                <router-link :to="{ path: 'profile', query: { nickname: nickname } }">个人信息</router-link>
-              </a-menu-item>
-              <a-menu-item @click="logout">注销</a-menu-item>
-            </a-menu>
-          </a-dropdown>
-        </template>
-        <template v-else>
-          <router-link to="/login">
-            <a-button type="primary" style="margin-right: 10px">登录</a-button>
-          </router-link>
-          <router-link to="/register">
-            <a-button>注册</a-button>
-          </router-link>
-        </template>
-      </a-menu>
-
-      <a-carousel autoplay style="height: 600px">
-        <img style="height: 600px" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1558497293209&di=48b70276e02fd17a558683fd8c62b0e4&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fblog%2F201503%2F07%2F20150307163030_aRPTy.jpeg">
-        <img style="height: 600px" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1558497293209&di=48b70276e02fd17a558683fd8c62b0e4&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fblog%2F201503%2F07%2F20150307163030_aRPTy.jpeg">
+      <a-carousel autoplay class="carousel">
+        <img src="https://s2.ax1x.com/2019/05/26/VV8t9s.jpg">
+        <img src="https://s2.ax1x.com/2019/05/26/VV8Jhj.jpg">
+        <img src="https://s2.ax1x.com/2019/05/26/VV8N3n.jpg">
       </a-carousel>
-      <!--
-      <div class="hero-holder" style="position: relative">
-        <div class="hero-message">
-          <h1 class="uppercase">优敏思</h1>
-          <h2 class="hero-subtitle">竞赛教育领跑者</h2>
+
+      <div class="banner-title">
+        <div class="text-center">
+          <h1>❤HNUCM❤</h1>
+          <h1>墙墙</h1>
         </div>
       </div>
-      -->
-    </header>
 
+    </header>
     <div style="margin-top: 100px"></div>
 
     <div class="container">
@@ -59,13 +26,11 @@
           <!-- Top -->
           <a-card hoverable style="width: 100%; margin-bottom: 20px">
             <template class="ant-card-actions" slot="actions">
-              <a-icon type="setting" />
-              <a-icon type="edit" />
-              <a-icon type="ellipsis" />
+              <a-icon type="heart" />
             </template>
             <a-card-meta
-              title="Card title"
-              description="This is the description">
+              title="Nickname"
+              description="表白的话">
               <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
             </a-card-meta>
             <img
@@ -96,10 +61,11 @@
               >
                 <a-row>
                   <a-col :span="8">
-                    <a-avatar :size="64" :src="baseUrl + item.userFrom_avatar" />
+                    <a-avatar v-if="item.userFrom_uid == -1" :size="64" :src="baseUrl + item.userFrom_avatar" />
+                    <a-avatar v-else :size="64" :src="baseUrl + item.userFrom_avatar" @click="$router.push({ path: 'profile', query: { uid: item.userFrom_uid } })" style="cursor: pointer;" />
                     <div>
-                      <a v-if="item.userFrom_nickname == 'Anony'">匿名</a>
-                      <a v-else @click="$router.push({ path: 'profile', query: { nickname: item.userFrom_nickname } })">{{ item.userFrom_nickname }}</a>
+                      <a v-if="item.userFrom_uid == -1">匿名</a>
+                      <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userFrom_uid } })">{{ item.userFrom_nickname }}</a>
                       <p class="bio">{{ item.userFrom_bio }}</p>
                     </div>
                   </a-col>
@@ -107,10 +73,11 @@
                     <a-avatar :size="64" src="https://s2.ax1x.com/2019/05/25/Vkx8oR.jpg" />
                   </a-col>
                   <a-col :span="8">
-                    <a-avatar :size="64" :src="baseUrl + item.userTo_avatar"/>
+                    <a-avatar v-if="item.userTo_uid == -1" :size="64" :src="baseUrl + item.userTo_avatar" />
+                    <a-avatar v-else :src="baseUrl + item.userTo_avatar" @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })" style="cursor: pointer;" />
                     <div>
-                      <a v-if="item.userTo_nickname == 'Anony'">TA</a>
-                      <a v-else @click="$router.push({ path: 'profile', query: { nickname: item.userTo_nickname } })">{{ item.userTo_nickname }}</a>
+                      <a v-if="item.userTo_uid == -1">{{ item.nameTo }}</a>
+                      <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })">{{ item.userTo_nickname }}</a>
                       <p class="bio">{{ item.userTo_bio }}</p>
                     </div>
                   </a-col>
@@ -125,16 +92,16 @@
 
                 <a-row>
                   <a-col :span="8">
-                    <span>
-                      <a-icon type="like-o" :theme="item.isThumbsUp ? 'filled' : 'outlined'" @click="ThumbsUp(item)" style="cursor: pointer; fontSize: 24px" /> {{ item.thumbsUp }}
+                    <span style="fontSize: 24px">
+                      <a-icon type="like-o" :theme="item.isThumbsUp ? 'filled' : 'outlined'" @click="ThumbsUp(item)" style="cursor: pointer;" /> {{ item.thumbsUp }}
                     </span>
                   </a-col>
                   <a-col :span="8">
-                    <a-button style="width: 100%">戳进去</a-button>
+                    <a-button style="width: 100%" @click="$router.push({ path: 'love/detail', query: { id: item.id } })">戳进去</a-button>
                   </a-col>
                   <a-col :span="8">
-                    <span>
-                      <a-icon type="message" style="fontSize: 24px" /> {{ item.comments }}
+                    <span style="fontSize: 24px">
+                      <a-icon type="message" /> {{ item.comments }}
                     </span>
                   </a-col>
                 </a-row>
@@ -152,15 +119,14 @@
 <script>
 import qs from 'qs'
 import { mapState } from 'vuex'
+import navbar from '~/components/navbar'
 
 export default {
-  name: 'Home',
+  components: {
+    navbar
+  },
   data() {
     return {
-      navbar: null,
-      nickname: null,
-      avatar: null,
-
       loading: false,
       busy: false,
       previewCover: false,
@@ -169,14 +135,12 @@ export default {
     }
   },
   async asyncData({ $axios }) {
-    let nickname = null
-    let avatar = null
+    let userBaseInfo = null
     let loveList = []
 
     await $axios.get('getUserBaseInfo')
     .then((response) => {
-      nickname = response.data.nickname,
-      avatar = response.data.avatar
+      userBaseInfo = response.data
     })
 
     await $axios.post('getLoveList', qs.stringify({
@@ -187,17 +151,11 @@ export default {
     })
 
     return {
-      nickname: nickname,
-      avatar: avatar,
+      userBaseInfo: userBaseInfo,
       loveList: loveList
     }
   },
   methods: {
-    logout() {
-      this.$axios.get('logout')
-      this.nickname = null
-      this.avatar = null
-    },
     infiniteLoadLoveList() {
       this.loading = true
       this.$axios.post('getLoveList', qs.stringify({
@@ -215,21 +173,26 @@ export default {
       })
     },
     ThumbsUp(item) {
-      if (item.isThumbsUp) {
-        item.isThumbsUp = false
-        item.thumbsUp -= 1
-        this.$axios.post('thumbsUp', qs.stringify({
-          id: item.id,
-          isThumbsUp: false
-        }))
+      if (this.userBaseInfo.uid == -1) {
+        this.$message.warning('先登录吧～')
       }
       else {
-        item.isThumbsUp = true
-        item.thumbsUp += 1
-        this.$axios.post('thumbsUp', qs.stringify({
-          id: item.id,
-          isThumbsUp: true
-        }))
+        if (item.isThumbsUp) {
+          item.isThumbsUp = false
+          item.thumbsUp -= 1
+          this.$axios.post('thumbsUp', qs.stringify({
+            id: item.id,
+            isThumbsUp: false
+          }))
+        }
+        else {
+          item.isThumbsUp = true
+          item.thumbsUp += 1
+          this.$axios.post('thumbsUp', qs.stringify({
+            id: item.id,
+            isThumbsUp: true
+          }))
+        }
       }
     }
   },
@@ -253,5 +216,42 @@ a {
   bottom: 40px;
   width: 100%;
   text-align: center;
+}
+
+.banner-title {
+  position: absolute;
+  width: 100%;
+  overflow: hidden;
+  display: block;
+  top: 10%;
+}
+.banner-title h1 {
+  font-size: 48px;
+  color: black;
+}
+
+.carousel {
+  height: 300px;
+}
+.carousel img {
+  height: 300px;
+  opacity: 0.7;
+  overflow: hidden;
+}
+
+@media (min-width: 1200px) {
+  .banner-title {
+    top: 20%;
+  }
+  .banner-title h1 {
+    font-size: 84px;
+  }
+
+  .carousel {
+    height: 600px;
+  }
+  .carousel img {
+    height: 600px;
+  }
 }
 </style>

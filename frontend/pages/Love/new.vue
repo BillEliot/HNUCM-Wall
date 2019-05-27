@@ -1,5 +1,7 @@
 <template>
     <div>
+        <!-- navbar -->
+        <navbar :userBaseInfo="userBaseInfo" />
         <!-- banner -->
         <div class="main-wrapper">
             <div class="page-title">
@@ -110,10 +112,12 @@
 <script>
 import qs from 'qs'
 import Footer from '~/components/footer.vue'
+import navbar from '~/components/navbar'
 
 export default {
   components: {
-      Footer
+      Footer,
+      navbar
   },
   data() {
     return {
@@ -144,6 +148,17 @@ export default {
         }
       },
     }
+  },
+  async asyncData({ $axios }) {
+      let userBaseInfo = null
+      await $axios.get('getUserBaseInfo')
+      .then((response) => {
+          userBaseInfo = response.data
+      })
+      
+      return {
+          userBaseInfo: userBaseInfo
+      }
   },
   methods: {
       searchUser(value) {

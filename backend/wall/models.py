@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class User(models.Model):
     avatar = models.ImageField(upload_to='img/avatar', default='img/avatar/default.png')
     email = models.EmailField()
@@ -10,6 +11,7 @@ class User(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     qq = models.CharField(max_length=20, blank=True, null=True)
     wechat = models.CharField(max_length=20, blank=True, null=True)
+    comments = models.ManyToManyField('Comment', blank=True, related_name='user_comments')
 
 
 
@@ -20,17 +22,20 @@ class Image(models.Model):
 
 class Comment(models.Model):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
     content = models.TextField()
+
+    class Meta:
+        ordering = ('-id',)
 
 
 
 class Love(models.Model):
     isAnony = models.BooleanField(default=False)
-    userFrom = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_from')
-    userTo = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='user_to')
+    userFrom = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user_from')
+    userTo = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, related_name='user_to')
+    nameTo = models.CharField(max_length=20, default='TA')
     content = models.TextField()
-    images = models.ManyToManyField(Image, blank=True)
-    comments = models.ManyToManyField(Comment, blank=True)
-    thumbsUpUser = models.ManyToManyField(User, blank=True)
-    
+    images = models.ManyToManyField('Image', blank=True)
+    comments = models.ManyToManyField('Comment', blank=True)
+    thumbsUpUser = models.ManyToManyField('User', blank=True)
