@@ -1,15 +1,23 @@
 <template>
     <a-menu v-model="navbar" mode="horizontal" theme="dark" class="nav">
         <a-sub-menu>
-            <span slot="title"><a-icon type="coffee" />表白墙</span>
-            <a-menu-item-group title="I Love U">
-            <a-menu-item key="love:1" @click="$router.push({ path: '/' })">表白墙</a-menu-item>
-            <a-menu-item key="love:2" @click="$router.push({ path: '/love/new' })">我要表白</a-menu-item>
+            <span slot="title"><a-icon type="coffee" />墙墙们</span>
+            <a-menu-item-group title="表白">
+                <a-menu-item key="love:1" @click="$router.push({ path: '/love' })">表白墙</a-menu-item>
+                <a-menu-item key="love:2" @click="navigate('/love/new')">我要表白</a-menu-item>
+            </a-menu-item-group>
+            <a-menu-item-group title="失物招领">
+                <a-menu-item key="lose:1" @click="$router.push({ path: '/lose' })">失物墙</a-menu-item>
+                <a-menu-item key="lose:2" @click="navigate('/lose/new')">发布失物</a-menu-item>
+            </a-menu-item-group>
+            <a-menu-item-group title="二手交易">
+                <a-menu-item key="deal:1" @click="$router.push({ path: '/deal' })">二手墙</a-menu-item>
+                <a-menu-item key="deal:2" @click="navigate('/deal/new')">发布物品</a-menu-item>
             </a-menu-item-group>
         </a-sub-menu>
 
-        <a-menu-item key="whisper">
-            <a-icon type="star" /> 悄悄话
+        <a-menu-item key="bank">
+            <a-icon type="star" /> 题库
         </a-menu-item>
         <!-- auth -->
         <template v-if="userBaseInfo.uid != -1">
@@ -48,9 +56,18 @@ export default {
   methods: {
       logout() {
         this.$axios.get('logout')
-        this.userBaseInfo.nickname = ''
-        this.userBaseInfo.avatar = ''
+        this.userBaseInfo.uid = -1
+        this.userBaseInfo.nickname = '赶快登录吧～'
+        this.userBaseInfo.avatar = '/media/img/avatar/anony.jpg'
       },
+      navigate(path) {
+          if (this.userBaseInfo.uid == -1) {
+              this.$message.warning('先登录吧～')
+          }
+          else {
+              this.$router.push({ path: path })
+          }
+      }
   },
   computed: mapState({
       baseUrl: state => state.baseUrl

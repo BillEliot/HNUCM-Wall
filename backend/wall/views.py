@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
-from .utils import *
+from utils.utils import *
 from datetime import timedelta
 import os
 
@@ -168,6 +168,24 @@ def getUserProfile(request):
                     'userTo_avatar': userToAvatar,
                     'content': love.content
                 })
+        # loses
+        loses = []
+        for lose in Lose.objects.filter(user=user):
+            loses.append({
+                'id': lose.id,
+                'isFound': lose.isFound,
+                'name': lose.name,
+                'description': lose.description
+            })
+        # deals
+        deals = []
+        for deal in Deal.objects.filter(user=user):
+            deals.append({
+                'id': deal.id,
+                'isSold': deal.isSold,
+                'name': deal.name,
+                'description': deal.description
+            })
 
         return JsonResponse({
             'uid': user.id,
@@ -180,7 +198,9 @@ def getUserProfile(request):
             'wechat': user.wechat,
             'class': user._class,
             'comments': comments,
-            'loves': loves
+            'loves': loves,
+            'loses': loses,
+            'deals': deals
         })
     except:
         return HttpResponse(1)
@@ -192,7 +212,7 @@ def uploadLoveImg(request):
     if request.method == 'POST':
         file_obj = request.FILES.get('files')
         name = formatName(file_obj.name)
-        f = open(generateLoveImgPath(name), 'wb')
+        f = open(generateUploadPath('/img/loveImg/', name), 'wb')
         for chunk in file_obj.chunks():
             f.write(chunk)
         f.close()
@@ -206,7 +226,59 @@ def removeLoveImg(request):
     name = request.POST.get('name')
     
     try:
-        os.remove(generateLoveImgPath(name))
+        os.remove(generateUploadPath('/img/loveImg', name))
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def uploadLoseImg(request):
+    if request.method == 'POST':
+        file_obj = request.FILES.get('files')
+        name = formatName(file_obj.name)
+        f = open(generateUploadPath('/img/loseImg/', name), 'wb')
+        for chunk in file_obj.chunks():
+            f.write(chunk)
+        f.close()
+
+        return HttpResponse(name)
+
+
+
+@csrf_exempt
+def removeLoseImg(request):
+    name = request.POST.get('name')
+    
+    try:
+        os.remove(generateUploadPath('/img/loseImg/', name))
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def uploadDealImg(request):
+    if request.method == 'POST':
+        file_obj = request.FILES.get('files')
+        name = formatName(file_obj.name)
+        f = open(generateUploadPath('/img/dealImg/', name), 'wb')
+        for chunk in file_obj.chunks():
+            f.write(chunk)
+        f.close()
+
+        return HttpResponse(name)
+
+
+
+@csrf_exempt
+def removeDealImg(request):
+    name = request.POST.get('name')
+    
+    try:
+        os.remove(generateUploadPath('/img/dealImg/', name))
         return HttpResponse(0)
     except:
         return HttpResponse(1)
@@ -255,11 +327,63 @@ def submitLove(request):
 
 
 @csrf_exempt
+def submitLose(request):
+    uid = request.POST.get('uid')
+    date = request.POST.get('date')
+    name = request.POST.get('name')
+    description = request.POST.get('description')
+    images = request.POST.getlist('images[]')
+
+    try:
+        lose = Lose.objects.create(
+            user = User.objects.get(id=uid),
+            date=date,
+            name=name,
+            description=description
+        )
+        if images:
+            for image in images:
+                lose.images.add(Image.objects.create(name='/media/img/loseImg/' + image))
+
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def submitDeal(request):
+    uid = request.POST.get('uid')
+    name = request.POST.get('name')
+    price = request.POST.get('price')
+    new = request.POST.get('new')
+    description = request.POST.get('description')
+    images = request.POST.getlist('images[]')
+
+    try:
+        deal = Deal.objects.create(
+            user=User.objects.get(id=uid),
+            name=name,
+            price=price,
+            new=new,
+            description=description
+        )
+        if images:
+            for image in images:
+                deal.images.add(Image.objects.create(name='/media/img/dealImg/' + image))
+        
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def getLoveList(request):
     index = int(request.POST.get('index'))
 
     if (index >= Love.objects.count()):
-        return HttpResponse(1)
+        return JsonResponse({ 'info': [] })
 
     listLove = []
     for love in Love.objects.all()[index:index+9]:
@@ -315,6 +439,64 @@ def getLoveList(request):
             'isThumbsUp': isThumbsUp
         })
     return JsonResponse({ 'info': listLove })
+
+
+
+@csrf_exempt
+def getLoseList(request):
+    index = int(request.POST.get('index'))
+
+    if (index >= Lose.objects.count()):
+        return JsonResponse({ 'info': [] })
+
+    listLose = []
+    for lose in Lose.objects.all()[index:index+9]:
+        # cover
+        if lose.images.count():
+            cover = lose.images.first().name
+        else:
+            cover = ''
+
+        listLose.append({
+            'id': lose.id,
+            'isFound': lose.isFound,
+            'avatar': lose.user.avatar.url,
+            'date': lose.date,
+            'name': lose.name,
+            'description': lose.description,
+            'cover': cover
+        })
+    return JsonResponse({ 'info': listLose })
+
+
+
+@csrf_exempt
+def getDealList(request):
+    index = int(request.POST.get('index'))
+
+    if (index >= Deal.objects.count()):
+        return JsonResponse({ 'info': [] })
+    
+    listDeal = []
+    for deal in Deal.objects.all()[index:index+9]:
+        # cover
+        if deal.images.count():
+            cover = deal.images.first().name
+        else:
+            cover = ''
+        
+        listDeal.append({
+            'id': deal.id,
+            'isSold': deal.isSold,
+            'avatar': deal.user.avatar.url,
+            'name': deal.name,
+            'price': deal.price,
+            'new': deal.new,
+            'description': deal.description,
+            'cover': cover
+        })
+
+    return JsonResponse({ 'info': listDeal })
 
 
 
@@ -380,6 +562,75 @@ def getLoveDetail(request):
 
 
 @csrf_exempt
+def getLoseDetail(request):
+    _id = request.POST.get('id')
+
+    try:
+        lose = Lose.objects.get(id=_id)
+        # comments
+        comments = []
+        for comment in lose.comments.all():
+            comments.append({
+                'uid': comment.user.id,
+                'avatar': comment.user.avatar.url,
+                'nickname': comment.user.nickname,
+                'content': comment.content
+            })
+        
+        return JsonResponse({
+            'id': lose.id,
+            'isFound': lose.isFound,
+            'uid': lose.user.id,
+            'nickname': lose.user.nickname,
+            'bio': lose.user.bio,
+            'avatar': lose.user.avatar.url,
+            'date': lose.date,
+            'name': lose.name,
+            'description': lose.description,
+            'images': list(lose.images.all().values_list('name', flat=True)),
+            'comments': comments
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def getDealDetail(request):
+    _id = request.POST.get('id')
+
+    try:
+        deal = Deal.objects.get(id=_id)
+        # comments
+        comments = []
+        for comment in deal.comments.all():
+            comments.append({
+                'uid': comment.user.id,
+                'avatar': comment.user.avatar.url,
+                'nickname': comment.user.nickname,
+                'content': comment.content
+            })
+        
+        return JsonResponse({
+            'id': deal.id,
+            'isSold': deal.isSold,
+            'uid': deal.user.id,
+            'nickname': deal.user.nickname,
+            'bio': deal.user.bio,
+            'avatar': deal.user.avatar.url,
+            'name': deal.name,
+            'price': deal.price,
+            'new': deal.new,
+            'description': deal.description,
+            'images': list(deal.images.all().values_list('name', flat=True)),
+            'comments': comments
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def thumbsUp(request):
     _id = request.POST.get('id')
     isThumbsUp = request.POST.get('isThumbsUp')
@@ -402,7 +653,24 @@ def thumbsUp(request):
 
 
 @csrf_exempt
-def submitComment(request):
+def submitUserComment(request):
+    uidTo = request.POST.get('uidTo')
+    uidFrom = request.POST.get('uidFrom')
+    content = request.POST.get('content')
+
+    try:
+        userTo = User.objects.get(id=uidTo)
+        userFrom = User.objects.get(id=uidFrom)
+        comment = Comment.objects.create(user=userFrom, content=content)
+        userTo.comments.add(comment)
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def submitLoveComment(request):
     _id = request.POST.get('id')
     uid = request.POST.get('uid')
     content = request.POST.get('content')
@@ -419,16 +687,33 @@ def submitComment(request):
 
 
 @csrf_exempt
-def submitUserComment(request):
-    uidTo = request.POST.get('uidTo')
-    uidFrom = request.POST.get('uidFrom')
+def submitLoseComment(request):
+    _id = request.POST.get('id')
+    uid = request.POST.get('uid')
     content = request.POST.get('content')
 
     try:
-        userTo = User.objects.get(id=uidTo)
-        userFrom = User.objects.get(id=uidFrom)
-        comment = Comment.objects.create(user=userFrom, content=content)
-        userTo.comments.add(comment)
+        lose = Lose.objects.get(id=_id)
+        user = User.objects.get(id=uid)
+        comment = Comment.objects.create(user=user, content=content)
+        lose.comments.add(comment)
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def submitDealComment(request):
+    _id = request.POST.get('id')
+    uid = request.POST.get('uid')
+    content = request.POST.get('content')
+
+    try:
+        deal = Deal.objects.get(id=_id)
+        user = User.objects.get(id=uid)
+        comment = Comment.objects.create(user=user, content=content)
+        deal.comments.add(comment)
         return HttpResponse(0)
     except:
         return HttpResponse(1)

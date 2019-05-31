@@ -16,8 +16,7 @@
             </div>
         </div>
         <div style="margin-top: 30px">
-            <a-button class="follow" type="primary">关注TA</a-button>
-            <a-button class="follow">偷偷关注TA</a-button>
+            <a-button class="follow" type="primary"><a-icon type="heart" />关注</a-button>
             <router-link to="/">
                 <a-button class="back" type="primary"><a-icon type="left" />返回主页</a-button>
             </router-link>
@@ -46,15 +45,16 @@
                     </a-cascader>
                 </div>
             </div>
+            <div style="margin-top: 30px"></div>
             <div class="row">
                 <div class="col-md-12">
                     <a-tabs defaultActiveKey="1">
+                        <!-- comments -->
                         <a-tab-pane key="1">
-                            <!-- comments -->
                             <span slot="tab">
                                 <a-icon type="highlight" />留言板
                             </span>
-                            <div id="comment" style="margin-top: 50px">
+                            <div id="comment">
                                 <a-list
                                     v-if="userProfile.comments.length"
                                     :pagination="commentPagination"
@@ -86,8 +86,8 @@
                                 </a-comment>
                             </div>
                         </a-tab-pane>
+                        <!-- love -->
                         <a-tab-pane key="2">
-                            <!-- loves -->
                             <span slot="tab">
                                 <a-icon type="heart" />TA的表白
                             </span>
@@ -105,6 +105,52 @@
                                         <a-avatar v-else slot="avatar" :src="baseUrl + item.userTo_avatar" @click="$router.push({ path: '/profile', query: { uid: item.userTo_uid } })" />
                                         <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/profile', query: { uid: item.userTo_uid } })">To {{ item.userTo_nickname }}</a>
                                         <p slot="content" class="text-left">{{ item.content }}</p>
+                                    </a-comment>
+                                </a-list-item>
+                            </a-list>
+                        </a-tab-pane>
+                        <!-- lose -->
+                        <a-tab-pane key="3">
+                            <span slot="tab">
+                                <a-icon type="book" />TA的失物
+                            </span>
+                            <a-list
+                                v-if="userProfile.loses.length"
+                                :pagination="losePagination"
+                                :dataSource="userProfile.loses"
+                                :header="`${userProfile.loses.length} 个丢失物品`"
+                                itemLayout="horizontal"
+                            >
+                                <div slot="footer"><b>这个人也太粗心了叭～</b></div>
+                                <a-list-item slot="renderItem" slot-scope="item, index">
+                                    <a-comment style="padding-left: 35px">
+                                        <p v-if="item.isFound" slot="avatar" class="found">已找到</p>
+                                        <p v-else slot="avatar" class="notfound">未找到</p>
+                                        <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/lose/detail', query: { id: item.id } })">{{ item.name }}</a>
+                                        <p slot="content" class="text-left">{{ item.description }}</p>
+                                    </a-comment>
+                                </a-list-item>
+                            </a-list>
+                        </a-tab-pane>
+                        <!-- deal -->
+                        <a-tab-pane key="4">
+                            <span slot="tab">
+                                <a-icon type="pay-circle" />TA的二手物品
+                            </span>
+                            <a-list
+                                v-if="userProfile.deals.length"
+                                :pagination="losePagination"
+                                :dataSource="userProfile.deals"
+                                :header="`${userProfile.deals.length} 个交易物品`"
+                                itemLayout="horizontal"
+                            >
+                                <div slot="footer"><b>这个人也太粗心了叭～</b></div>
+                                <a-list-item slot="renderItem" slot-scope="item, index">
+                                    <a-comment style="padding-left: 35px">
+                                        <p v-if="item.isSold" slot="avatar" class="found">已售出</p>
+                                        <p v-else slot="avatar" class="notfound">未售出</p>
+                                        <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/deal/detail', query: { id: item.id } })">{{ item.name }}</a>
+                                        <p slot="content" class="text-left">{{ item.description }}</p>
                                     </a-comment>
                                 </a-list-item>
                             </a-list>
@@ -143,6 +189,13 @@ export default {
                 }
             },
             lovePagination: {
+                current: 1,
+                pageSize: 10,
+                onChange (page) {
+                    this.current = page
+                }
+            },
+            losePagination: {
                 current: 1,
                 pageSize: 10,
                 onChange (page) {
@@ -244,5 +297,16 @@ a:hover {
 .back {
     float: left;
     margin-left: 20px
+}
+
+.found {
+    cursor: default;
+    color: green;
+    font-weight: bold;
+}
+.notfound {
+    cursor: default;
+    color: red;
+    font-weight: bold;
 }
 </style>

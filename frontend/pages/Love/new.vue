@@ -19,10 +19,8 @@
         <div class="container" style="margin-top: 50px">
             <div class="row">
                 <div class="col-md-12">
-                    <a-form
-                        :form="form_love"
-                        @submit="submitLove"
-                    >
+                    <a-button type="primary" @click="$router.push({ path: '/love' })"><a-icon type="left" />返回</a-button>
+                    <a-form :form="form_love" @submit="submitLove">
                         <a-form-item v-bind="formItemLayout">
                             <span slot="label">
                                 启用匿名？&nbsp;
@@ -74,8 +72,8 @@
                                     listType='picture'
                                     :multiple='true'
                                     :supportServerRender='true'
-                                    action="http://localhost:8000/api/uploadLoveImg"
-                                    @preview='previewLoveImg'
+                                    :action="baseUrl + '/api/uploadLoveImg'"
+                                    @preview='previewImg'
                             >
                             <p class="ant-upload-drag-icon">
                                 <a-icon type="inbox" />
@@ -87,8 +85,8 @@
                                 这些图片一定有着你对TA的思念吧～
                             </p>
                             </a-upload-dragger>
-                            <a-modal :visible="previewLoveImgVisible" :footer="null" @cancel="previewLoveImgVisible = false">
-                                <img style="width: 100%" :src="previewLoveImageUrl" />
+                            <a-modal :visible="previewImgVisible" :footer="null" @cancel="previewImgVisible = false">
+                                <img style="width: 100%" :src="previewImageUrl" />
                             </a-modal>
                         </a-form-item>
                         <a-form-item v-bind="tailFormItemLayout">
@@ -111,6 +109,7 @@
 
 <script>
 import qs from 'qs'
+import { mapState } from 'vuex'
 import Footer from '~/components/footer.vue'
 import navbar from '~/components/navbar'
 
@@ -123,8 +122,8 @@ export default {
     return {
       form_love: this.$form.createForm(this),
       users: [],
-      previewLoveImgVisible: false,
-      previewLoveImageUrl: null,
+      previewImgVisible: false,
+      previewImageUrl: null,
       formItemLayout: {
         labelCol: {
           xs: { span: 24 },
@@ -154,6 +153,9 @@ export default {
       await $axios.get('getUserBaseInfo')
       .then((response) => {
           userBaseInfo = response.data
+          if (userBaseInfo.uid == -1) {
+              redirect({ path: '/love' })
+          }
       })
       
       return {
@@ -200,9 +202,9 @@ export default {
           }
           return e.fileList
       },
-      previewLoveImg(file) {
-          this.previewLoveImageUrl = file.url || file.thumbUrl
-          this.previewLoveImgVisible = true
+      previewImg(file) {
+          this.previewImageUrl = file.url || file.thumbUrl
+          this.previewImgVisible = true
       },
       submitLove(e) {
           e.preventDefault()
@@ -228,13 +230,16 @@ export default {
                       }
                       else {
                           this.$message.success('成功发布告白～')
-                          this.$router.push({ path: '/' })
+                          this.$router.push({ path: '/love' })
                       }
                   })
               }
           })
       },
   },
+  computed: mapState({
+      baseUrl: state => state.baseUrl
+  })
 }
 </script>
 

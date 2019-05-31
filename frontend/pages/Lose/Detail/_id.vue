@@ -9,8 +9,8 @@
                 <div class="container">
                     <div class="title-holder">
                         <div class="title-text text-center">
-                            <h1>（づ￣3￣）づ╭❤～</h1>
-                            <p class="subheading">说出来了呢～</p>
+                            <h1>(＞﹏＜)</h1>
+                            <p class="subheading">要尽快找回来啊～</p>
                         </div>
                     </div>
                 </div>
@@ -23,46 +23,39 @@
                 <div class="text-center col-md-12">
                     <a-row>
                         <a-col :span="12">
-                            <a-avatar :size="64" :src="baseUrl + loveDetail.userFrom_avatar" />
-                            <div>
-                                <a v-if="loveDetail.userFrom_nickname == 'Anony'">匿名</a>
-                                <a v-else @click="$router.push({ path: '/profile', query: { uid: loveDetail.userFrom_uid } })">{{ loveDetail.userFrom_nickname }}</a>
-                                <p class="bio">{{ loveDetail.userFrom_bio }}</p>
-                            </div>
+                            <p class="losetime text-left">丢失日期：{{ loseDetail.date }}</p>
                         </a-col>
                         <a-col :span="12">
-                            <a-avatar :size="64" :src="baseUrl + loveDetail.userTo_avatar" />
-                            <div>
-                                <a v-if="loveDetail.userTo_nickname == 'Anony'">{{ loveDetail.nameTo }}</a>
-                                <a v-else @click="$router.push({ path: '/profile', query: { uid: loveDetail.userTo_uid } })">{{ loveDetail.userTo_nickname }}</a>
-                                <p class="bio">{{ loveDetail.userTo_bio }}</p>
-                            </div>
+                            <p v-if="loseDetail.isFound" class="found">已找到</p>
+                            <p v-else class="notfound">未找到</p>
                         </a-col>
                     </a-row>
+                    <a-avatar :size="64" :src="baseUrl + loseDetail.avatar" />
+                        <div>
+                            <a @click="$router.push({ path: '/profile', query: { uid: loseDetail.uid } })">{{ loseDetail.nickname }}</a>
+                            <p class="bio">{{ loseDetail.bio }}</p>
+                        </div>
                     <hr />
-                    <a-card title="对Ta的话">
-                        <p>{{ loveDetail.content }}</p>
+                    <a-card :title="loseDetail.name">
+                        <p>{{ loseDetail.description }}</p>
                     </a-card>
                     <hr />
                     <a-carousel arrows dotsClass="slick-dots slick-thumb">
                         <a slot="customPaging" slot-scope="props">
-                            <img :src="baseUrl + loveDetail.images[props.i]" />
+                            <img :src="baseUrl + loseDetail.images[props.i]" />
                         </a>
-                        <div v-for="image in loveDetail.images">
+                        <div v-for="image in loseDetail.images">
                             <img :src="baseUrl + image" />
                         </div>
                     </a-carousel>
                     <hr style="margin-top: 70px" />
                     <div>
-                        <div class="icon-left">
-                            <a-icon type="like-o" :theme="loveDetail.isThumbsUp ? 'filled' : 'outlined'" @click="ThumbsUp(loveDetail)" /> {{ loveDetail.thumbsUp }}
-                        </div>
                         <div class="icon-right">
-                            <a target='_blank' href="http://connect.qq.com/widget/shareqq/index.html?url=http://127.0.0.1&sharesource=qzone&title=湖南中医药大学表白墙&summary=描述&desc=简述">
+                            <a target='_blank' href="http://connect.qq.com/widget/shareqq/index.html?url=http://127.0.0.1&sharesource=qzone&title=湖南中医药大学失物墙&summary=描述&desc=简述">
                                 <icon-font type="icon-qq" />
                             </a>
                             <icon-font type="icon-wechat" />
-                            <a target='_blank' href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://127.0.0.1&sharesource=qzone&title=湖南中医药大学表白墙&summary=描述">
+                            <a target='_blank' href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://127.0.0.1&sharesource=qzone&title=湖南中医药大学失物墙&summary=描述">
                                 <icon-font type="icon-qzone" />
                             </a>
                             <icon-font type="icon-pyq" />
@@ -72,10 +65,10 @@
                     
                     <div id="comment" style="margin-top: 50px">
                         <a-list
-                            v-if="loveDetail.comments.length"
+                            v-if="loseDetail.comments.length"
                             :pagination="commentPagination"
-                            :dataSource="loveDetail.comments"
-                            :header="`${loveDetail.comments.length} 条回复`"
+                            :dataSource="loseDetail.comments"
+                            :header="`${loseDetail.comments.length} 条回复`"
                             itemLayout="horizontal"
                         >
                             <div slot="footer"><b>友善的回复是交流的起点</b></div>
@@ -142,19 +135,19 @@ export default {
   },
   async asyncData({ $axios, query, redirect }) {
       if (!query.id) {
-          redirect('/')
+          redirect('/lose')
       }
 
-      let loveDetail = null
-      await $axios.post('getLoveDetail', qs.stringify({
+      let loseDetail = null
+      await $axios.post('getLoseDetail', qs.stringify({
           id: query.id
       }))
       .then((response) => {
           if (response.data == 1) {
-              redirect('/')
+              redirect('/lose')
           }
           else {
-              loveDetail = response.data
+              loseDetail = response.data
           }
       })
 
@@ -165,34 +158,11 @@ export default {
       })
 
       return {
-          loveDetail: loveDetail,
+          loseDetail: loseDetail,
           userBaseInfo: userBaseInfo
       }
   },
   methods: {
-      ThumbsUp (loveDetail) {
-        if (this.userBaseInfo.uid == -1) {
-            this.$message.warning('先登录吧～')
-        }
-        else {
-            if (loveDetail.isThumbsUp) {
-                loveDetail.isThumbsUp = false
-                loveDetail.thumbsUp -= 1
-                this.$axios.post('thumbsUp', qs.stringify({
-                    id: loveDetail.id,
-                    isThumbsUp: false
-                }))
-            }
-            else {
-                loveDetail.isThumbsUp = true
-                loveDetail.thumbsUp += 1
-                this.$axios.post('thumbsUp', qs.stringify({
-                    id: loveDetail.id,
-                    isThumbsUp: true
-                }))
-            }
-        }
-      },
       submitComment() {
           if (!this.commentContent) {
               this.$message.warning('说点什么吧～')
@@ -202,8 +172,8 @@ export default {
           }
           else {
               this.commenting = true
-              this.$axios.post('submitLoveComment', qs.stringify({
-                  id: this.loveDetail.id,
+              this.$axios.post('submitLoseComment', qs.stringify({
+                  id: this.loseDetail.id,
                   uid: this.userBaseInfo.uid,
                   content: this.commentContent
               }))
@@ -213,7 +183,7 @@ export default {
                       this.$message.error('未知错误')
                   }
                   else {
-                      this.loveDetail.comments.unshift({
+                      this.loseDetail.comments.unshift({
                           avatar: this.userBaseInfo.avatar,
                           nickname: this.userBaseInfo.nickname,
                           content: this.commentContent
@@ -243,6 +213,26 @@ a:hover {
     color: blue;
 }
 
+.losetime {
+    color: indigo;
+    font-size: 28px;
+    font-weight: bold;
+}
+.found {
+    margin-top: 0;
+    float: right;
+    color: green;
+    font-size: 28px;
+    font-weight: bold;
+}
+.notfound {
+    margin-top: 0;
+    float: right;
+    color: red;
+    font-size: 28px;
+    font-weight: bold;
+}
+
 .anchor >>> .ant-anchor-link-title {
     text-decoration: none;
 }
@@ -254,11 +244,6 @@ a:hover {
 .icon-right >>> .anticon {
     font-size: 24px;
     cursor: pointer;
-}
-.icon-left {
-    position: absolute;
-    left: 10px;
-    font-size: 18px;
 }
 
 .ant-carousel >>> .slick-dots {

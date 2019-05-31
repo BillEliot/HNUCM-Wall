@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-import smtplib, random
+import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
-import re, hashlib
+import re, random, time
 
 
 # mail
@@ -48,10 +48,10 @@ def isEmail(email):
 
 
 def formatName(name):
-    return hashlib.md5(name.encode('utf-8')).hexdigest() + '.jpg'
+    return name + '_' + str(int(time.time())) + '.jpg'
 
 
 
-def generateLoveImgPath(name):
-    return settings.MEDIA_ROOT + '/img/loveImg/' + name
+def generateUploadPath(path, name):
+    return settings.MEDIA_ROOT + path + name
 
