@@ -62,9 +62,28 @@ class Deal(models.Model):
 
 
 
+class Bank(models.Model):
+    title = models.CharField(max_length=50)
+    A = models.CharField(max_length=50)
+    B = models.CharField(max_length=50)
+    C = models.CharField(max_length=50)
+    D = models.CharField(max_length=50)
+    isMultiple = models.BooleanField(default=False)
+    # After sorting, 'A', 'AB' or 'ABCDE'
+    answer = models.CharField(max_length=10)
+    bank = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.title
+
+
+
+
 class Image(models.Model):
     name = models.CharField(max_length=100, default='default')
 
+    def __str__(self):
+        return self.name
 
 
 class Comment(models.Model):

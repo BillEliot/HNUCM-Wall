@@ -16,7 +16,7 @@
             </a-menu-item-group>
         </a-sub-menu>
 
-        <a-menu-item key="bank">
+        <a-menu-item key="bank" @click="$router.push({ path: '/bank' })">
             <a-icon type="star" /> 题库
         </a-menu-item>
         <!-- auth -->
