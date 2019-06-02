@@ -74,12 +74,13 @@ export default {
         }
     }
   },
-  async asyncData({ $axios }) {
+  async asyncData({ $axios, store }) {
     let userBaseInfo = null
 
     await $axios.get('getUserBaseInfo')
     .then((response) => {
         userBaseInfo = response.data
+        console.log(store)
     })
 
     return {
