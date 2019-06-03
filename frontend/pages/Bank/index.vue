@@ -68,55 +68,23 @@
                 <a-form :form="form_bank" @submit="submitBank">
                     <a-form-item v-bind="formItemLayout">
                         <span slot="label">
-                            刷题方式&nbsp;
+                            刷题策略&nbsp;
                             <a-tooltip title="初期你可以刷全部题库，后期可以选择随机组题来检验自己">
                                 <a-icon type="question-circle-o" />
                             </a-tooltip>
                         </span>
-                        <a-select
+                        <a-radio-group
                             v-decorator="[
                                 'type',
                                 {
                                     initialValue: 'total'
                                 }
                             ]"
-                        >
-                            <a-select-option value="total">全部题库</a-select-option>
-                            <a-select-option value="random">随机组题</a-select-option>
-                        </a-select>
-                    </a-form-item>
-                    <a-form-item v-if="form_bank.getFieldValue('type') == 'total' || !form_bank.getFieldValue('type')" v-bind="formItemLayout" label="组题策略">
-                        <a-radio-group
-                            v-decorator="[
-                                'method',
-                                {
-                                    initialValue: 'order'
-                                }
-                            ]"
                             buttonStyle="solid"
                         >
-                            <a-radio-button value="order">顺序组题</a-radio-button>
-                            <a-radio-button value="range">范围组题</a-radio-button>
+                            <a-radio-button value="total">全部题库</a-radio-button>
+                            <a-radio-button value="random">随机组题</a-radio-button>
                         </a-radio-group>
-                    </a-form-item>
-                    <a-form-item v-bind="formItemLayout" v-if="form_bank.getFieldValue('method') == 'range'">
-                        <span slot="label">
-                            题库范围&nbsp;
-                            <a-tooltip title="如果您选择了多个题库，那么范围选择会作用于各个题库">
-                                <a-icon type="question-circle-o" />
-                            </a-tooltip>
-                        </span>
-                        <a-slider
-                            v-decorator="[
-                                'range',
-                                {
-                                    initialValue: [0, 100],
-                                    rules: [{ validator: validatorRange }]
-                                }
-                            ]"
-                            range
-                            :tipFormatter="rangeFormatter"
-                        />
                     </a-form-item>
                     <a-form-item v-bind="formItemLayout" label="选择题库">
                         <a-select
@@ -136,10 +104,118 @@
                             </a-select-opt-group>
                             <a-select-opt-group>
                                 <span slot="label"><a-icon type="appstore"/>西医类</span>
+                                <a-select-option value="免疫学">免疫学</a-select-option>
                                 <a-select-option value="组织学与胚胎学">组织学与胚胎学</a-select-option>
                                 <a-select-option value="生物化学">生物化学</a-select-option>
                             </a-select-opt-group>
                         </a-select>
+                    </a-form-item>
+                    <a-form-item v-if="form_bank.getFieldValue('type') == 'total' || !form_bank.getFieldValue('type')" v-bind="formItemLayout" label="题型选择" style="margin-bottom: 0">
+                        <a-checkbox
+                            v-decorator="[
+                                'questionType',
+                                {
+                                    valuePropName: 'checked',
+                                    initialValue: true,
+                                    getValueFromEvent: checkAllQuestionType
+                                }
+                            ]"
+                            :indeterminate="indeterminate"
+                        >
+                            全部
+                        </a-checkbox>
+                        <a-form-item>
+                            <a-checkbox-group
+                                v-decorator="[
+                                    'questionTypeOption',
+                                    {
+                                        initialValue: questionType,
+                                        getValueFromEvent: checkQuestionType
+                                    }
+                                ]"
+                                :options="questionType"
+                            />
+                        </a-form-item>
+                    </a-form-item>
+                    <a-form-item v-bind="formItemLayout" v-if="form_bank.getFieldValue('type') == 'random'">
+                        <span slot="label">
+                            题型占比&nbsp;
+                            <a-tooltip title="注意：【问答题】不会进行答案核对，【填空题】只有精准核对，没有模糊核对">
+                                <a-icon type="question-circle-o" />
+                            </a-tooltip>
+                        </span>
+                        <a-form-item label="单选-A型题目" class="questionPercent">
+                            <a-slider
+                                v-decorator="[
+                                    'singleA',
+                                    {
+                                        initialValue: 17
+                                    }
+                                ]"
+                                :tipFormatter="rangeFormatter"
+                                :marks="marks" 
+                            />
+                        </a-form-item>
+                        <a-form-item label="单选-B型题目" class="questionPercent">
+                            <a-slider
+                                v-decorator="[
+                                    'singleB',
+                                    {
+                                        initialValue: 17
+                                    }
+                                ]"
+                                :tipFormatter="rangeFormatter"
+                                :marks="marks" 
+                            />
+                        </a-form-item>
+                        <a-form-item label="多选" class="questionPercent">
+                            <a-slider
+                                v-decorator="[
+                                    'multiple',
+                                    {
+                                        initialValue: 17
+                                    }
+                                ]"
+                                :tipFormatter="rangeFormatter"
+                                :marks="marks" 
+                            />
+                        </a-form-item>
+                        <a-form-item label="填空" class="questionPercent">
+                            <a-slider
+                                v-decorator="[
+                                    'blank',
+                                    {
+                                        initialValue: 17
+                                    }
+                                ]"
+                                :tipFormatter="rangeFormatter"
+                                :marks="marks" 
+                            />
+                        </a-form-item>
+                        <a-form-item label="判断" class="questionPercent">
+                            <a-slider
+                                v-decorator="[
+                                    'judge',
+                                    {
+                                        initialValue: 16
+                                    }
+                                ]"
+                                :tipFormatter="rangeFormatter"
+                                :marks="marks" 
+                            />
+                        </a-form-item>
+                        <a-form-item label="问答" class="questionPercent">
+                            <a-slider
+                                v-decorator="[
+                                    'qa',
+                                    {
+                                        initialValue: 16
+                                    }
+                                ]"
+                                :tipFormatter="rangeFormatter"
+                                :marks="marks"
+                            />
+                        </a-form-item>
                     </a-form-item>
                     <a-form-item v-bind="formItemLayout">
                         <span slot="label">
@@ -170,7 +246,7 @@
 
 <script>
 import qs from 'qs'
-import { mapActions } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import Footer from '~/components/footer.vue'
 import navbar from '~/components/navbar'
 
@@ -182,9 +258,16 @@ export default {
   data() {
     return {
         form_bank: this.$form.createForm(this),
+        marks: {
+            0: '0',
+            16: '16%',
+            50: '50%',
+            100: '100%',
+        },
+        indeterminate: false,
         formItemLayout: {
             labelCol: {
-                span: 8
+                span: 9
             },
             wrapperCol: {
                 span: 8
@@ -194,7 +277,7 @@ export default {
             wrapperCol: {
                 md: {
                     span: 10,
-                    offset: 6,
+                    offset: 7,
                 },
                 sm: {
                     span: 10,
@@ -218,34 +301,56 @@ export default {
   },
   methods: {
       ...mapActions({
-          setBank: 'setBank'
+          setBank: 'bank/setBank'
       }),
-      validatorRange(rule, value, callback) {
-          if (value[0] == value[1]) {
-              callback('范围不对哦～')
-          }
-          callback()
+      checkAllQuestionType(e) {
+          this.indeterminate = false
+          this.form_bank.setFieldsValue({
+              'questionTypeOption': e.target.checked ? this.questionType : []
+          })
+          return e.target.checked
+      },
+      checkQuestionType(checkedList) {
+          this.indeterminate = !!checkedList.length && (checkedList.length < this.questionType.length)
+          this.form_bank.setFieldsValue({
+              'questionType': checkedList.length === this.questionType.length
+          })
+          return checkedList
       },
       submitBank(e) {
           e.preventDefault()
           this.form_bank.validateFields((err, values) => {
               if (!err) {
+                  let { singleA,singleB,multiple,blank,judge,qa } = this.form_bank.getFieldsValue(['singleA', 'singleB', 'multiple', 'blank', 'judge', 'qa'])
                   if (this.userBaseInfo.uid == -1) {
                       this.$message.warning('先登录吧～')
+                  }
+                  else if (singleA+singleB+multiple+blank+judge+qa > 100) {
+                      this.$message.warning('题型占比超过100%, 请检查')
+                  }
+                  else if (singleA+singleB+multiple+blank+judge+qa < 100) {
+                      this.$message.warning('题型占比不足100%, 请检查')
                   }
                   else {
                       this.$axios.post('submitBank', qs.stringify({
                           type: values.type,
-                          method: values.method,
-                          range: values.range,
-                          banks: values.banks
-                      }))
+                          banks: values.banks,
+                          singleA: values.singleA,
+                          singleB: values.singleB,
+                          multiple: values.multiple,
+                          blank: values.blank,
+                          judge: values.judge,
+                          qa: values.qa,
+                          questionType: values.questionTypeOption
+                      }, { arrayFormat: 'brackets' }))
                       .then((response) => {
                           if (response.data == 1) {
                               this.$message.error('未知错误')
                           }
                           else {
-                              this.setBank(response.data.questions, values.timer)
+                              console.log(response.data.info)
+                              this.setBank({ 'questions': response.data.info, 'timer': values.timer })
+                              this.$router.push({ path: '/bank/bank' })
                           }
                       })
                   }
@@ -255,7 +360,10 @@ export default {
       rangeFormatter(value) {
           return `${value} %`
       }
-  }
+  },
+  computed: mapState({
+      questionType: state => state.bank.questionType
+  })
 }
 </script>
 
@@ -273,5 +381,12 @@ export default {
     margin-bottom: 30px;
     color: green;
     text-align: center;
+}
+
+.questionPercent {
+    margin-bottom: 0;
+}
+.questionPercent >>> .ant-slider {
+    margin-top: 0
 }
 </style>

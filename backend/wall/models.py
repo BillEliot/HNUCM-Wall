@@ -1,5 +1,14 @@
 from django.db import models
 
+questionType = (
+    ('singleA', '单选-题型A'),
+    ('singleB', '单选-题型B'),
+    ('mutiple', '多选'),
+    ('blank', '填空'),
+    ('judge', '判断'),
+    ('qa', '问答'),
+)
+
 
 class User(models.Model):
     avatar = models.ImageField(upload_to='img/avatar', default='img/avatar/default.png')
@@ -64,18 +73,18 @@ class Deal(models.Model):
 
 class Bank(models.Model):
     title = models.CharField(max_length=50)
-    A = models.CharField(max_length=50)
-    B = models.CharField(max_length=50)
-    C = models.CharField(max_length=50)
-    D = models.CharField(max_length=50)
-    isMultiple = models.BooleanField(default=False)
-    # After sorting, 'A', 'AB' or 'ABCDE'
+    A = models.CharField(max_length=50, blank=True)
+    B = models.CharField(max_length=50, blank=True)
+    C = models.CharField(max_length=50, blank=True)
+    D = models.CharField(max_length=50, blank=True)
+    E = models.CharField(max_length=50, blank=True)
+    questionType = models.CharField(max_length=10, choices=questionType, default='singleA')
+    # After sorting, 'A', 'AB' or 'blank'
     answer = models.CharField(max_length=10)
     bank = models.CharField(max_length=20)
 
     def __str__(self):
         return self.title
-
 
 
 

@@ -379,6 +379,35 @@ def submitDeal(request):
 
 
 @csrf_exempt
+def submitBank(request):
+    _type = request.POST.get('type')
+    banks = transformBank(request.POST.getlist('banks[]'))
+    # total
+    questionType = transformQuestionType(request.POST.getlist('questionType[]'))
+    # random
+    singleA = request.POST.get('singleA')
+    singleB = request.POST.get('singleB')
+    multiple = request.POST.get('multiple')
+    blank = request.POST.get('blank')
+    judge = request.POST.get('judge')
+    qa = request.POST.get('qa')
+
+    questions = []
+    try:
+        if (_type == 'total'):
+            for bank in banks:
+                for _type in questionType:
+                    questions.extend(Bank.objects.filter(bank=bank).filter(questionType=_type).values())
+        elif (_type == 'random'):
+            pass
+        
+        return JsonResponse({ 'info': questions })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def getLoveList(request):
     index = int(request.POST.get('index'))
 

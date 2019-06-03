@@ -29,6 +29,7 @@ urlpatterns = [
     path('submitLove', views.submitLove),
     path('submitLose', views.submitLose),
     path('submitDeal', views.submitDeal),
+    path('submitBank', views.submitBank),
     path('submitLoveComment', views.submitLoveComment),
     path('submitLoseComment', views.submitLoseComment),
     path('submitUserComment', views.submitUserComment),
