@@ -56,33 +56,3 @@ def generateUploadPath(path, name):
     return settings.MEDIA_ROOT + path + name
 
 
-
-def transformBank(banks):
-    for index, bank in enumerate(banks):
-        if bank == '中医基础理论':
-            banks[index] = 'zyjcll'
-        elif bank == '医古文':
-            banks[index] = 'ygw'
-        elif bank == '免疫学':
-            banks[index] = 'myx'
-    
-    return banks
-
-
-
-def transformQuestionType(questionType):
-    for index, _type in enumerate(questionType):
-        if _type == '单选-A型题':
-            questionType[index] = 'singleA'
-        elif _type == '单选-B型题':
-            questionType[index] = 'singleB'
-        elif _type == '多选':
-            questionType[index] = 'multiple'
-        elif _type == '填空':
-            questionType[index] = 'blank'
-        elif _type == '判断':
-            questionType[index] = 'judge'
-        elif _type == '问答':
-            questionType[index] = 'qa'
-    
-    return questionType

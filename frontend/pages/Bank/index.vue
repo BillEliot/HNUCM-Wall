@@ -65,6 +65,9 @@
             <!-- Main -->
             <h1 class="title">开始刷题吧～</h1>
             <div class="text-left">
+                <div class="text-center notice">
+                    <span>题库数据来源于练习册</span>
+                </div>
                 <a-form :form="form_bank" @submit="submitBank">
                     <a-form-item v-bind="formItemLayout">
                         <span slot="label">
@@ -82,8 +85,8 @@
                             ]"
                             buttonStyle="solid"
                         >
-                            <a-radio-button value="total">全部题库</a-radio-button>
-                            <a-radio-button value="random">随机组题</a-radio-button>
+                            <a-radio-button value="total" @click="selectAllBank">全部题库</a-radio-button>
+                            <a-radio-button value="random" @click="selectRandomBank">随机组题</a-radio-button>
                         </a-radio-group>
                     </a-form-item>
                     <a-form-item v-bind="formItemLayout" label="选择题库">
@@ -91,56 +94,41 @@
                             v-decorator="[
                                 'banks',
                                 {
-                                    rules: [{ required: true, message: '请至少选择一个题库' }]
+                                    rules: [{ required: true, message: '请至少选择一个题库' }],
+                                    getValueFromEvent: selectBank
                                 }
                             ]"
-                            mode="multiple"
-                            placeholder="选择一个或多个题库吧"
                         >
                             <a-select-opt-group>
-                                <span slot="label"><a-icon type="smile"/>中医类</span>
+                                <span slot="label"><a-icon type="heat-map"/>中医类</span>
                                 <a-select-option value="中医基础理论">中医基础理论</a-select-option>
-                                <a-select-option value="医古文">医古文</a-select-option>
                             </a-select-opt-group>
                             <a-select-opt-group>
-                                <span slot="label"><a-icon type="appstore"/>西医类</span>
+                                <span slot="label"><a-icon type="stock"/>西医类</span>
                                 <a-select-option value="免疫学">免疫学</a-select-option>
-                                <a-select-option value="组织学与胚胎学">组织学与胚胎学</a-select-option>
-                                <a-select-option value="生物化学">生物化学</a-select-option>
                             </a-select-opt-group>
                         </a-select>
                     </a-form-item>
-                    <a-form-item v-if="form_bank.getFieldValue('type') == 'total' || !form_bank.getFieldValue('type')" v-bind="formItemLayout" label="题型选择" style="margin-bottom: 0">
-                        <a-checkbox
+                    <a-form-item v-bind="formItemLayout" label="选择子章">
+                        <a-transfer
                             v-decorator="[
-                                'questionType',
                                 {
-                                    valuePropName: 'checked',
-                                    initialValue: true,
-                                    getValueFromEvent: checkAllQuestionType
+                                    rules: [{ validator: validatorTransfer }],
+                                    getValueFromEvent: transferBanks
                                 }
                             ]"
-                            :indeterminate="indeterminate"
+                            :dataSource="subBanks"
+                            showSearch
+                            :filterOption="subBankFilter"
+                            :targetKeys="targetSubBanks"
+                            :render="item => item.title"
                         >
-                            全部
-                        </a-checkbox>
-                        <a-form-item>
-                            <a-checkbox-group
-                                v-decorator="[
-                                    'questionTypeOption',
-                                    {
-                                        initialValue: questionType,
-                                        getValueFromEvent: checkQuestionType
-                                    }
-                                ]"
-                                :options="questionType"
-                            />
-                        </a-form-item>
+                        </a-transfer>
                     </a-form-item>
-                    <a-form-item v-bind="formItemLayout" v-if="form_bank.getFieldValue('type') == 'random'">
+                    <a-form-item v-bind="formItemLayout">
                         <span slot="label">
                             题型占比&nbsp;
-                            <a-tooltip title="注意：【问答题】不会进行答案核对，【填空题】只有精准核对，没有模糊核对">
+                            <a-tooltip title="当策略为【全部题库】时，题型占比为【该题型占所选题库该题型的百分比】；当策略为【随机组题】时，题型占比为【该题型占所有题型的百分比】">
                                 <a-icon type="question-circle-o" />
                             </a-tooltip>
                         </span>
@@ -149,7 +137,7 @@
                                 v-decorator="[
                                     'singleA',
                                     {
-                                        initialValue: 17
+                                        initialValue: 100
                                     }
                                 ]"
                                 :tipFormatter="rangeFormatter"
@@ -161,7 +149,7 @@
                                 v-decorator="[
                                     'singleB',
                                     {
-                                        initialValue: 17
+                                        initialValue: 100
                                     }
                                 ]"
                                 :tipFormatter="rangeFormatter"
@@ -173,7 +161,7 @@
                                 v-decorator="[
                                     'multiple',
                                     {
-                                        initialValue: 17
+                                        initialValue: 100
                                     }
                                 ]"
                                 :tipFormatter="rangeFormatter"
@@ -185,7 +173,7 @@
                                 v-decorator="[
                                     'blank',
                                     {
-                                        initialValue: 17
+                                        initialValue: 100
                                     }
                                 ]"
                                 :tipFormatter="rangeFormatter"
@@ -197,7 +185,7 @@
                                 v-decorator="[
                                     'judge',
                                     {
-                                        initialValue: 16
+                                        initialValue: 100
                                     }
                                 ]"
                                 :tipFormatter="rangeFormatter"
@@ -209,7 +197,7 @@
                                 v-decorator="[
                                     'qa',
                                     {
-                                        initialValue: 16
+                                        initialValue: 100
                                     }
                                 ]"
                                 :tipFormatter="rangeFormatter"
@@ -246,9 +234,10 @@
 
 <script>
 import qs from 'qs'
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex'
 import Footer from '~/components/footer.vue'
 import navbar from '~/components/navbar'
+
 
 export default {
   components: {
@@ -258,25 +247,26 @@ export default {
   data() {
     return {
         form_bank: this.$form.createForm(this),
+        subBanks: [],
+        targetSubBanks: [],
         marks: {
             0: '0',
             16: '16%',
             50: '50%',
             100: '100%',
         },
-        indeterminate: false,
         formItemLayout: {
             labelCol: {
-                span: 9
+                span: 8,
             },
             wrapperCol: {
-                span: 8
+                span: 10
             },
         },
         tailFormItemLayout: {
             wrapperCol: {
                 md: {
-                    span: 10,
+                    span: 12,
                     offset: 7,
                 },
                 sm: {
@@ -303,19 +293,41 @@ export default {
       ...mapActions({
           setBank: 'bank/setBank'
       }),
-      checkAllQuestionType(e) {
-          this.indeterminate = false
-          this.form_bank.setFieldsValue({
-              'questionTypeOption': e.target.checked ? this.questionType : []
-          })
-          return e.target.checked
+      validatorTransfer(rule, value, callback) {
+          if (this.targetSubBanks.length == 0) {
+              callback('请至少选择一个子章节')
+          }
+          callback()
       },
-      checkQuestionType(checkedList) {
-          this.indeterminate = !!checkedList.length && (checkedList.length < this.questionType.length)
+      selectAllBank() {
           this.form_bank.setFieldsValue({
-              'questionType': checkedList.length === this.questionType.length
+              'singleA': 100,
+              'singleB': 100,
+              'multiple': 100,
+              'blank': 100,
+              'judge': 100,
+              'qa': 100
           })
-          return checkedList
+      },
+      selectRandomBank() {
+          this.form_bank.setFieldsValue({
+              'singleA': 17,
+              'singleB': 17,
+              'multiple': 17,
+              'blank': 17,
+              'judge': 16,
+              'qa': 16
+          })
+      },
+      selectBank(value) {
+          this.subBanks = this.getSubBanks(value)
+          return value
+      },
+      transferBanks(targetKeys, direction, moveKeys) {
+          this.targetSubBanks = targetKeys
+      },
+      subBankFilter(inputValue, option) {
+          return option.title.indexOf(inputValue) > -1
       },
       submitBank(e) {
           e.preventDefault()
@@ -325,30 +337,28 @@ export default {
                   if (this.userBaseInfo.uid == -1) {
                       this.$message.warning('先登录吧～')
                   }
-                  else if (singleA+singleB+multiple+blank+judge+qa > 100) {
+                  else if (values.type == 'random' && singleA+singleB+multiple+blank+judge+qa > 100) {
                       this.$message.warning('题型占比超过100%, 请检查')
                   }
-                  else if (singleA+singleB+multiple+blank+judge+qa < 100) {
+                  else if (values.type == 'random' && singleA+singleB+multiple+blank+judge+qa < 100) {
                       this.$message.warning('题型占比不足100%, 请检查')
                   }
                   else {
                       this.$axios.post('submitBank', qs.stringify({
                           type: values.type,
-                          banks: values.banks,
+                          banks: this.targetSubBanks,
                           singleA: values.singleA,
                           singleB: values.singleB,
                           multiple: values.multiple,
                           blank: values.blank,
                           judge: values.judge,
                           qa: values.qa,
-                          questionType: values.questionTypeOption
                       }, { arrayFormat: 'brackets' }))
                       .then((response) => {
                           if (response.data == 1) {
                               this.$message.error('未知错误')
                           }
                           else {
-                              console.log(response.data.info)
                               this.setBank({ 'questions': response.data.info, 'timer': values.timer })
                               this.$router.push({ path: '/bank/bank' })
                           }
@@ -361,13 +371,24 @@ export default {
           return `${value} %`
       }
   },
-  computed: mapState({
-      questionType: state => state.bank.questionType
-  })
+  computed: {
+      ...mapState({
+          banks: state => state.bank.banks
+      }),
+      ...mapGetters({
+          getSubBanks: 'bank/getSubBanks'
+      })
+  }
 }
 </script>
 
 <style scoped>
+.notice {
+    margin-bottom: 30px;
+    font-weight: bold;
+    color: red;
+}
+
 .cellwarpper {
     display: table;
 }
@@ -388,5 +409,15 @@ export default {
 }
 .questionPercent >>> .ant-slider {
     margin-top: 0
+}
+
+.floatcard {
+    float: right;
+    position: fixed;
+    right: 60px;
+    top: 200px;
+}
+.floatcard h4 {
+    color: red;
 }
 </style>

@@ -54,7 +54,7 @@
                                         <a-radio-button v-if="item.E" value="E">E. {{ item.E }}</a-radio-button>
                                     </a-radio-group>
                                 </div>
-                                <!-- mutiple -->
+                                <!-- multiple -->
                                 <div v-else-if="item.questionType == 'multiple'">
                                     <a-checkbox-group>
                                         <a-checkbox value="A">A. {{ item.A }}</a-checkbox>
@@ -157,16 +157,6 @@ export default {
 }
 .anchor >>> .ant-anchor-link-title {
     text-decoration: none;
-}
-
-.floatcard {
-    float: right;
-    position: fixed;
-    right: 60px;
-    top: 200px;
-}
-.floatcard h4 {
-    color: red;
 }
 
 .summary {

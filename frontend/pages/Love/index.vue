@@ -17,8 +17,9 @@
                 </div>
             </div>
         </div>
+        <div style="margin-top: 50px"></div>
         <!-- container -->
-        <div class="container" style="margin-top: 50px">
+        <div class="container">
             <div class="row">
                 <div class="col-md-12 col-xs-12">
                     <!-- Top -->
@@ -34,6 +35,17 @@
                             style="height: 300px"
                         />
                     </a-card>
+                    <!-- filter -->
+                    <div class="filter">
+                        <a-dropdown-button>
+                            时间排序
+                            <a-menu slot="overlay" @click="filterSort">
+                                <a-menu-item key="1"><a-icon type="clock-circle" />时间排序</a-menu-item>
+                                <a-menu-item key="2"><a-icon type="fire" />热度排序</a-menu-item>
+                                <a-menu-item key="3"><a-icon type="message" />评论排序</a-menu-item>
+                            </a-menu>
+                        </a-dropdown-button>
+                    </div>
                     <!-- List -->
                     <DynamicScroller
                         :items="loveList"
@@ -194,6 +206,9 @@ export default {
             }))
         }
       }
+    },
+    filterSort() {
+
     }
   },
   computed: mapState({
@@ -212,5 +227,9 @@ a {
   bottom: 40px;
   width: 100%;
   text-align: center;
+}
+
+.filter {
+    margin-bottom: 50px;
 }
 </style>

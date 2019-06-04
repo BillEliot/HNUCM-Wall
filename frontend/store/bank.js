@@ -1,8 +1,26 @@
 export const state = () => ({
-    questionType: ['单选-A型题', '单选-B型题', '多选', '填空', '判断', '问答'],
     timer: null,
-    questions: []
+    questions: [],
+    banks: [{
+        key: '中医基础理论',
+        subBanks: [{
+            key: 'zyjcll-1',
+            title: '第一章'
+        },
+        {
+            key: 'zyjcll-2',
+            title: '第二章'
+        }]
+    }]
 })
+
+export const getters = {
+    getSubBanks: (state) => (bank) => {
+        return state.banks.filter((subBank) => {
+            return subBank.key == bank
+        })[0].subBanks
+    }
+}
 
 export const mutations = {
     setQuestions(state, questions) {
@@ -17,5 +35,5 @@ export const actions = {
     setBank({ commit }, { questions, timer }) {
         commit('setQuestions', questions)
         commit('setTimer', timer)
-    }
+    },
 }

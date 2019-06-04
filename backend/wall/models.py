@@ -3,7 +3,7 @@ from django.db import models
 questionType = (
     ('singleA', '单选-题型A'),
     ('singleB', '单选-题型B'),
-    ('mutiple', '多选'),
+    ('multiple', '多选'),
     ('blank', '填空'),
     ('judge', '判断'),
     ('qa', '问答'),
@@ -30,6 +30,7 @@ class Love(models.Model):
     userTo = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, related_name='user_to')
     nameTo = models.CharField(max_length=20, default='TA')
     content = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
     images = models.ManyToManyField('Image', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)
     thumbsUpUser = models.ManyToManyField('User', blank=True)
@@ -42,6 +43,7 @@ class Lose(models.Model):
     date = models.CharField(max_length=20)
     name = models.CharField(max_length=20)
     description = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
     images = models.ManyToManyField('Image', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)
 
@@ -60,6 +62,7 @@ class Deal(models.Model):
     price = models.FloatField()
     new = models.IntegerField()
     description = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
     images = models.ManyToManyField('Image', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)
 
