@@ -32,9 +32,9 @@ class Love(models.Model):
 class Lose(models.Model):
     isFound = models.BooleanField(default=False)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
-    loseDate = models.CharField(max_length=20)
     name = models.CharField(max_length=20)
     description = models.TextField()
+    loseDate = models.CharField(max_length=20)
     publicDate = models.DateTimeField(auto_now_add=True)
     images = models.ManyToManyField('Image', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)

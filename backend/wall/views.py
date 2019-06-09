@@ -506,13 +506,29 @@ def getLoveList(request):
 
 @csrf_exempt
 def getLoseList(request):
+    filterName = request.POST.get('filterName')
+    order = request.POST.get('order')
     index = int(request.POST.get('index'))
 
     if (index >= Lose.objects.count()):
         return JsonResponse({ 'info': [] })
 
+    loses = []
     listLose = []
-    for lose in Lose.objects.all()[index:index+9]:
+    if filterName == 'loseTime':
+        if order == 'positive':
+            loses = Lose.objects.order_by('loseDate')[index:index+9]
+        elif order == 'reverse':
+            loses = Lose.objects.order_by('-loseDate')[index:index+9]
+    elif filterName == 'publicTime':
+        if order == 'positive':
+            loses = Lose.objects.order_by('publicDate')[index:index+9]
+        elif order == 'reverse':
+            loses = Lose.objects.order_by('-publicDate')[index:index+9]
+    else:
+        loses = Lose.objects.all()[index:index+9]
+
+    for lose in loses:
         # cover
         if lose.images.count():
             cover = lose.images.first().name
@@ -529,6 +545,7 @@ def getLoseList(request):
             'description': lose.description,
             'cover': cover
         })
+
     return JsonResponse({ 'info': listLose })
 
 

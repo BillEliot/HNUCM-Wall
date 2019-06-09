@@ -35,42 +35,33 @@
                         />
                     </div>
                     <!-- List -->
-                    <DynamicScroller
+                    <RecycleScroller
                         :items="dealList"
-                        :min-item-size="50"
+                        :item-size="20"
+                        v-slot="{ item }"
                         v-infinite-scroll="infiniteLoadList"
                         infinite-scroll-disabled="busy"
                         :infinite-scroll-distance="20"
-                        style="width: 100%"
+                        style="height: 100%"
                     >
-                        <template v-slot="{ item, index, active }">
-                            <DynamicScrollerItem
-                                :item="item"
-                                :active="active"
-                                :size-dependencies="[item]"
-                                :data-index="index"
-                                slot="renderItem"
-                            >
-                                <a-card hoverable style="width: 100%; margin-bottom: 20px" @click="$router.push({ path: '/deal/detail', query: { id: item.id } })">
-                                    <p class="price">最低价：¥ {{ item.price }}</p>
-                                    <div class="info">
-                                        <span class="new">
-                                            <a-rate :defaultValue="item.new" disabled :count="2.5" /> {{ item.new*2 }} 成新
-                                        </span>
-                                        <br />
-                                        <h2 v-if="item.isFound" class="sold">已售出</h2>
-                                        <h2 v-else class="notsold">未售出</h2>
-                                    </div>
-                                    <a-card-meta
-                                        :title="item.name"
-                                        :description="item.description">
-                                        <a-avatar slot="avatar" :src="baseUrl + item.avatar" />
-                                    </a-card-meta>
-                                    <img :src="baseUrl + item.cover" slot="cover" style="height: 200px" />
-                                </a-card>
-                            </DynamicScrollerItem>
-                        </template>
-                    </DynamicScroller>
+                        <a-card hoverable @click="$router.push({ path: '/deal/detail', query: { id: item.id } })">
+                            <p class="price">最低价：¥ {{ item.price }}</p>
+                            <div class="info">
+                                <span class="new">
+                                    <a-rate :defaultValue="item.new" disabled :count="2.5" /> {{ item.new*2 }} 成新
+                                </span>
+                                <br />
+                                <h2 v-if="item.isFound" class="sold">已售出</h2>
+                                <h2 v-else class="notsold">未售出</h2>
+                            </div>
+                            <a-card-meta
+                                :title="item.name"
+                                :description="item.description">
+                                <a-avatar slot="avatar" :src="baseUrl + item.avatar" />
+                            </a-card-meta>
+                            <img :src="baseUrl + item.cover" slot="cover" style="height: 200px" />
+                        </a-card>
+                    </RecycleScroller>
                     <a-spin v-if="loading" class="loading" />
                 </div>
             </div>
