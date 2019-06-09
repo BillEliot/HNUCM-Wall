@@ -218,7 +218,7 @@ export default {
 
                   this.$axios.post('submitLose', qs.stringify({
                       uid: this.userBaseInfo.uid,
-                      date: values.date.format('YYYY-MM-DD HH:mm:ss'),
+                      loseDate: values.date.format('YYYY-MM-DD HH:mm:ss'),
                       name: values.name,
                       description: values.description,
                       images: images

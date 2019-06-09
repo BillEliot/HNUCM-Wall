@@ -2,43 +2,45 @@
     <div class="footer">
         <div class="container">
             <div class="row">
-                <div class="col-md-2  col-sm-3 col-xs-6">
-                    <div class="footer-logo">
-                        <div class="footer-logo-text">Eliot Drizzle</div>
-                        <p>I love you, but I can't tell you, you know.</p>
+                <div class="text-center">
+                    <div class="col-md-2  col-sm-3 col-xs-6">
+                        <div class="footer-logo">
+                            <div class="footer-logo-text">Eliot Drizzle</div>
+                            <p>I love you, but I can't tell you, you know.</p>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-2 col-sm-3 col-xs-6">
-                    <h3>友情链接</h3>
-                    <ul class="list-unstyled links">
-                        <li>优敏思-UMS</li>
-                        <li>UMS-OJ</li>
-                        <li>Eliot's Blog</li>
-                    </ul>
-                </div>
-                <div class="col-md-2 col-sm-3 col-xs-6">
-                    <h3>HNUCM-Wall</h3>
-                    <ul class="list-unstyled links">
-                        <li>关于墙墙</li>
-                    </ul>
-                </div>
-                <div class="col-md-2 col-sm-3 col-xs-6">
-                    <h3>分享</h3>
-                    <ul class="list-unstyled links">
-                        <li>qq</li>
-                        <li>微信</li>
-                        <li>qq空间</li>
-                        <li>朋友圈</li>
-                    </ul>
-                </div>
-                <div class="col-md-2 col-sm-3 col-xs-6">
-                    <h3>联系我</h3>
-                    <ul class="list-unstyled links">
-                        <li>2017级 中医学院 四班</li>
-                        <li>eliotwjz@gmail.com</li>
-                        <li>qq: 1161142536</li>
-                        <li>wechat: ieliot</li>
-                    </ul>
+                    <div class="col-md-2 col-sm-3 col-xs-6">
+                        <h3>友情链接</h3>
+                        <ul class="list-unstyled links">
+                            <li>优敏思-UMS</li>
+                            <li>UMS-OJ</li>
+                            <li>Eliot's Blog</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-6">
+                        <h3>HNUCM-Wall</h3>
+                        <ul class="list-unstyled links">
+                            <li>关于墙墙</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-6">
+                        <h3>分享</h3>
+                        <ul class="list-unstyled links">
+                            <li>qq</li>
+                            <li>微信</li>
+                            <li>qq空间</li>
+                            <li>朋友圈</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-6">
+                        <h3>联系我</h3>
+                        <ul class="list-unstyled links">
+                            <li>2017级 中医学院 四班</li>
+                            <li>eliotwjz@gmail.com</li>
+                            <li>qq: 1161142536</li>
+                            <li>wechat: ieliot</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             <hr />

@@ -30,7 +30,7 @@
                                             required: true, message: '请输入密码',
                                         },
                                         {
-                                            validator: validator_password2,
+                                            validator: validator_password,
                                         }],
                                     }
                                 ]"
@@ -46,8 +46,9 @@
                                     {
                                         rules: [{
                                             required: true, message: '请输入密码',
-                                        }, {
-                                            validator: validator_password,
+                                        }, 
+                                        {
+                                            validator: validator_password2,
                                         }],
                                     }
                                 ]"
@@ -224,21 +225,21 @@ export default {
   },
   methods: {
     blur_password2 (e) {
-        var value = e.target.value
+        let value = e.target.value
         this.confirmDirty = this.confirmDirty || !!value
     },
     validator_password (rule, value, callback) {
+      if (value && this.confirmDirty) {
+          this.form_register.validateFields(['password2'], { force: true })
+      }
+      callback()
+    },
+    validator_password2 (rule, value, callback) {
         if (value && value !== this.form_register.getFieldValue('password')) {
             callback('两次密码不一致')
         } else {
             callback()
         }
-    },
-    validator_password2 (rule, value, callback) {
-      if (value && this.confirmDirty) {
-          this.form_register.validateFields(['password2'], { force: true })
-      }
-      callback()
     },
     validator_phone (rule, value, callback) {
         var regex_phone = /^1[34578]\d{9}$/

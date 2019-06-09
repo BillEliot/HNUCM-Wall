@@ -1,5 +1,139 @@
 <template>
     <div>
+        <!-- drawer - profile -->
+        <a-drawer
+            title="编辑个人资料"
+            :width="360"
+            @close="visibleDrawerProfile = false"
+            :visible="visibleDrawerProfile"
+            :closable = "false"
+        >
+            <a-form :form="form_profile" layout="vertical">
+                <a-form-item label="昵称">
+                    <a-input
+                        v-decorator="[
+                            'nickname',
+                            {
+                                rules: [{ required: true, message: '请输入你的昵称' }]
+                            }
+                        ]"
+                        placeholder="你的昵称"
+                    />
+                </a-form-item>
+                <a-form-item label="个性签名">
+                    <a-input
+                        v-decorator="[
+                            'bio',
+                            {
+                                rules: [{ required: true, message: '请输入你的个性签名' }]
+                            }
+                        ]"
+                        placeholder="你的个性签名"
+                    />
+                </a-form-item>
+                <a-form-item label="手机">
+                    <a-input
+                        v-decorator="[
+                            'phone'
+                        ]"
+                        placeholder="你的手机号"
+                    />
+                </a-form-item>
+                <a-form-item label="qq">
+                    <a-input
+                        v-decorator="[
+                            'qq'
+                        ]"
+                        placeholder="你的qq"
+                    />
+                </a-form-item>
+                <a-form-item label="微信">
+                    <a-input
+                        v-decorator="[
+                            'wechat'
+                        ]"
+                        placeholder="你的微信"
+                    />
+                </a-form-item>
+                <a-form-item label="班级">
+                    <a-cascader
+                        v-decorator="[
+                            'class',
+                            {
+                                initialValue: ['zhongyi', 'wuyi'],
+                                rules: [{ type: 'array', required: true, message: '请选择您的班级' }],
+                            }
+                        ]"
+                        :options="classes"
+                    />
+                </a-form-item>
+                <a-form-item class="submit">
+                    <a-button @click="visibleDrawerProfile = false" style="margin-right: 10px">取消</a-button>
+                    <a-button @click="submitProfile" type="primary" html-type="submit">确定</a-button>
+                </a-form-item>
+            </a-form>
+        </a-drawer>
+        <!-- drawer - change password -->
+        <a-drawer
+            title="修改密码"
+            :width="360"
+            @close="visibleDrawerPassword = false"
+            :visible="visibleDrawerPassword"
+            :closable = "false"
+        >
+            <a-form :form="form_password" layout="vertical">
+                <a-form-item label="原密码">
+                    <a-input
+                        v-decorator="[
+                            'originPassword',
+                            {
+                                rules: [{ 
+                                    required: true, message: '请输入原密码' 
+                                }]
+                            }
+                        ]"
+                        placeholder="原密码"
+                    />
+                </a-form-item>
+                <a-form-item label="密码">
+                    <a-input
+                        v-decorator="[
+                            'password',
+                            {
+                                rules: [{ 
+                                    required: true, message: '请输入密码' 
+                                },
+                                {
+                                    validator: validatorPassword
+                                }]
+                            }
+                        ]"
+                        placeholder="密码"
+                    />
+                </a-form-item>
+                <a-form-item label="重复密码">
+                    <a-input
+                        v-decorator="[
+                            'password2',
+                            {
+                                rules: [{ 
+                                    required: true, message: '请重复输入密码' 
+                                },
+                                {
+                                    validator: validatorPassword2
+                                }]
+                            }
+                        ]"
+                        placeholder="重复输入密码"
+                        @blur="blurPassword2"
+                    />
+                </a-form-item>
+                <a-form-item class="submit">
+                    <a-button @click="visibleDrawerProfile = false" style="margin-right: 10px">取消</a-button>
+                    <a-button @click="submitProfile" type="primary" html-type="submit">确定</a-button>
+                </a-form-item>
+            </a-form>
+        </a-drawer>
         <!-- navbar -->
         <navbar :userBaseInfo="userBaseInfo" />
         <!-- banner -->
@@ -43,6 +177,14 @@
                     <a-cascader :options="classes" placeholder="班级" disabled v-model="userProfile.class.split('/')" style="width: 100%; text-align: left">
                         <a-icon type="table" slot="suffixIcon" />
                     </a-cascader>
+                    <a-input placeholder="硬币" disabled v-model="userProfile.coin + ' 枚硬币'">
+                        <a-icon slot="prefix" type="gold" />
+                    </a-input>
+                    <div style="margin-top: 20px">
+                        <!-- actions -->
+                        <a-button @click="visibleDrawerProfile = true">编辑资料</a-button>
+                        <a-button @click="visibleDrawerPassword = true">修改密码</a-button>
+                    </div>
                 </div>
             </div>
             <div style="margin-top: 30px"></div>
@@ -201,7 +343,12 @@ export default {
                 onChange (page) {
                     this.current = page
                 }
-            }
+            },
+            visibleDrawerProfile: false,
+            visibleDrawerPassword: false,
+            form_profile: this.$form.createForm(this),
+            form_password: this.$form.createForm(this),
+            confirmDirty: false
         }
     },
     async asyncData({ $axios, query, error }) {
@@ -238,8 +385,22 @@ export default {
         }
     },
     methods: {
-        searchClass() {
-
+        blurPassword2(e) {
+            this.confirmDirty = this.confirmDirty || !!e.target.value
+        },
+        validatorPassword(rule, value, callback) {
+            if (value && this.confirmDirty) {
+                this.form_password.validateFields(['password2'], { force: true })
+            }
+            callback()
+        },
+        validatorPassword2(rule, value, callback) {
+            if (value && value !== this.form_password.getFieldValue('password')) {
+                callback('两次密码不一致')
+            }
+            else {
+                callback()
+            }
         },
         submitUserComment() {
             if (!this.commentContent) {
@@ -272,11 +433,14 @@ export default {
                     }
                 })
             }
+        },
+        submitProfile() {
+
         }
     },
     computed: mapState({
         baseUrl: state => state.baseUrl,
-        classes: state => state.classes
+        classes: state => state.classes,
     })
 }
 </script>
@@ -287,6 +451,17 @@ a {
 }
 a:hover {
     color: blue;
+}
+
+.submit {
+    position: 'absolute';
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    border-top: 1px solid #e9e9e9;
+    padding: 10px 16px;
+    background: #fff;
+    text-align: right;
 }
 
 .follow {

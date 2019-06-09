@@ -28,8 +28,9 @@ export default {
   */
   css: [
     'ant-design-vue/dist/antd.css',
+    'mavon-editor/dist/css/index.css',
     '@assets/css/bootstrap.min.css',
-    '@assets/css/style.css',
+    '@assets/css/style.css'
   ],
 
   /*
@@ -47,6 +48,10 @@ export default {
     {
       src: '~plugins/VueVirtualScroller',
       ssr: true
+    },
+    {
+      src: '~plugins/mavonEditor',
+      ssr: false
     }
   ],
 

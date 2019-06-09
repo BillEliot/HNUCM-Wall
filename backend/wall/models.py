@@ -1,14 +1,5 @@
 from django.db import models
 
-questionType = (
-    ('singleA', '单选-题型A'),
-    ('singleB', '单选-题型B'),
-    ('multiple', '多选'),
-    ('blank', '填空'),
-    ('judge', '判断'),
-    ('qa', '问答'),
-)
-
 
 class User(models.Model):
     avatar = models.ImageField(upload_to='img/avatar', default='img/avatar/default.png')
@@ -20,6 +11,7 @@ class User(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     qq = models.CharField(max_length=20, blank=True, null=True)
     wechat = models.CharField(max_length=20, blank=True, null=True)
+    coin = models.PositiveIntegerField(default=0)
     comments = models.ManyToManyField('Comment', blank=True, related_name='user_comments')
 
 
@@ -40,10 +32,10 @@ class Love(models.Model):
 class Lose(models.Model):
     isFound = models.BooleanField(default=False)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
-    date = models.CharField(max_length=20)
+    loseDate = models.CharField(max_length=20)
     name = models.CharField(max_length=20)
     description = models.TextField()
-    date = models.DateTimeField(auto_now_add=True)
+    publicDate = models.DateTimeField(auto_now_add=True)
     images = models.ManyToManyField('Image', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)
 
@@ -75,6 +67,15 @@ class Deal(models.Model):
 
 
 class Bank(models.Model):
+    questionType = (
+        ('singleA', '单选-题型A'),
+        ('singleB', '单选-题型B'),
+        ('multiple', '多选'),
+        ('blank', '填空'),
+        ('judge', '判断'),
+        ('qa', '问答'),
+    )
+
     title = models.CharField(max_length=50)
     A = models.CharField(max_length=50, blank=True)
     B = models.CharField(max_length=50, blank=True)
@@ -85,6 +86,19 @@ class Bank(models.Model):
     # After sorting, 'A', 'AB' or 'blank'
     answer = models.CharField(max_length=10)
     bank = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.title
+
+
+
+class Article(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    title = models.CharField(max_length=30)
+    content = models.TextField()
+    neededCoin = models.PositiveIntegerField(default=0)
+    publicDate = models.DateTimeField(auto_now_add=True)
+    editDate = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title

@@ -38,16 +38,21 @@
                                 ]" />
                         </a-form-item>
                         <a-form-item v-bind="formItemLayout" label="表白人">
-                            <a-auto-complete
-                                :dataSource="users"
-                                style="width: 200px"
-                                @search="searchUser"
-                                placeholder="要表白的人的email或昵称"
+                            <a-select
                                 v-decorator="[
                                     'userTo',
                                     { rules: [{ required: true, message: '请输入要表白的人的email或昵称' }] }
-                                ]">
-                            </a-auto-complete>
+                                ]"
+                                :showSearch="true"
+                                placeholder="要表白的人的昵称"
+                                style="width: 100%"
+                                :filterOption="false"
+                                @search="searchUser"
+                                :notFoundContent="searchingUser ? undefined : null"
+                            >
+                                <a-spin v-if="searchingUser" slot="notFoundContent" size="small"/>
+                                <a-select-option v-for="user in users" :key="user">{{ user }}</a-select-option>
+                            </a-select>
                         </a-form-item>
                         <a-form-item v-bind="formItemLayout" label="表白语">
                             <a-textarea 
@@ -60,31 +65,26 @@
                             />
                         </a-form-item>
                         <a-form-item v-bind="formItemLayout" label="图片">
-                            <a-upload-dragger
+                            <a-upload
                                 v-decorator="[
-                                    'dragger', 
+                                    'uploader', 
                                     {
                                         valuePropName: 'fileList',
-                                        getValueFromEvent: uploadFile,
+                                        getValueFromEvent: uploadImages,
                                     }]"
-                                    name="files"
-                                    accept='.jpg, .jpeg, .png'
-                                    listType='picture'
-                                    :multiple='true'
-                                    :supportServerRender='true'
-                                    :action="baseUrl + '/api/uploadLoveImg'"
-                                    @preview='previewImg'
+                                name="files"
+                                accept='.jpg, .jpeg, .png'
+                                listType="picture-card"
+                                :multiple='true'
+                                :supportServerRender='true'
+                                :action="baseUrl + '/api/uploadLoveImg'"
+                                @preview="previewImg"
                             >
-                            <p class="ant-upload-drag-icon">
-                                <a-icon type="inbox" />
-                            </p>
-                            <p class="ant-upload-text">
-                                点击选择或拖拽图片
-                            </p>
-                            <p class="ant-upload-hint">
-                                这些图片一定有着你对TA的思念吧～
-                            </p>
-                            </a-upload-dragger>
+                                <div v-if="!form_love.getFieldValue('uploader') || (form_love.getFieldValue('uploader') && form_love.getFieldValue('uploader').length < 3)">
+                                    <a-icon type="plus" />
+                                    <div>上传</div>
+                                </div>
+                            </a-upload>
                             <a-modal :visible="previewImgVisible" :footer="null" @cancel="previewImgVisible = false">
                                 <img style="width: 100%" :src="previewImageUrl" />
                             </a-modal>
@@ -122,16 +122,17 @@ export default {
     return {
       form_love: this.$form.createForm(this),
       users: [],
+      searchingUser: false,
       previewImgVisible: false,
       previewImageUrl: null,
       formItemLayout: {
         labelCol: {
           xs: { span: 24 },
-          sm: { span: 8 },
+          sm: { span: 10 },
         },
         wrapperCol: {
           xs: { span: 24 },
-          sm: { span: 16 },
+          sm: { span: 8 },
         },
       },
       tailFormItemLayout: {
@@ -141,20 +142,20 @@ export default {
             offset: 0,
           },
           sm: {
-            span: 16,
-            offset: 8,
+            span: 10,
+            offset: 10,
           }
         }
       },
     }
   },
-  async asyncData({ $axios }) {
+  async asyncData({ $axios, error }) {
       let userBaseInfo = null
       await $axios.get('getUserBaseInfo')
       .then((response) => {
           userBaseInfo = response.data
           if (userBaseInfo.uid == -1) {
-              redirect({ path: '/love' })
+              error({ statusCode: 403, message: '先登录吧～' })
           }
       })
       
@@ -164,14 +165,16 @@ export default {
   },
   methods: {
       searchUser(value) {
-          this.$axios.post('/searchUser', qs.stringify({
+          this.searchingUser = true
+          this.$axios.post('searchUser', qs.stringify({
               user: value
           }))
           .then((response) => {
+              this.searchingUser = false
               this.users = response.data.info
           })
       },
-      uploadFile(e) {
+      uploadImages(e) {
           if (!e || !e.fileList) {
             return e
           }
@@ -211,7 +214,7 @@ export default {
           this.form_love.validateFields((err, values) => {
               if (!err) {
                   var images = []
-                  values.dragger.forEach((file) => {
+                  values.uploader.forEach((file) => {
                       images.push(file.name)
                   })
 

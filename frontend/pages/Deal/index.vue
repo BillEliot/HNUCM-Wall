@@ -21,7 +21,19 @@
         <!-- container -->
         <div class="container">
             <div class="row">
-                <div class="col-md-6 col-md-offset-3 col-xs-12">
+                <div class="col-md-6 col-md-offset-3 col-sm-12">
+                    <div class="filter">
+                        <a-button>时间<a-icon type="minus" /></a-button>
+                        <a-button>新度<a-icon type="minus" /></a-button>
+                        <a-button>价格<a-icon type="minus" /></a-button>
+                        <a-button>售出<a-icon type="minus" /></a-button>
+                        <a-input-search
+                            placeholder="搜索物品"
+                            @search="searchItem"
+                            enterButton
+                            style="width: 30%"
+                        />
+                    </div>
                     <!-- List -->
                     <DynamicScroller
                         :items="dealList"
@@ -85,7 +97,6 @@ export default {
         loading: false,
         busy: false,
         previewCover: false,
-
         dealList: []
     }
   },
@@ -111,6 +122,9 @@ export default {
     }
   },
   methods: {
+    searchItem() {
+
+    },
     infiniteLoadList() {
         this.loading = true
         this.$axios.post('getDealList', qs.stringify({
@@ -135,6 +149,10 @@ export default {
 </script>
 
 <style scoped>
+.filter {
+    margin-bottom: 50px;
+}
+
 .loading {
   position: absolute;
   bottom: 40px;

@@ -22,6 +22,19 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6 col-md-offset-3 col-xs-12">
+                    <!-- filter -->
+                    <div class="filter">
+                        <div class="filter">
+                            <a-button>丢失时间<a-icon type="minus" /></a-button>
+                            <a-button>发布时间<a-icon type="minus" /></a-button>
+                            <a-input-search
+                                placeholder="搜索物品"
+                                @search="searchItem"
+                                enterButton
+                                style="width: 30%"
+                            />
+                        </div>
+                    </div>
                     <!-- List -->
                     <DynamicScroller
                         :items="loseList"
@@ -40,7 +53,7 @@
                                 slot="renderItem"
                             >
                                 <a-card hoverable style="width: 100%; margin-bottom: 20px" @click="$router.push({ path: '/lose/detail', query: { id: item.id } })">
-                                    <p class="losetime">丢失时间：{{ item.date }}</p>
+                                    <p class="losetime">丢失时间：{{ item.loseDate }}</p>
                                     <h2 v-if="item.isFound" class="found">已找到</h2>
                                     <h2 v-else class="notfound">未找到</h2>
                                     <a-card-meta
@@ -79,7 +92,6 @@ export default {
         loading: false,
         busy: false,
         previewCover: false,
-
         loseList: []
     }
   },
@@ -105,6 +117,9 @@ export default {
     }
   },
   methods: {
+    searchItem() {
+        
+    },
     infiniteLoadList() {
         this.loading = true
         this.$axios.post('getLoseList', qs.stringify({
@@ -129,6 +144,10 @@ export default {
 </script>
 
 <style scoped>
+.filter {
+    margin-bottom: 30px;
+}
+
 .loading {
   position: absolute;
   bottom: 40px;

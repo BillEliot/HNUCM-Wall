@@ -1,5 +1,8 @@
 <template>
     <a-menu v-model="navbar" mode="horizontal" theme="dark" class="nav">
+        <a-menu-item key="home" @click="$router.push({ path: '/' })">
+            <a-icon type="home" /> 主页
+        </a-menu-item>
         <a-sub-menu>
             <span slot="title"><a-icon type="coffee" />墙墙们</span>
             <a-menu-item-group title="表白">
@@ -14,10 +17,18 @@
                 <a-menu-item key="deal:1" @click="$router.push({ path: '/deal' })">二手墙</a-menu-item>
                 <a-menu-item key="deal:2" @click="navigate('/deal/new')">发布物品</a-menu-item>
             </a-menu-item-group>
+            <a-menu-item-group title="吐槽">
+                <a-menu-item key="complain:1" @click="$router.push({ path: '/complain' })">吐槽墙</a-menu-item>
+                <a-menu-item key="complain:2" @click="navigate('/complain/new')">我要吐槽</a-menu-item>
+            </a-menu-item-group>
         </a-sub-menu>
 
         <a-menu-item key="bank" @click="$router.push({ path: '/bank' })">
             <a-icon type="star" /> 题库
+        </a-menu-item>
+
+        <a-menu-item key="article" @click="$router.push({ path: '/article' })">
+            <a-icon type="crown" /> 大佬杂谈
         </a-menu-item>
         <!-- auth -->
         <template v-if="userBaseInfo.uid != -1">

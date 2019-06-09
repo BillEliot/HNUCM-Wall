@@ -151,6 +151,16 @@ export default {
 </script>
 
 <style scoped>
+.floatcard {
+    float: right;
+    position: fixed;
+    right: 60px;
+    top: 200px;
+}
+.floatcard h4 {
+    color: red;
+}
+
 .anchor {
     margin-left: 60px;
     width: 200px;

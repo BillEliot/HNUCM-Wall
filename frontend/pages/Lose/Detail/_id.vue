@@ -23,7 +23,7 @@
                 <div class="text-center col-md-12">
                     <a-row>
                         <a-col :span="12">
-                            <p class="losetime text-left">丢失日期：{{ loseDetail.date }}</p>
+                            <p class="losetime text-left">丢失日期：{{ loseDetail.loseDate }}</p>
                         </a-col>
                         <a-col :span="12">
                             <p v-if="loseDetail.isFound" class="found">已找到</p>

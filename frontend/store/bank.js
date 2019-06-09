@@ -11,6 +11,17 @@ export const state = () => ({
             key: 'zyjcll-2',
             title: '第二章'
         }]
+    },
+    {
+        key: '免疫学',
+        subBanks: [{
+            key: 'myx-1',
+            title: '第一章'
+        },
+        {
+            key: 'myx-2',
+            title: '第二章'
+        }]
     }]
 })
 

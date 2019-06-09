@@ -11,7 +11,7 @@
                             <h1>表白墙</h1>
                             <p class="subheading">ヾ(≧O≦)〃嗷~</p>
                             <br />
-                            <a-button type="primary" @click="$router.push({ path: '/love/new' })">我要表白</a-button>
+                            <a-button type="primary" @click="$router.push({ path: '/love/new' })" style="margin-top: 20px">我要表白</a-button>
                         </div>
                     </div>
                 </div>
@@ -37,19 +37,16 @@
                     </a-card>
                     <!-- filter -->
                     <div class="filter">
-                        <a-dropdown-button>
-                            时间排序
-                            <a-menu slot="overlay" @click="filterSort">
-                                <a-menu-item key="1"><a-icon type="clock-circle" />时间排序</a-menu-item>
-                                <a-menu-item key="2"><a-icon type="fire" />热度排序</a-menu-item>
-                                <a-menu-item key="3"><a-icon type="message" />评论排序</a-menu-item>
-                            </a-menu>
-                        </a-dropdown-button>
+                        <div class="filter">
+                            <a-button>时间<a-icon type="minus" /></a-button>
+                            <a-button>热度<a-icon type="minus" /></a-button>
+                            <a-button>评论<a-icon type="minus" /></a-button>
+                        </div>
                     </div>
                     <!-- List -->
                     <DynamicScroller
                         :items="loveList"
-                        :min-item-size="50"
+                        :min-item-size="10"
                         v-infinite-scroll="infiniteLoadList"
                         infinite-scroll-disabled="busy"
                         :infinite-scroll-distance="20"
@@ -57,63 +54,62 @@
                         class="text-center"
                     >
                         <template v-slot="{ item, index, active }">
-                        <DynamicScrollerItem
-                            :item="item"
-                            :active="active"
-                            :size-dependencies="[item]"
-                            :data-index="index"
-                            slot="renderItem"
-                        >
-                            <a-row>
-                                <a-col :span="8">
-                                    <a-avatar v-if="item.userFrom_uid == -1" :size="64" :src="baseUrl + item.userFrom_avatar" />
-                                    <a-avatar v-else :size="64" :src="baseUrl + item.userFrom_avatar" @click="$router.push({ path: 'profile', query: { uid: item.userFrom_uid } })" style="cursor: pointer;" />
-                                    <div>
-                                        <a v-if="item.userFrom_uid == -1">匿名</a>
-                                        <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userFrom_uid } })">{{ item.userFrom_nickname }}</a>
-                                        <p class="bio">{{ item.userFrom_bio }}</p>
-                                    </div>
-                                </a-col>
-                                <a-col :span="8">
-                                    <a-avatar :size="64" src="https://s2.ax1x.com/2019/05/25/Vkx8oR.jpg" />
-                                </a-col>
-                                <a-col :span="8">
-                                    <a-avatar v-if="item.userTo_uid == -1" :size="64" :src="baseUrl + item.userTo_avatar" />
-                                    <a-avatar v-else :src="baseUrl + item.userTo_avatar" @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })" style="cursor: pointer;" />
-                                    <div>
-                                        <a v-if="item.userTo_uid == -1">{{ item.nameTo }}</a>
-                                        <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })">{{ item.userTo_nickname }}</a>
-                                        <p class="bio">{{ item.userTo_bio }}</p>
-                                    </div>
-                                </a-col>
-                            </a-row>
+                            <DynamicScrollerItem
+                                :item="item"
+                                :active="active"
+                                :data-index="index"
+                                slot="renderItem"
+                            >
+                                <a-row>
+                                    <a-col :span="8">
+                                        <a-avatar v-if="item.userFrom_uid == -1" :size="64" :src="baseUrl + item.userFrom_avatar" />
+                                        <a-avatar v-else :size="64" :src="baseUrl + item.userFrom_avatar" @click="$router.push({ path: 'profile', query: { uid: item.userFrom_uid } })" style="cursor: pointer;" />
+                                        <div>
+                                            <a v-if="item.userFrom_uid == -1">匿名</a>
+                                            <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userFrom_uid } })">{{ item.userFrom_nickname }}</a>
+                                            <p class="bio">{{ item.userFrom_bio }}</p>
+                                        </div>
+                                    </a-col>
+                                    <a-col :span="8">
+                                        <a-avatar :size="64" src="https://s2.ax1x.com/2019/05/25/Vkx8oR.jpg" />
+                                    </a-col>
+                                    <a-col :span="8">
+                                        <a-avatar v-if="item.userTo_uid == -1" :size="64" :src="baseUrl + item.userTo_avatar" />
+                                        <a-avatar v-else :src="baseUrl + item.userTo_avatar" @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })" style="cursor: pointer;" />
+                                        <div>
+                                            <a v-if="item.userTo_uid == -1">{{ item.nameTo }}</a>
+                                            <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })">{{ item.userTo_nickname }}</a>
+                                            <p class="bio">{{ item.userTo_bio }}</p>
+                                        </div>
+                                    </a-col>
+                                </a-row>
 
-                            <p style="padding: 10px; font-size: large">{{ item.content }}</p>
-                            <img v-if="item.cover" style="width: 60%; margin-bottom: 10px;" :src="baseUrl + item.cover" @click="previewCover=true" />
-                            <a-modal v-model="previewCover" :footer="null">
-                                <img style="width: 100%" :src="baseUrl + item.cover">
-                            </a-modal>
-                            <br />
+                                <!--<p style="padding: 10px; font-size: large">{{ item.content }}</p>
+                                <img v-if="item.cover" style="width: 60%; margin-bottom: 10px;" :src="baseUrl + item.cover" @click="previewCover=true" />
+                                <a-modal v-model="previewCover" :footer="null">
+                                    <img style="width: 100%" :src="baseUrl + item.cover">
+                                </a-modal>-->
+                                <br />
 
-                            <a-row>
-                                <a-col :span="8">
-                                    <span style="fontSize: 24px">
-                                        <a-icon type="like-o" :theme="item.isThumbsUp ? 'filled' : 'outlined'" @click="ThumbsUp(item)" style="cursor: pointer;" /> {{ item.thumbsUp }}
-                                    </span>
-                                </a-col>
-                                <a-col :span="8">
-                                    <a-button style="width: 100%" @click="$router.push({ path: 'love/detail', query: { id: item.id } })">
-                                        <a-icon type="heart" />戳进去<a-icon type="heart" />
-                                    </a-button>
-                                </a-col>
-                                <a-col :span="8">
-                                    <span style="fontSize: 24px">
-                                        <a-icon type="message" /> {{ item.comments }}
-                                    </span>
-                                </a-col>
-                            </a-row>
-                            <hr />
-                        </DynamicScrollerItem>
+                                <a-row>
+                                    <a-col :span="8">
+                                        <span style="fontSize: 24px">
+                                            <a-icon type="like-o" :theme="item.isThumbsUp ? 'filled' : 'outlined'" @click="ThumbsUp(item)" style="cursor: pointer;" /> {{ item.thumbsUp }}
+                                        </span>
+                                    </a-col>
+                                    <a-col :span="8">
+                                        <a-button style="width: 100%" @click="$router.push({ path: 'love/detail', query: { id: item.id } })">
+                                            <a-icon type="heart" />戳进去<a-icon type="heart" />
+                                        </a-button>
+                                    </a-col>
+                                    <a-col :span="8">
+                                        <span style="fontSize: 24px">
+                                            <a-icon type="message" /> {{ item.comments }}
+                                        </span>
+                                    </a-col>
+                                </a-row>
+                                <hr />
+                            </DynamicScrollerItem>
                         </template>
                     </DynamicScroller>
                     <a-spin v-if="loading" class="loading" />

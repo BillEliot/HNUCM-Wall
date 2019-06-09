@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from utils.utils import *
 from datetime import timedelta
-import os
+import os, random
 
 
 @csrf_exempt
@@ -197,6 +197,7 @@ def getUserProfile(request):
             'qq': user.qq,
             'wechat': user.wechat,
             'class': user._class,
+            'coin': user.coin,
             'comments': comments,
             'loves': loves,
             'loses': loses,
@@ -287,7 +288,7 @@ def removeDealImg(request):
 
 @csrf_exempt
 def submitLove(request):
-    isAnony = request.POST.get('anony')
+    isAnony = True if request.POST.get('anony') == 'true' else False
     userTo = request.POST.get('userTo')
     content = request.POST.get('content')
     images = request.POST.getlist('images[]')
@@ -329,7 +330,7 @@ def submitLove(request):
 @csrf_exempt
 def submitLose(request):
     uid = request.POST.get('uid')
-    date = request.POST.get('date')
+    loseDate = request.POST.get('loseDate')
     name = request.POST.get('name')
     description = request.POST.get('description')
     images = request.POST.getlist('images[]')
@@ -337,7 +338,7 @@ def submitLose(request):
     try:
         lose = Lose.objects.create(
             user = User.objects.get(id=uid),
-            date=date,
+            loseDate=loseDate,
             name=name,
             description=description
         )
@@ -382,27 +383,57 @@ def submitDeal(request):
 def submitBank(request):
     _type = request.POST.get('type')
     banks = request.POST.getlist('banks[]')
-    singleA = request.POST.get('singleA')
-    singleB = request.POST.get('singleB')
-    multiple = request.POST.get('multiple')
-    blank = request.POST.get('blank')
-    judge = request.POST.get('judge')
-    qa = request.POST.get('qa')
+    numQuestion = request.POST.get('numQuestion')
+    freSingleA = float(request.POST.get('singleA')) / 100.0
+    freSingleB = float(request.POST.get('singleB')) / 100.0
+    freMultiple = float(request.POST.get('multiple')) / 100.0
+    freBlank = float(request.POST.get('blank')) / 100.0
+    freJudge = float(request.POST.get('judge')) / 100.0
+    freQA = float(request.POST.get('qa')) / 100.0
     
     questions = []
     try:
         if (_type == 'total'):
             for bank in banks:
-                # all chapters in the bank
-                if '-' not in bank:
-                    pass
-                # a chapter in the bank
-                else:
-                    pass
+                allQuestions = Bank.objects.filter(bank=bank)
+                singleA = allQuestions.filter(questionType='singleA')
+                singleB = allQuestions.filter(questionType='singleB')
+                multiple = allQuestions.filter(questionType='multiple')
+                blank = allQuestions.filter(questionType='blank')
+                judge = allQuestions.filter(questionType='judge')
+                qa = allQuestions.filter(questionType='qa')
 
+                questions.extend(list(singleA[0:int(singleA.count()*freSingleA)].values()))
+                questions.extend(list(singleB[0:int(singleB.count()*freSingleB)].values()))
+                questions.extend(list(multiple[0:int(multiple.count()*freMultiple)].values()))
+                questions.extend(list(blank[0:int(blank.count()*freMultiple)].values()))
+                questions.extend(list(judge[0:int(judge.count()*freJudge)].values()))
+                questions.extend(list(qa[0:int(qa.count()*freQA)].values()))
         elif (_type == 'random'):
-            pass
-        
+            singleA, singleB, multiple, blank, judge, qa = []
+            for bank in banks:
+                allQuestions = Bank.objects.filter(bank=bank)
+                singleA.extend(allQuestions.filter(questionType='singleA'))
+                singleB.extend(allQuestions.filter(questionType='singleB'))
+                multiple.extend(allQuestions.filter(questionType='multiple'))
+                blank.extend(allQuestions.filter(questionType='blank'))
+                judge.extend(allQuestions.filter(questionType='judge'))
+                qa.extend(allQuestions.filter(questionType='qa'))
+            # random all questions
+            random.shuffle(singleA)
+            random.shuffle(singleB)
+            random.shuffle(multiple)
+            random.shuffle(blank)
+            random.shuffle(judge)
+            random.shuffle(qa)
+            
+            questions.extend(list(singleA[0:int(numQuestion*freSingleA)].values()))
+            questions.extend(list(singleB[0:int(numQuestion*freSingleB)].values()))
+            questions.extend(list(multiple[0:int(numQuestion*freMultiple)].values()))
+            questions.extend(list(blank[0:int(numQuestion*freMultiple)].values()))
+            questions.extend(list(judge[0:int(numQuestion*freJudge)].values()))
+            questions.extend(list(qa[0:int(numQuestion*freQA)].values()))
+
         return JsonResponse({ 'info': questions })
     except:
         return HttpResponse(1)
@@ -492,7 +523,8 @@ def getLoseList(request):
             'id': lose.id,
             'isFound': lose.isFound,
             'avatar': lose.user.avatar.url,
-            'date': lose.date,
+            'publicDate': lose.publicDate,
+            'loseDate': lose.loseDate,
             'name': lose.name,
             'description': lose.description,
             'cover': cover
@@ -528,6 +560,35 @@ def getDealList(request):
         })
 
     return JsonResponse({ 'info': listDeal })
+
+
+
+@csrf_exempt
+def getArticleList(request):
+    index = int(request.POST.get('index')) - 1
+
+    listArtcile = []
+    try:
+        allArticles = Article.objects.all()
+        for article in allArticles[index:index+9]:
+            listArtcile.append({
+                'uid': article.user.id,
+                'avatar': article.user.avatar.url,
+                'nickname': article.user.nickname,
+                'bio': article.user.bio,
+                'title': article.title,
+                'content': article.content,
+                'neededCoin': article.neededCoin,
+                'publicDate': article.publicDate,
+                'editDate': article.editDate
+            })
+
+        return JsonResponse({
+            'list': listArtcile,
+            'total': allArticles.count()
+        })
+    except:
+        return HttpResponse(1)
 
 
 
@@ -615,7 +676,8 @@ def getLoseDetail(request):
             'nickname': lose.user.nickname,
             'bio': lose.user.bio,
             'avatar': lose.user.avatar.url,
-            'date': lose.date,
+            'publicDate': lose.publicDate,
+            'loseDate': lose.loseDate,
             'name': lose.name,
             'description': lose.description,
             'images': list(lose.images.all().values_list('name', flat=True)),
@@ -684,6 +746,18 @@ def thumbsUp(request):
 
 
 @csrf_exempt
+def getNumQuestion(request):
+    banks = request.POST.getlist('banks[]')
+
+    quantity = 0
+    for bank in banks:
+        quantity += Bank.objects.filter(bank=bank).count()
+
+    return HttpResponse(quantity)
+
+
+
+@csrf_exempt
 def submitUserComment(request):
     uidTo = request.POST.get('uidTo')
     uidFrom = request.POST.get('uidFrom')
@@ -745,6 +819,26 @@ def submitDealComment(request):
         user = User.objects.get(id=uid)
         comment = Comment.objects.create(user=user, content=content)
         deal.comments.add(comment)
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def submitArticle(request):
+    uid = request.POST.get('uid')
+    title = request.POST.get('title')
+    content = request.POST.get('content')
+    neededCoin = request.POST.get('neededCoin')
+
+    try:
+        Article.objects.create(
+            user = User.objects.get(id=uid),
+            title = title,
+            content = content,
+            neededCoin = neededCoin
+        )
         return HttpResponse(0)
     except:
         return HttpResponse(1)

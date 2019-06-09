@@ -112,6 +112,7 @@
                     <a-form-item v-bind="formItemLayout" label="选择子章">
                         <a-transfer
                             v-decorator="[
+                                'transfer',
                                 {
                                     rules: [{ validator: validatorTransfer }],
                                     getValueFromEvent: transferBanks
@@ -124,6 +125,25 @@
                             :render="item => item.title"
                         >
                         </a-transfer>
+                    </a-form-item>
+                    <a-form-item v-bind="formItemLayout" label="题目总数">
+                        <a-row :gutter="16">
+                            <a-col :span="20">
+                                <a-slider
+                                    v-decorator="[
+                                        'numQuestion',
+                                        {
+                                            initialValue: 0
+                                        }
+                                    ]"
+                                    :min="1"
+                                    :max="maxNumQuestion"
+                                />
+                            </a-col>
+                            <a-col :span="4">
+                                <span>{{ form_bank.getFieldValue('numQuestion') }} 道题目</span>
+                            </a-col>
+                        </a-row>
                     </a-form-item>
                     <a-form-item v-bind="formItemLayout">
                         <span slot="label">
@@ -249,6 +269,7 @@ export default {
         form_bank: this.$form.createForm(this),
         subBanks: [],
         targetSubBanks: [],
+        maxNumQuestion: 0,
         marks: {
             0: '0',
             16: '16%',
@@ -321,10 +342,24 @@ export default {
       },
       selectBank(value) {
           this.subBanks = this.getSubBanks(value)
+          this.form_bank.setFieldsValue({
+              'numQuestion': 0
+          })
+          this.maxNumQuestion = 0
           return value
       },
       transferBanks(targetKeys, direction, moveKeys) {
-          this.targetSubBanks = targetKeys
+          this.targetSubBanks = moveKeys
+          // get quantity of selected banks' question
+          this.$axios.post('getNumQuestion', qs.stringify({
+              banks: moveKeys
+          }, { arrayFormat: 'brackets' }))
+          .then((response) => {
+              this.maxNumQuestion = response.data
+              this.form_bank.setFieldsValue({
+                  'numQuestion': response.data
+              })
+          })
       },
       subBankFilter(inputValue, option) {
           return option.title.indexOf(inputValue) > -1
@@ -347,6 +382,7 @@ export default {
                       this.$axios.post('submitBank', qs.stringify({
                           type: values.type,
                           banks: this.targetSubBanks,
+                          numQuestion: this.form_bank.getFieldValue('numQuestion'),
                           singleA: values.singleA,
                           singleB: values.singleB,
                           multiple: values.multiple,
@@ -409,15 +445,5 @@ export default {
 }
 .questionPercent >>> .ant-slider {
     margin-top: 0
-}
-
-.floatcard {
-    float: right;
-    position: fixed;
-    right: 60px;
-    top: 200px;
-}
-.floatcard h4 {
-    color: red;
 }
 </style>

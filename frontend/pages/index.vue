@@ -1,24 +1,107 @@
 <template>
   <div>
-    <header>
-      <!-- navbar -->
-      <navbar :userBaseInfo="userBaseInfo" />
+    <!-- navbar -->
+    <navbar :userBaseInfo="userBaseInfo" />
 
-      <a-carousel autoplay class="carousel">
-        <img src="https://s2.ax1x.com/2019/05/26/VV8t9s.jpg">
-        <img src="https://s2.ax1x.com/2019/05/26/VV8Jhj.jpg">
-        <img src="https://s2.ax1x.com/2019/05/26/VV8N3n.jpg">
-      </a-carousel>
+    <a-carousel autoplay class="carousel">
+      <img src="https://s2.ax1x.com/2019/05/26/VV8t9s.jpg">
+      <img src="https://s2.ax1x.com/2019/05/26/VV8Jhj.jpg">
+      <img src="https://s2.ax1x.com/2019/05/26/VV8N3n.jpg">
+    </a-carousel>
 
-    </header>
-    
-    <div style="margin-top: 100px"></div>
-
-    <div class="container">
-      <div class="row">
-        
+    <!-- statement -->
+    <section class="section">
+      <div class="container">
+        <div class="col-md-8 col-md-offset-2 text-center">
+          <h1>墙墙们</h1>
+          <p>ヽ(✿ﾟ▽ﾟ)ノ</p>
+          <hr />
+        </div>
+        <!-- row_1 -->
+        <div class="row text-center">
+          <div class="col-md-4">
+            <div class="section-item">
+              <a-icon type="heart" theme="twoTone" class="section-icon" />
+              <h2>表白墙</h2>
+              <p>来表白墙敞开心扉表白吧～</p>
+              <router-link to="/love">进入</router-link>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="section-item">
+              <a-icon type="tags" theme="twoTone" class="section-icon" />
+              <h2>失物墙</h2>
+              <p>丢掉物品很伤心吧，来这里大家一起找找吧～</p>
+              <router-link to="/lose">进入</router-link>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="section-item">
+              <a-icon type="switcher" theme="twoTone" class="section-icon" />
+              <h2>二手墙</h2>
+              <p>旧东西也能焕发光彩呢～</p>
+              <router-link to="/deal">进入</router-link>
+            </div>
+          </div>
+        </div>
+        <!-- row_2 -->
+        <div class="row text-center">
+          <div class="col-md-4">
+            <div class="section-item">
+              <a-icon type="sound" theme="twoTone" class="section-icon" />
+              <h2>吐槽墙</h2>
+              <p>来这里发泄一下吧～</p>
+              <a href="#">进入</a>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="section-item">
+              <a-icon type="database" theme="twoTone" class="section-icon" />
+              <h2>题库</h2>
+              <p>C位！万能的题库~</p>
+              <router-link to="/bank">进入</router-link>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="section-item">
+              <a-icon type="crown" theme="twoTone" class="section-icon" />
+              <h2>大佬杂谈</h2>
+              <p>大佬们的学习经验～</p>
+              <router-link to="/article">进入</router-link>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
+    <!-- about us -->
+    <section class="section">
+      <div class="container">
+        <div class="row text-center">
+          <div class="col-md-8 col-md-offset-2">
+            <h1>你问我答</h1>
+            <p>(๑•̀ㅂ•́)و✧</p>
+            <hr />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <h4><a-icon type="check" /> 墙墙们有什么用？</h4>
+            <p>墙墙可你帮你表白，帮你寻找失物，帮你出售二手物品，还可以任你吐槽发泄！</p>
+            <h4><a-icon type="check" /> 题库使用效果怎么样？</h4>
+            <p>我们的题库收录了几乎练习册上的所有题目，当然您也可以上传自己的题目，更厉害的是，你可以组织一场自我考试！</p>
+          </div>
+          <div class="col-md-6">
+            <h4><a-icon type="check" /> 大佬杂谈有用么？</h4>
+            <p>我们会邀请校内的优秀学子分享他们的学习经验，看得多了，总会有用的！</p>
+            <h4><a-icon type="check" /> 我们应该还要有XXX功能！</h4>
+            <p>如果你想拥有其他的板块或功能，在页面最下方就可以看到我的联系方式了！</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <Footer></Footer>
+
   </div>
 </template>
 
@@ -26,10 +109,12 @@
 import qs from 'qs'
 import { mapState } from 'vuex'
 import navbar from '~/components/navbar'
+import Footer from '~/components/footer'
 
 export default {
   components: {
-    navbar
+    navbar,
+    Footer
   },
   data() {
     return {
@@ -61,10 +146,30 @@ a {
   text-decoration: none
 }
 
+.section {
+  padding: 2em 0;
+  position: relative;
+}
+.section h2 {
+  color: #0099FF;
+}
+.section h4 {
+  color: #0099FF;
+}
+.section-item {
+  position: relative;
+  padding: 30px;
+  margin-bottom: 30px;
+  float: left;
+  width: 100%;
+}
+.section-icon {
+  font-size: 64px;
+}
+
 .ant-carousel >>> .slick-dots {
   height: auto
 }
-
 .carousel {
   height: 300px;
 }
@@ -74,7 +179,7 @@ a {
   overflow: hidden;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 992px) {
   .carousel {
     height: 600px;
   }
