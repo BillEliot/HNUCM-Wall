@@ -27,37 +27,40 @@
                         <div class="filter">
                             <a-button @click="filterLoseTime">丢失时间<a-icon :type="type_loseTime" /></a-button>
                             <a-button @click="filterPublicTime">发布时间<a-icon :type="type_publicTime" /></a-button>
+                            <a-button @click="filterFound">是否找到<a-icon :type="type_isFound" /></a-button>
                             <a-input-search
                                 placeholder="搜索物品"
                                 @search="searchItem"
                                 enterButton
-                                style="width: 30%"
+                                style="width: 35%"
                             />
                         </div>
                     </div>
                     <!-- List -->
-                    <RecycleScroller
-                        :items="loseList"
-                        :item-size="1"
-                        key-field="id"
-                        v-slot="{ item }"
-                        v-infinite-scroll="infiniteLoadList"
-                        infinite-scroll-disabled="busy"
-                        :infinite-scroll-distance="20"
-                        style="height: 100%"
-                    >
-                        <a-card hoverable @click="$router.push({ path: '/lose/detail', query: { id: item.id } })" style="margin-bottom: 20px">
-                            <p class="losetime">丢失时间：{{ item.loseDate }}</p>
-                            <h2 v-if="item.isFound" class="found">已找到</h2>
-                            <h2 v-else class="notfound">未找到</h2>
-                            <a-card-meta
-                                :title="item.name"
-                                :description="item.description">
-                                <a-avatar slot="avatar" :src="baseUrl + item.avatar" />
-                            </a-card-meta>
-                            <img :src="baseUrl + item.cover" slot="cover" style="height: 200px" />
-                        </a-card>
-                    </RecycleScroller>
+                    <a-spin :spinning="spinning">
+                        <RecycleScroller
+                            :items="loseList"
+                            :item-size="1"
+                            key-field="id"
+                            v-slot="{ item }"
+                            v-infinite-scroll="infiniteLoadList"
+                            infinite-scroll-disabled="busy"
+                            :infinite-scroll-distance="20"
+                            style="height: 100%"
+                        >
+                            <a-card hoverable @click="$router.push({ path: '/lose/detail', query: { id: item.id } })" style="margin-bottom: 20px">
+                                <p class="losetime">丢失时间：{{ item.loseDate }}</p>
+                                <h2 v-if="item.isFound" class="found">已找到</h2>
+                                <h2 v-else class="notfound">未找到</h2>
+                                <a-card-meta
+                                    :title="item.name"
+                                    :description="item.description">
+                                    <a-avatar slot="avatar" :src="baseUrl + item.avatar" />
+                                </a-card-meta>
+                                <img :src="baseUrl + item.cover" slot="cover" style="height: 200px" />
+                            </a-card>
+                        </RecycleScroller>
+                    </a-spin>
                     <a-spin v-if="loading" class="loading" />
                 </div>
             </div>
@@ -82,13 +85,17 @@ export default {
   data() {
     return {
         loading: false,
+        spinning: false,
         busy: false,
         previewCover: false,
         loseList: [],
-        filterName: '',
+
+        isSearched: false,
+        filterType: '',
         order: 'normal',
         type_loseTime: 'minus',
-        type_publicTime: 'minus'
+        type_publicTime: 'minus',
+        type_isFound: 'minus'
     }
   },
   async asyncData({ $axios }) {
@@ -114,8 +121,11 @@ export default {
   },
   methods: {
     filterLoseTime() {
-        this.filterName = 'loseTime'
+        this.isSearched = false
+        this.spinning = true
+        this.filterType = 'loseTime'
         this.type_publicTime = 'minus'
+        this.type_isFound = 'minus'
         if (this.type_loseTime == 'minus') {
             this.order = 'reverse'
             this.type_loseTime = 'down'
@@ -136,8 +146,11 @@ export default {
         }
     },
     filterPublicTime() {
-        this.filterName = 'publicTime'
+        this.isSearched = false
+        this.spinning = true
+        this.filterType = 'publicTime'
         this.type_loseTime = 'minus'
+        this.type_isFound = 'minus'
         if (this.type_publicTime == 'minus') {
             this.order = 'positive'
             this.type_publicTime = 'up'
@@ -157,26 +170,80 @@ export default {
             this.infiniteLoadList()
         }
     },
-    searchItem() {
-        
+    filterFound() {
+        this.isSearched = false
+        this.spinning = true
+        this.filterType = 'isFound'
+        this.type_loseTime = 'minus'
+        this.type_publicTime = 'minus'
+        if (this.type_isFound == 'minus') {
+            this.order = 'positive'
+            this.type_isFound = 'up'
+            this.loseList = []
+            this.infiniteLoadList()
+        }
+        else if (this.type_isFound == 'up') {
+            this.order = 'reverse'
+            this.type_isFound = 'down'
+            this.loseList = []
+            this.infiniteLoadList()
+        }
+        else if (this.type_isFound == 'down') {
+            this.order = 'positive'
+            this.type_isFound = 'up'
+            this.loseList = []
+            this.infiniteLoadList()
+        }
+    },
+    searchItem(value) {
+        if (!!value) {
+            this.spinning = true
+            this.isSearched = true
+            this.$axios.post('searchLoseItem', qs.stringify({
+                name: value
+            }))
+            .then((response) => {
+                this.spinning = false
+                if (response.data == 1) {
+                    this.$message.error('未知错误')
+                }
+                else {
+                    this.type_loseTime = 'minus'
+                    this.type_publicTime = 'minus'
+                    this.loseList = response.data.info
+                    this.$notification.open({
+                        message: '搜索结果',
+                        description: `共搜索到 ${this.loseList.length} 条结果`,
+                        icon: <a-icon type="smile" style="color: #108ee9" />,
+                        duration: 0
+                    })
+                }
+            })
+        }
+        else {
+            this.$message.warning('输入要搜索的物品吧～')
+        }
     },
     infiniteLoadList() {
-        this.loading = true
-        this.$axios.post('getLoseList', qs.stringify({
-            filterName: this.filterName,
-            order: this.order,
-            index: this.loseList.length
-        }))
-        .then((response) => {
-            this.loading = false
-            if (response.data.info.length == 0) {
-                this.busy = true
-                this.$message.warning('到底啦～')
-            }
-            else {
-                this.loseList = this.loseList.concat(response.data.info)
-            }
-        })
+        if (!this.isSearched) {
+            this.loading = true
+            this.$axios.post('getLoseList', qs.stringify({
+                filterType: this.filterType,
+                order: this.order,
+                index: this.loseList.length
+            }))
+            .then((response) => {
+                this.loading = false
+                this.spinning = false
+                if (response.data.info.length == 0) {
+                    this.busy = true
+                    this.$message.warning('到底啦～')
+                }
+                else {
+                    this.loseList = this.loseList.concat(response.data.info)
+                }
+            })
+        }
     }
   },
   computed: mapState({

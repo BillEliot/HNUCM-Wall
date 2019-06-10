@@ -278,17 +278,17 @@ export default {
         },
         formItemLayout: {
             labelCol: {
-                span: 8,
+                span: 6,
             },
             wrapperCol: {
-                span: 10
+                span: 12
             },
         },
         tailFormItemLayout: {
             wrapperCol: {
                 md: {
                     span: 12,
-                    offset: 7,
+                    offset: 6,
                 },
                 sm: {
                     span: 10,

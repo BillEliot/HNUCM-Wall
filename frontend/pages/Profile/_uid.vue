@@ -129,7 +129,7 @@
                     />
                 </a-form-item>
                 <a-form-item class="submit">
-                    <a-button @click="visibleDrawerProfile = false" style="margin-right: 10px">取消</a-button>
+                    <a-button @click="visibleDrawerPassword = false" style="margin-right: 10px">取消</a-button>
                     <a-button @click="submitProfile" type="primary" html-type="submit">确定</a-button>
                 </a-form-item>
             </a-form>

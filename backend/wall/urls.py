@@ -11,6 +11,7 @@ urlpatterns = [
     path('getCaptcha', views.getCaptcha),
     # Query
     path('searchUser', views.searchUser),
+    path('searchLoseItem', views.searchLoseItem),
     path('getLoveList', views.getLoveList),
     path('getLoseList', views.getLoseList),
     path('getDealList', views.getDealList),

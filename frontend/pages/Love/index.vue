@@ -37,11 +37,20 @@
                     </a-card>
                     <!-- filter -->
                     <div class="filter">
-                        <div class="filter">
-                            <a-button>时间<a-icon type="minus" /></a-button>
-                            <a-button>热度<a-icon type="minus" /></a-button>
-                            <a-button>评论<a-icon type="minus" /></a-button>
-                        </div>
+                        <a-button>时间<a-icon type="minus" /></a-button>
+                        <a-button>热度<a-icon type="minus" /></a-button>
+                        <a-input-search
+                            placeholder="搜索表白人"
+                            @search="searchLoveFrom"
+                            enterButton
+                            style="width: 40%"
+                        />
+                        <a-input-search
+                            placeholder="搜索被表白人"
+                            @search="searchLoveTo"
+                            enterButton
+                            style="width: 40%"
+                        />
                     </div>
                     <!-- List -->
                     <RecycleScroller

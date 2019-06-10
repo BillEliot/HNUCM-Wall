@@ -133,6 +133,36 @@ def searchUser(request):
 
 
 @csrf_exempt
+def searchLoseItem(request):
+    name = request.POST.get('name')
+
+    listLose = []
+    try:
+        for lose in Lose.objects.filter(name__contains=name):
+            # cover
+            if lose.images.count():
+                cover = lose.images.first().name
+            else:
+                cover = ''
+
+            listLose.append({
+                'id': lose.id,
+                'isFound': lose.isFound,
+                'avatar': lose.user.avatar.url,
+                'publicDate': lose.publicDate,
+                'loseDate': lose.loseDate,
+                'name': lose.name,
+                'description': lose.description,
+                'cover': cover
+            })
+        
+        return JsonResponse({ 'info': listLose })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def getUserProfile(request):
     uid = request.POST.get('uid')
 
@@ -506,7 +536,7 @@ def getLoveList(request):
 
 @csrf_exempt
 def getLoseList(request):
-    filterName = request.POST.get('filterName')
+    filterType = request.POST.get('filterType')
     order = request.POST.get('order')
     index = int(request.POST.get('index'))
 
@@ -515,16 +545,21 @@ def getLoseList(request):
 
     loses = []
     listLose = []
-    if filterName == 'loseTime':
+    if filterType == 'loseTime':
         if order == 'positive':
             loses = Lose.objects.order_by('loseDate')[index:index+9]
         elif order == 'reverse':
             loses = Lose.objects.order_by('-loseDate')[index:index+9]
-    elif filterName == 'publicTime':
+    elif filterType == 'publicTime':
         if order == 'positive':
             loses = Lose.objects.order_by('publicDate')[index:index+9]
         elif order == 'reverse':
             loses = Lose.objects.order_by('-publicDate')[index:index+9]
+    elif filterType == 'isFound':
+        if order == 'positive':
+            loses = Lose.objects.order_by('isFound')[index:index+9]
+        elif order == 'reverse':
+            loses = Lose.objects.order_by('-isFound')[index:index+9]
     else:
         loses = Lose.objects.all()[index:index+9]
 
