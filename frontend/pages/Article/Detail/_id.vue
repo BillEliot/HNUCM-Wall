@@ -2,15 +2,14 @@
     <div>
         <!-- navbar -->
         <navbar :userBaseInfo="userBaseInfo" />
-
         <!-- banner -->
         <div class="main-wrapper">
             <div class="page-title">
                 <div class="container">
                     <div class="title-holder">
                         <div class="title-text text-center">
-                            <h1>(＞﹏＜)</h1>
-                            <p class="subheading">要尽快找回来啊～</p>
+                            <h1>大佬杂谈</h1>
+                            <p class="subheading">努力提高自己吧～</p>
                         </div>
                     </div>
                 </div>
@@ -21,34 +20,27 @@
         <div class="container">
             <div class="row">
                 <div class="text-center col-md-12">
-                    <a-row>
-                        <a-col :span="12">
-                            <p class="losetime text-left">丢失日期：{{ loseDetail.loseDate }}</p>
-                        </a-col>
-                        <a-col :span="12">
-                            <p v-if="loseDetail.isFound" class="found">已找到</p>
-                            <p v-else class="notfound">未找到</p>
-                        </a-col>
-                    </a-row>
-                    <a-avatar :size="64" :src="baseUrl + loseDetail.avatar" />
-                        <div>
-                            <a @click="$router.push({ path: '/profile', query: { uid: loseDetail.uid } })">{{ loseDetail.nickname }}</a>
-                            <p class="bio">{{ loseDetail.bio }}</p>
-                        </div>
+                    <div class="author">
+                        <a-avatar :size="64" :src="baseUrl + articleDetail.avatar" />
+                        <br />
+                        <a>{{ articleDetail.nickname }}</a>
+                        <p>{{ articleDetail.bio }}</p>
+                    </div>
+                    <h1>{{ articleDetail.title }}</h1>
+                    <span class="date">发布时间: {{ moment(articleDetail.publicDate).format("llll") }}</span>
+                    <br />
+                    <span class="date">最后编辑: {{ moment(articleDetail.editDate).format("llll") }}</span>
+                    <no-ssr placeholder='Loading'>
+                        <mavon-editor
+                            v-model="articleDetail.content"
+                            :subfield="false"
+                            defaultOpen="preview"
+                            :toolbarsFlag="false"
+                            :editable="false"
+                            class="editor"
+                        />
+                    </no-ssr>
                     <hr />
-                    <a-card :title="loseDetail.name">
-                        <p>{{ loseDetail.description }}</p>
-                    </a-card>
-                    <hr />
-                    <a-carousel arrows dotsClass="slick-dots slick-thumb">
-                        <a slot="customPaging" slot-scope="props">
-                            <img :src="baseUrl + loseDetail.images[props.i]" />
-                        </a>
-                        <div v-for="image in loseDetail.images">
-                            <img :src="baseUrl + image" />
-                        </div>
-                    </a-carousel>
-                    <hr style="margin-top: 70px" />
                     <div class="icon-share">
                         <a target='_blank' href="http://connect.qq.com/widget/shareqq/index.html?url=http://127.0.0.1&sharesource=qzone&title=湖南中医药大学失物墙&summary=描述&desc=简述">
                             <icon-font type="icon-qq" />
@@ -60,13 +52,12 @@
                         <icon-font type="icon-pyq" />
                         <icon-font type="icon-weibo" />
                     </div>
-                    
                     <div id="comment" style="margin-top: 50px">
                         <a-list
-                            v-if="loseDetail.comments.length"
+                            v-if="articleDetail.comments.length"
                             :pagination="commentPagination"
-                            :dataSource="loseDetail.comments"
-                            :header="`${loseDetail.comments.length} 条回复`"
+                            :dataSource="articleDetail.comments"
+                            :header="`${articleDetail.comments.length} 条回复`"
                             itemLayout="horizontal"
                         >
                             <div slot="footer"><b>友善的回复是交流的起点</b></div>
@@ -103,6 +94,7 @@
 
 <script>
 import qs from 'qs'
+import moment from 'moment'
 import { Icon } from 'ant-design-vue'
 import { mapState } from 'vuex'
 import navbar from '~/components/navbar'
@@ -119,6 +111,7 @@ export default {
   },
   data() {
     return {
+        moment,
         commenting: false,
         commentContent: null,
         commentPagination: {
@@ -133,22 +126,21 @@ export default {
   },
   async asyncData({ $axios, query, redirect }) {
       if (!query.id) {
-          redirect('/lose')
+          redirect('/article')
       }
 
-      let loseDetail = null
-      await $axios.post('getLoseDetail', qs.stringify({
+      let articleDetail = null
+      await $axios.post('getArticleDetail', qs.stringify({
           id: query.id
       }))
       .then((response) => {
           if (response.data == 1) {
-              redirect('/lose')
+              redirect('/article')
           }
           else {
-              loseDetail = response.data
+              articleDetail = response.data
           }
       })
-
       let userBaseInfo = null
       await $axios.get('getUserBaseInfo')
       .then((response) => {
@@ -156,7 +148,7 @@ export default {
       })
 
       return {
-          loseDetail: loseDetail,
+          articleDetail: articleDetail,
           userBaseInfo: userBaseInfo
       }
   },
@@ -170,8 +162,8 @@ export default {
           }
           else {
               this.commenting = true
-              this.$axios.post('submitLoseComment', qs.stringify({
-                  id: this.loseDetail.id,
+              this.$axios.post('submitArticleComment', qs.stringify({
+                  id: this.articleDetail.id,
                   uid: this.userBaseInfo.uid,
                   content: this.commentContent
               }))
@@ -181,7 +173,7 @@ export default {
                       this.$message.error('未知错误')
                   }
                   else {
-                      this.loseDetail.comments.unshift({
+                      this.articleDetail.comments.unshift({
                           avatar: this.userBaseInfo.avatar,
                           nickname: this.userBaseInfo.nickname,
                           content: this.commentContent
@@ -207,32 +199,24 @@ export default {
 a {
     text-decoration: none;
 }
-a:hover {
-    color: blue;
+
+.date {
+    color: gray;
 }
 
-.losetime {
-    color: indigo;
-    font-size: 28px;
-    font-weight: bold;
+.author {
+    margin: 10px;
 }
-.found {
-    margin-top: 0;
-    float: right;
-    color: green;
-    font-size: 28px;
-    font-weight: bold;
+.author a {
+    font-size: 24px;
 }
-.notfound {
-    margin-top: 0;
-    float: right;
-    color: red;
-    font-size: 28px;
-    font-weight: bold;
+.author p {
+    color: gray;
 }
 
-.anchor >>> .ant-anchor-link-title {
-    text-decoration: none;
+.editor {
+    margin-top: 20px;
+    z-index: inherit;
 }
 
 .icon-share {
@@ -242,36 +226,5 @@ a:hover {
 .icon-share >>> .anticon {
     font-size: 24px;
     cursor: pointer;
-}
-
-.ant-carousel >>> .slick-dots {
-    height: auto
-}
-.ant-carousel >>> .slick-slide img{
-    border: 5px solid #FFF;
-    display: block;
-    margin: auto;
-    max-width: 300px;
-}
-.ant-carousel >>> .slick-thumb {
-    bottom: -45px;
-}
-.ant-carousel >>> .slick-thumb li {
-    width: 60px;
-    height: 45px;
-}
-.ant-carousel >>> .slick-thumb li img {
-    width: 100%;
-    height: 100%;
-    filter: grayscale(100%);
-}
-.ant-carousel >>> .slick-thumb li.slick-active img{
-    filter: grayscale(0%);
-}
-
-@media (min-width: 992px) {
-    .ant-carousel >>> .slick-slide img{
-        max-width: 600px;
-    }
 }
 </style>

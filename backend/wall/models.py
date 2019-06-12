@@ -99,6 +99,7 @@ class Article(models.Model):
     neededCoin = models.PositiveIntegerField(default=0)
     publicDate = models.DateTimeField(auto_now_add=True)
     editDate = models.DateTimeField(auto_now=True)
+    comments = models.ManyToManyField('Comment', blank=True)
 
     def __str__(self):
         return self.title

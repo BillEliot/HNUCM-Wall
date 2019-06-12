@@ -129,21 +129,17 @@ export default {
         if (this.type_loseTime == 'minus') {
             this.order = 'reverse'
             this.type_loseTime = 'down'
-            this.loseList = []
-            this.infiniteLoadList()
         }
         else if (this.type_loseTime == 'up') {
             this.order = 'reverse'
             this.type_loseTime = 'down'
-            this.loseList = []
-            this.infiniteLoadList()
         }
         else if (this.type_loseTime == 'down') {
             this.order = 'positive'
             this.type_loseTime = 'up'
-            this.loseList = []
-            this.infiniteLoadList()
         }
+        this.loseList = []
+        this.infiniteLoadList()
     },
     filterPublicTime() {
         this.isSearched = false
@@ -154,21 +150,17 @@ export default {
         if (this.type_publicTime == 'minus') {
             this.order = 'positive'
             this.type_publicTime = 'up'
-            this.loseList = []
-            this.infiniteLoadList()
         }
         else if (this.type_publicTime == 'up') {
             this.order = 'reverse'
             this.type_publicTime = 'down'
-            this.loseList = []
-            this.infiniteLoadList()
         }
         else if (this.type_publicTime == 'down') {
             this.order = 'positive'
             this.type_publicTime = 'up'
-            this.loseList = []
-            this.infiniteLoadList()
         }
+        this.loseList = []
+        this.infiniteLoadList()
     },
     filterFound() {
         this.isSearched = false
@@ -179,21 +171,17 @@ export default {
         if (this.type_isFound == 'minus') {
             this.order = 'positive'
             this.type_isFound = 'up'
-            this.loseList = []
-            this.infiniteLoadList()
         }
         else if (this.type_isFound == 'up') {
             this.order = 'reverse'
             this.type_isFound = 'down'
-            this.loseList = []
-            this.infiniteLoadList()
         }
         else if (this.type_isFound == 'down') {
             this.order = 'positive'
             this.type_isFound = 'up'
-            this.loseList = []
-            this.infiniteLoadList()
         }
+        this.loseList = []
+        this.infiniteLoadList()
     },
     searchItem(value) {
         if (!!value) {

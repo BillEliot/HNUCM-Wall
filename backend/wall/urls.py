@@ -11,7 +11,9 @@ urlpatterns = [
     path('getCaptcha', views.getCaptcha),
     # Query
     path('searchUser', views.searchUser),
+    path('searchLoveItem', views.searchLoveItem),
     path('searchLoseItem', views.searchLoseItem),
+    path('searchDealItem', views.searchDealItem),
     path('getLoveList', views.getLoveList),
     path('getLoseList', views.getLoseList),
     path('getDealList', views.getDealList),
@@ -19,6 +21,7 @@ urlpatterns = [
     path('getLoveDetail', views.getLoveDetail),
     path('getLoseDetail', views.getLoseDetail),
     path('getDealDetail', views.getDealDetail),
+    path('getArticleDetail', views.getArticleDetail),
     path('thumbsUp', views.thumbsUp),
     path('getNumQuestion', views.getNumQuestion),
     # Upload
@@ -37,5 +40,6 @@ urlpatterns = [
     path('submitLoseComment', views.submitLoseComment),
     path('submitUserComment', views.submitUserComment),
     path('submitDealComment', views.submitDealComment),
+    path('submitArticleComment', views.submitArticleComment),
     path('submitArticle', views.submitArticle)
 ]

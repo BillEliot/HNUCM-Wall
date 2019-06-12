@@ -41,14 +41,13 @@
                             <a-select
                                 v-decorator="[
                                     'userTo',
-                                    { rules: [{ required: true, message: '请输入要表白的人的email或昵称' }] }
+                                    { rules: [{ required: true, message: '请输入要表白的人的昵称' }] }
                                 ]"
-                                :showSearch="true"
+                                mode="tags"
+                                :showArrow="false" 
                                 placeholder="要表白的人的昵称"
-                                style="width: 100%"
-                                :filterOption="false"
                                 @search="searchUser"
-                                :notFoundContent="searchingUser ? undefined : null"
+                                style="width: 100%"
                             >
                                 <a-spin v-if="searchingUser" slot="notFoundContent" size="small"/>
                                 <a-select-option v-for="user in users" :key="user">{{ user }}</a-select-option>

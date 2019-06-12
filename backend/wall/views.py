@@ -1,5 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Count
 from .models import *
 from utils.utils import *
 from datetime import timedelta
@@ -133,6 +134,77 @@ def searchUser(request):
 
 
 @csrf_exempt
+def searchLoveItem(request):
+    name = request.POST.get('name')
+    _object = request.POST.get('object')
+
+    loves = []
+    listLove = []
+    try:
+        if _object == 'from':
+            loves = Love.objects.filter(userFrom__nickname__contains=name)
+        elif _object == 'to':
+            loves = Love.objects.filter(userTo__nickname__contains=name)
+
+        for love in loves:
+            # cover
+            if love.images.count():
+                cover = love.images.first().name
+            else:
+                cover = ''
+            # userFrom
+            if love.isAnony and _object == 'from':
+                continue
+            elif love.isAnony and _object == 'to':
+                userFromID = -1
+                userFromNickname = 'Anony'
+                userFromAvatar = '/media/img/avatar/anony.jpg'
+                userFromBio = 'TA匿名了呢～'
+            else:
+                userFromID = love.userFrom.id
+                userFromNickname = love.userFrom.nickname
+                userFromAvatar = love.userFrom.avatar.url
+                userFromBio = love.userFrom.bio
+            # userTo
+            if love.userTo:
+                userToID = love.userTo.id
+                userToNickname = love.userTo.nickname
+                userToAvatar = love.userTo.avatar.url
+                userToBio = love.userTo.bio
+            else:
+                continue
+            # is thumbsUp
+            uid = request.session.get('uid', None)
+            if uid:
+                user = User.objects.get(id=uid)
+                isThumbsUp = love.thumbsUpUser.filter(id=user.id).exists()
+            else:
+                isThumbsUp = False
+            listLove.append({
+                'id': love.id,
+                'userFrom_uid': userFromID,
+                'userFrom_nickname': userFromNickname,
+                'userFrom_avatar': userFromAvatar,
+                'userFrom_bio': userFromBio,
+                'userTo_uid': userToID,
+                'userTo_nickname': userToNickname,
+                'userTo_avatar': userToAvatar,
+                'userTo_bio': userToBio,
+                'nameTo': love.nameTo,
+                'content': love.content,
+                'cover': cover,
+                'thumbsUp': love.thumbsUpUser.count(),
+                'comments': love.comments.count(),
+                'isThumbsUp': isThumbsUp
+            })
+            
+        return JsonResponse({ 'info': listLove })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def searchLoseItem(request):
     name = request.POST.get('name')
 
@@ -157,6 +229,36 @@ def searchLoseItem(request):
             })
         
         return JsonResponse({ 'info': listLose })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def searchDealItem(request):
+    name = request.POST.get('name')
+
+    listDeal = []
+    try:
+        for deal in Deal.objects.filter(name__contains=name):
+            # cover
+            if deal.images.count():
+                cover = deal.images.first().name
+            else:
+                cover = ''
+            
+            listDeal.append({
+                'id': deal.id,
+                'isSold': deal.isSold,
+                'avatar': deal.user.avatar.url,
+                'name': deal.name,
+                'price': deal.price,
+                'new': deal.new,
+                'description': deal.description,
+                'cover': cover
+            })
+        
+        return JsonResponse({ 'info': listDeal })
     except:
         return HttpResponse(1)
 
@@ -471,14 +573,50 @@ def submitBank(request):
 
 
 @csrf_exempt
+def submitArticle(request):
+    uid = request.POST.get('uid')
+    title = request.POST.get('title')
+    content = request.POST.get('content')
+    neededCoin = request.POST.get('neededCoin')
+
+    try:
+        Article.objects.create(
+            user = User.objects.get(id=uid),
+            title = title,
+            content = content,
+            neededCoin = neededCoin
+        )
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def getLoveList(request):
+    filterType = request.POST.get('filterType')
+    order = request.POST.get('order')
     index = int(request.POST.get('index'))
 
     if (index >= Love.objects.count()):
         return JsonResponse({ 'info': [] })
 
+    loves = []
     listLove = []
-    for love in Love.objects.all()[index:index+9]:
+    if filterType == 'date':
+        if order == 'positive':
+            loves = Love.objects.order_by('date')[index:index+9]
+        elif order == 'reverse':
+            loves = Love.objects.order_by('-date')[index:index+9]
+    elif filterType == 'thumbsUp':
+        if order == 'positive':
+            loves = Love.objects.annotate(numThumbsUp = Count('thumbsUpUser')).order_by('numThumbsUp')[index:index+9]
+        elif order == 'reverse':
+            loves = Love.objects.annotate(numThumbsUp = Count('thumbsUpUser')).order_by('-numThumbsUp')[index:index+9]
+    else:
+        loves = Love.objects.all()[index:index+9]
+
+    for love in loves:
         # cover
         if love.images.count():
             cover = love.images.first().name
@@ -587,13 +725,39 @@ def getLoseList(request):
 
 @csrf_exempt
 def getDealList(request):
+    filterType = request.POST.get('filterType')
+    order = request.POST.get('order')
     index = int(request.POST.get('index'))
 
     if (index >= Deal.objects.count()):
         return JsonResponse({ 'info': [] })
     
+    deals = []
     listDeal = []
-    for deal in Deal.objects.all()[index:index+9]:
+    if filterType == 'date':
+        if order == 'positive':
+            deals = Deal.objects.order_by('date')[index:index+9]
+        elif order == 'reverse':
+            deals = Deal.objects.order_by('-date')[index:index+9]
+    elif filterType == 'new':
+        if order == 'positive':
+            deals = Deal.objects.order_by('new')[index:index+9]
+        elif order == 'reverse':
+            deals = Deal.objects.order_by('-new')[index:index+9]
+    elif filterType == 'price':
+        if order == 'positive':
+            deals = Deal.objects.order_by('price')[index:index+9]
+        elif order == 'reverse':
+            deals = Deal.objects.order_by('-price')[index:index+9]
+    elif filterType == 'isSold':
+        if order == 'positive':
+            deals = Deal.objects.order_by('isSold')[index:index+9]
+        elif order == 'reverse':
+            deals = Deal.objects.order_by('-isSold')[index:index+9]
+    else:
+        deals = Deal.objects.all()[index:index+9]
+
+    for deal in deals:
         # cover
         if deal.images.count():
             cover = deal.images.first().name
@@ -624,6 +788,7 @@ def getArticleList(request):
         allArticles = Article.objects.all()
         for article in allArticles[index:index+9]:
             listArtcile.append({
+                'id': article.id,
                 'uid': article.user.id,
                 'avatar': article.user.avatar.url,
                 'nickname': article.user.nickname,
@@ -776,6 +941,39 @@ def getDealDetail(request):
 
 
 @csrf_exempt
+def getArticleDetail(request):
+    _id = request.POST.get('id')
+
+    try:
+        article = Article.objects.get(id=_id)
+        # comments
+        comments = []
+        for comment in article.comments.all():
+            comments.append({
+                'uid': comment.user.id,
+                'avatar': comment.user.avatar.url,
+                'nickname': comment.user.nickname,
+                'content': comment.content
+            })
+
+        return JsonResponse({
+            'id': article.id,
+            'uid': article.user.id,
+            'nickname': article.user.nickname,
+            'bio': article.user.bio,
+            'avatar': article.user.avatar.url,
+            'title': article.title,
+            'content': article.content,
+            'publicDate': article.publicDate,
+            'editDate': article.editDate,
+            'comments': comments
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def thumbsUp(request):
     _id = request.POST.get('id')
     isThumbsUp = request.POST.get('isThumbsUp')
@@ -878,19 +1076,7 @@ def submitDealComment(request):
 
 
 @csrf_exempt
-def submitArticle(request):
-    uid = request.POST.get('uid')
-    title = request.POST.get('title')
-    content = request.POST.get('content')
-    neededCoin = request.POST.get('neededCoin')
+def submitArticleComment(request):
+    pass
 
-    try:
-        Article.objects.create(
-            user = User.objects.get(id=uid),
-            title = title,
-            content = content,
-            neededCoin = neededCoin
-        )
-        return HttpResponse(0)
-    except:
-        return HttpResponse(1)
+

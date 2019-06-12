@@ -21,7 +21,7 @@
         <!-- container -->
         <div class="container">
             <div class="row">
-                <div class="col-md-12 col-xs-12">
+                <div class="col-md-8 col-md-offset-2 col-xs-12">
                     <!-- Top -->
                     <a-card hoverable style="width: 100%; margin-bottom: 20px">
                         <a-card-meta
@@ -37,84 +37,86 @@
                     </a-card>
                     <!-- filter -->
                     <div class="filter">
-                        <a-button>时间<a-icon type="minus" /></a-button>
-                        <a-button>热度<a-icon type="minus" /></a-button>
+                        <a-button @click="filterDate">时间<a-icon :type="type_date" /></a-button>
+                        <a-button @click="filterThumbsUp">赞数<a-icon :type="type_thumbsUp" /></a-button>
                         <a-input-search
                             placeholder="搜索表白人"
                             @search="searchLoveFrom"
                             enterButton
-                            style="width: 40%"
+                            style="width: 30%"
                         />
                         <a-input-search
                             placeholder="搜索被表白人"
                             @search="searchLoveTo"
                             enterButton
-                            style="width: 40%"
+                            style="width: 30%"
                         />
                     </div>
                     <!-- List -->
-                    <RecycleScroller
-                        :items="loveList"
-                        :item-size="20"
-                        v-slot="{ item }"
-                        v-infinite-scroll="infiniteLoadList"
-                        infinite-scroll-disabled="busy"
-                        :infinite-scroll-distance="20"
-                        style="height: 100%"
-                        class="text-center"
-                    >
-                        <div>
-                            <a-row>
-                                <a-col :span="8">
-                                    <a-avatar v-if="item.userFrom_uid == -1" :size="64" :src="baseUrl + item.userFrom_avatar" />
-                                    <a-avatar v-else :size="64" :src="baseUrl + item.userFrom_avatar" @click="$router.push({ path: 'profile', query: { uid: item.userFrom_uid } })" style="cursor: pointer;" />
-                                    <div>
-                                        <a v-if="item.userFrom_uid == -1">匿名</a>
-                                        <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userFrom_uid } })">{{ item.userFrom_nickname }}</a>
-                                        <p class="bio">{{ item.userFrom_bio }}</p>
-                                    </div>
-                                </a-col>
-                                <a-col :span="8">
-                                    <a-avatar :size="64" src="https://s2.ax1x.com/2019/05/25/Vkx8oR.jpg" />
-                                </a-col>
-                                <a-col :span="8">
-                                    <a-avatar v-if="item.userTo_uid == -1" :size="64" :src="baseUrl + item.userTo_avatar" />
-                                    <a-avatar v-else :src="baseUrl + item.userTo_avatar" @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })" style="cursor: pointer;" />
-                                    <div>
-                                        <a v-if="item.userTo_uid == -1">{{ item.nameTo }}</a>
-                                        <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })">{{ item.userTo_nickname }}</a>
-                                        <p class="bio">{{ item.userTo_bio }}</p>
-                                    </div>
-                                </a-col>
-                            </a-row>
+                    <a-spin :spinning="spinning">
+                        <RecycleScroller
+                            :items="loveList"
+                            :item-size="1"
+                            v-slot="{ item }"
+                            v-infinite-scroll="infiniteLoadList"
+                            infinite-scroll-disabled="busy"
+                            :infinite-scroll-distance="20"
+                            style="height: 100%"
+                            class="text-center"
+                        >
+                            <div style="margin-bottom: 20px;">
+                                <a-row>
+                                    <a-col :span="8">
+                                        <a-avatar v-if="item.userFrom_uid == -1" :size="64" :src="baseUrl + item.userFrom_avatar" />
+                                        <a-avatar v-else :size="64" :src="baseUrl + item.userFrom_avatar" @click="$router.push({ path: 'profile', query: { uid: item.userFrom_uid } })" style="cursor: pointer;" />
+                                        <div>
+                                            <a v-if="item.userFrom_uid == -1">匿名</a>
+                                            <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userFrom_uid } })">{{ item.userFrom_nickname }}</a>
+                                            <p class="bio">{{ item.userFrom_bio }}</p>
+                                        </div>
+                                    </a-col>
+                                    <a-col :span="8">
+                                        <a-avatar :size="64" src="https://s2.ax1x.com/2019/05/25/Vkx8oR.jpg" />
+                                    </a-col>
+                                    <a-col :span="8">
+                                        <a-avatar v-if="item.userTo_uid == -1" :size="64" :src="baseUrl + item.userTo_avatar" />
+                                        <a-avatar v-else :size="64" :src="baseUrl + item.userTo_avatar" @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })" style="cursor: pointer;" />
+                                        <div>
+                                            <a v-if="item.userTo_uid == -1">{{ item.nameTo }}</a>
+                                            <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })">{{ item.userTo_nickname }}</a>
+                                            <p class="bio">{{ item.userTo_bio }}</p>
+                                        </div>
+                                    </a-col>
+                                </a-row>
 
-                            <p style="padding: 10px; font-size: large">{{ item.content }}</p>
-                            <img v-if="item.cover" style="width: 60%; margin-bottom: 10px;" :src="baseUrl + item.cover" @click="previewCover=true" />
-                            <a-modal v-model="previewCover" :footer="null">
-                                <img style="width: 100%" :src="baseUrl + item.cover">
-                            </a-modal>
-                            <br />
+                                <p class="content">{{ item.content }}</p>
+                                <img v-if="item.cover" style="width: 60%; margin-bottom: 10px;" :src="baseUrl + item.cover" @click="previewCover=true" />
+                                <a-modal v-model="previewCover" :footer="null">
+                                    <img style="width: 100%" :src="baseUrl + item.cover">
+                                </a-modal>
+                                <br />
 
-                            <a-row>
-                                <a-col :span="8">
-                                    <span style="fontSize: 24px">
-                                        <a-icon type="like-o" :theme="item.isThumbsUp ? 'filled' : 'outlined'" @click="ThumbsUp(item)" style="cursor: pointer;" /> {{ item.thumbsUp }}
-                                    </span>
-                                </a-col>
-                                <a-col :span="8">
-                                    <a-button style="width: 100%" @click="$router.push({ path: 'love/detail', query: { id: item.id } })">
-                                        <a-icon type="heart" />戳进去<a-icon type="heart" />
-                                    </a-button>
-                                </a-col>
-                                <a-col :span="8">
-                                    <span style="fontSize: 24px">
-                                        <a-icon type="message" /> {{ item.comments }}
-                                    </span>
-                                </a-col>
-                            </a-row>
-                            <hr />
-                        </div>
-                    </RecycleScroller>
+                                <a-row>
+                                    <a-col :span="8">
+                                        <span style="fontSize: 24px">
+                                            <a-icon type="like-o" :theme="item.isThumbsUp ? 'filled' : 'outlined'" @click="ThumbsUp(item)" style="cursor: pointer;" /> {{ item.thumbsUp }}
+                                        </span>
+                                    </a-col>
+                                    <a-col :span="8">
+                                        <a-button style="width: 100%" @click="$router.push({ path: 'love/detail', query: { id: item.id } })">
+                                            <a-icon type="heart" />戳进去<a-icon type="heart" />
+                                        </a-button>
+                                    </a-col>
+                                    <a-col :span="8">
+                                        <span style="fontSize: 24px">
+                                            <a-icon type="message" /> {{ item.comments }}
+                                        </span>
+                                    </a-col>
+                                </a-row>
+                                <hr />
+                            </div>
+                        </RecycleScroller>
+                    </a-spin>
                     <a-spin v-if="loading" class="loading" />
                 </div>
             </div>
@@ -139,10 +141,16 @@ export default {
   data() {
     return {
         loading: false,
+        spinning: false,
         busy: false,
         previewCover: false,
+        loveList: [],
 
-        loveList: []
+        isSearched: false,
+        filterType: '',
+        order: 'normal',
+        type_date: 'minus',
+        type_thumbsUp: 'minus',
     }
   },
   async asyncData({ $axios }) {
@@ -167,13 +175,116 @@ export default {
     }
   },
   methods: {
+    filterDate() {
+        this.isSearched = false
+        this.spinning = true
+        this.filterType = 'date'
+        this.type_thumbsUp = 'minus'
+        if (this.type_date == 'minus') {
+            this.order = 'positive'
+            this.type_date = 'up'
+        }
+        else if (this.type_date == 'up') {
+            this.order = 'reverse'
+            this.type_date = 'down'
+        }
+        else if (this.type_date == 'down') {
+            this.order = 'positive'
+            this.type_date = 'up'
+        }
+        this.loveList = []
+        this.infiniteLoadList()
+    },
+    filterThumbsUp() {
+        this.isSearched = false
+        this.spinning = true
+        this.filterType = 'thumbsUp'
+        this.type_date = 'minus'
+        if (this.type_thumbsUp == 'minus') {
+            this.order = 'positive'
+            this.type_thumbsUp = 'up'
+        }
+        else if (this.type_thumbsUp == 'up') {
+            this.order = 'reverse'
+            this.type_thumbsUp = 'down'
+        }
+        else if (this.type_thumbsUp == 'down') {
+            this.order = 'positive'
+            this.type_thumbsUp = 'up'
+        }
+        this.loveList = []
+        this.infiniteLoadList()
+    },
+    searchLoveFrom(value) {
+        if (!!value) {
+            this.spinning = true
+            this.isSearched = true
+            this.$axios.post('searchLoveItem', qs.stringify({
+                name: value,
+                object: 'from'
+            }))
+            .then((response) => {
+                this.spinning = false
+                if (response.data == 1) {
+                    this.$message.error('未知错误')
+                }
+                else {
+                    this.type_date = 'minus'
+                    this.type_thumbsUp = 'minus'
+                    this.loveList = response.data.info
+                    this.$notification.open({
+                        message: '搜索结果',
+                        description: `共搜索到 ${this.loveList.length} 条结果`,
+                        icon: <a-icon type="smile" style="color: #108ee9" />,
+                        duration: 0
+                    })
+                }
+            })
+        }
+        else {
+            this.$message.warning('输入要搜索的人吧～')
+        }
+    },
+    searchLoveTo(value) {
+        if (!!value) {
+            this.spinning = true
+            this.isSearched = true
+            this.$axios.post('searchLoveItem', qs.stringify({
+                name: value,
+                object: 'to'
+            }))
+            .then((response) => {
+                this.spinning = false
+                if (response.data == 1) {
+                    this.$message.error('未知错误')
+                }
+                else {
+                    this.type_date = 'minus'
+                    this.type_thumbsUp = 'minus'
+                    this.loveList = response.data.info
+                    this.$notification.open({
+                        message: '搜索结果',
+                        description: `共搜索到 ${this.loveList.length} 条结果`,
+                        icon: <a-icon type="smile" style="color: #108ee9" />,
+                        duration: 0
+                    })
+                }
+            })
+        }
+        else {
+            this.$message.warning('输入要搜索的人吧～')
+        }
+    },
     infiniteLoadList() {
         this.loading = true
         this.$axios.post('getLoveList', qs.stringify({
+            filterType: this.filterType,
+            order: this.order,
             index: this.loveList.length
         }))
         .then((response) => {
             this.loading = false
+            this.spinning = false
             if (response.data.info.length == 0) {
                 this.busy = true
                 this.$message.warning('到底啦～')
@@ -206,9 +317,6 @@ export default {
         }
       }
     },
-    filterSort() {
-
-    }
   },
   computed: mapState({
       baseUrl: state => state.baseUrl
@@ -219,6 +327,12 @@ export default {
 <style scoped>
 a {
     text-decoration: none;
+}
+
+.content {
+    border: 1px dashed gray;
+    padding: 10px;
+    font-size: large
 }
 
 .loading {

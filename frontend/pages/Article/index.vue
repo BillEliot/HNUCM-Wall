@@ -56,7 +56,7 @@
                             <span slot="actions">
                                 <a-icon type="message" /> 289
                             </span>
-                            <a slot="actions">查看</a>
+                            <a slot="actions" @click="$router.push({ path: '/article/detail', query: { id: item.id } })">查看</a>
                             <div>
                                 <span>发布时间：{{ item.publicDate }}</span>
                                 <br />
