@@ -30,7 +30,7 @@
                             </span>
                             <a-switch
                                 v-decorator="[
-                                    'anony',
+                                    'isAnony',
                                     {
                                         valuePropName: 'checked',
                                         initialValue: false,
@@ -212,22 +212,20 @@ export default {
           e.preventDefault()
           this.form_love.validateFields((err, values) => {
               if (!err) {
-                  var images = []
-                  values.uploader.forEach((file) => {
-                      images.push(file.name)
-                  })
-
+                  if (!!values.uploader) {
+                      var images = []
+                      values.uploader.forEach((file) => {
+                          images.push(file.name)
+                      })
+                  }
                   this.$axios.post('submitLove', qs.stringify({
-                      anony: values.anony,
+                      isAnony: values.isAnony,
                       userTo: values.userTo,
                       content: values.content,
                       images: images
                   }, { arrayFormat: 'brackets' }))
                   .then((response) => {
                       if (response.data == 1) {
-                          this.$message.error('非法数据')
-                      }
-                      else if (response.data == 2) {
                           this.$message.error('未知错误')
                       }
                       else {

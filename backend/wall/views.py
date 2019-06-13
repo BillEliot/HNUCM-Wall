@@ -116,18 +116,11 @@ def searchUser(request):
     user = request.POST.get('user')
 
     try:
-        # email
-        if isEmail(user):
-            listEmail = []
-            for user in User.objects.filter(email__contains=user):
-                listEmail.append(user.email)
-            return JsonResponse({ 'info': listEmail })
         # nickname
-        else:
-            listNickname = []
-            for user in User.objects.filter(nickname__contains=user):
-                listNickname.append(user.nickname)
-            return JsonResponse({ 'info': listNickname })
+        listNickname = []
+        for user in User.objects.filter(nickname__contains=user):
+            listNickname.append(user.nickname)
+        return JsonResponse({ 'info': listNickname })
     except:
         return JsonResponse({ 'info': [] })
 
@@ -420,42 +413,43 @@ def removeDealImg(request):
 
 @csrf_exempt
 def submitLove(request):
-    isAnony = True if request.POST.get('anony') == 'true' else False
-    userTo = request.POST.get('userTo')
+    isAnony = True if request.POST.get('isAnony') == 'true' else False
+    userTos = request.POST.getlist('userTo[]')
     content = request.POST.get('content')
     images = request.POST.getlist('images[]')
 
-    # get userFrom
     try:
+        # get userFrom
         UserFrom = User.objects.get(id=request.session.get('uid', None))
+        # get userTo
+        listUserTo = []
+        nameTo = ''
+        for userTo in userTos:
+            user = User.objects.filter(nickname=userTo)
+            if user.exists():
+                listUserTo.append(user[0])
+            else:
+                nameTo = nameTo + userTo + ';'
     except:
         return HttpResponse(1)
-    
-    # get userTo
-    try:
-        if (isEmail(userTo)):
-            UserTo = User.objects.get(email=userTo)
-        else:
-            UserTo = User.objects.get(nickname=userTo)
-    except:
-        UserTo = None
-
     # create
     try:
         love = Love.objects.create(
             isAnony=isAnony,
             userFrom=UserFrom,
-            userTo=UserTo,
-            nameTo=userTo,
+            nameTo=nameTo,
             content=content
         )
-        if images:
-            for image in images:
-                love.images.add(Image.objects.create(name='/media/img/loveImg/' + image))
+        # userTos
+        for userTo in listUserTo:
+            love.userTo.add(userTo)
+        # images
+        for image in images:
+            love.images.add(Image.objects.create(name='/media/img/loveImg/' + image))
 
         return HttpResponse(0)
     except:
-        return HttpResponse(2)
+        return HttpResponse(1)
 
 
 
@@ -634,16 +628,24 @@ def getLoveList(request):
             userFromAvatar = love.userFrom.avatar.url
             userFromBio = love.userFrom.bio
         # userTo
+        userTos = []
         if love.userTo:
-            userToID = love.userTo.id
-            userToNickname = love.userTo.nickname
-            userToAvatar = love.userTo.avatar.url
-            userToBio = love.userTo.bio
-        else:
-            userToID = -1
-            userToNickname = 'Anony'
-            userToAvatar = '/media/img/avatar/anony.jpg'
-            userToBio = 'TA还没有来呢～'
+            for user in love.userTo.all():
+                userTos.append({
+                    'uid': user.id,
+                    'nickname': user.nickname,
+                    'avatar': user.avatar.url,
+                    'bio': user.bio
+                })
+        if love.nameTo:
+            for user in love.nameTo.split(';'):
+                if user:
+                    userTos.append({
+                        'uid': -1,
+                        'nickname': user,
+                        'avatar': '/media/img/avatar/anony.jpg',
+                        'bio': 'TA还没有来呢～'
+                    })
         # is thumbsUp
         uid = request.session.get('uid', None)
         if uid:
@@ -657,11 +659,7 @@ def getLoveList(request):
             'userFrom_nickname': userFromNickname,
             'userFrom_avatar': userFromAvatar,
             'userFrom_bio': userFromBio,
-            'userTo_uid': userToID,
-            'userTo_nickname': userToNickname,
-            'userTo_avatar': userToAvatar,
-            'userTo_bio': userToBio,
-            'nameTo': love.nameTo,
+            'userTo': userTos,
             'content': love.content,
             'cover': cover,
             'thumbsUp': love.thumbsUpUser.count(),
@@ -817,22 +815,34 @@ def getLoveDetail(request):
         love = Love.objects.get(id=_id)
         # userFrom
         if love.isAnony:
+            userFromUID = -1
             userFromNickname = 'Anony'
             userFromAvatar = '/media/img/avatar/anony.jpg'
             userFromBio = 'TA匿名了呢～'
         else:
+            userFromUID = love.userFrom.id
             userFromNickname = love.userFrom.nickname
             userFromAvatar = love.userFrom.avatar.url
             userFromBio = love.userFrom.bio
         # userTo
+        userTos = []
         if love.userTo:
-            userToNickname = love.userTo.nickname
-            userToAvatar = love.userTo.avatar.url
-            userToBio = love.userTo.bio
-        else:
-            userToNickname = 'Anony'
-            userToAvatar = '/media/img/avatar/anony.jpg'
-            userToBio = 'TA还没有来呢～'
+            for user in love.userTo.all():
+                userTos.append({
+                    'uid': user.id,
+                    'nickname': user.nickname,
+                    'avatar': user.avatar.url,
+                    'bio': user.bio
+                })
+        if love.nameTo:
+            for user in love.nameTo.split(';'):
+                if user:
+                    userTos.append({
+                        'uid': -1,
+                        'nickname': user,
+                        'avatar': '/media/img/avatar/anony.jpg',
+                        'bio': 'TA还没有来呢～'
+                    })
         # is thumbsUp
         uid = request.session.get('uid', None)
         if uid:
@@ -852,13 +862,11 @@ def getLoveDetail(request):
 
         return JsonResponse({
             'id': love.id,
+            'userFrom_uid': userFromUID,
             'userFrom_nickname': userFromNickname,
             'userFrom_avatar': userFromAvatar,
             'userFrom_bio': userFromBio,
-            'userTo_nickname': userToNickname,
-            'userTo_avatar': userToAvatar,
-            'userTo_bio': userToBio,
-            'nameTo': love.nameTo,
+            'userTo': userTos,
             'content': love.content,
             'images': list(love.images.all().values_list('name', flat=True)),
             'thumbsUp': love.thumbsUpUser.count(),
@@ -1077,6 +1085,16 @@ def submitDealComment(request):
 
 @csrf_exempt
 def submitArticleComment(request):
-    pass
+    _id = request.POST.get('id')
+    uid = request.POST.get('uid')
+    content = request.POST.get('content')
 
+    try:
+        article = Article.objects.get(id=_id)
+        user = User.objects.get(id=uid)
+        comment = Comment.objects.create(user=user, content=content)
+        article.comments.add(comment)
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
 

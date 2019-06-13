@@ -19,7 +19,7 @@ class User(models.Model):
 class Love(models.Model):
     isAnony = models.BooleanField(default=False)
     userFrom = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user_from')
-    userTo = models.ForeignKey('User', on_delete=models.CASCADE, blank=True, null=True, related_name='user_to')
+    userTo = models.ManyToManyField('User', blank=True, related_name='user_to')
     nameTo = models.CharField(max_length=20, default='TA')
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)

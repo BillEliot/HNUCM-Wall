@@ -23,7 +23,7 @@
                     <div class="author">
                         <a-avatar :size="64" :src="baseUrl + articleDetail.avatar" />
                         <br />
-                        <a>{{ articleDetail.nickname }}</a>
+                        <a @click="$router.push({ path: '/profile', query: { uid: articleDetail.uid } })">{{ articleDetail.nickname }}</a>
                         <p>{{ articleDetail.bio }}</p>
                     </div>
                     <h1>{{ articleDetail.title }}</h1>

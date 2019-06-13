@@ -1,8 +1,26 @@
 <template>
     <div>
+        <!-- drawer - more userto -->
+        <a-drawer
+            title="所有被表白人"
+            placement="right"
+            :width="300"
+            :closable="false"
+            @close="visibleMoreUserTo = false"
+            :visible="visibleMoreUserTo"
+        >
+            <div class="row">
+                <div class="col-md-4 col-md-offset-4 col-xs-4 col-xs-offset-4 c text-center">
+                    <div v-for="user in loveDetail.userTo" :key="user.nickname">
+                        <a-avatar :size="64" :src="baseUrl + user.avatar" />
+                        <a>{{ user.nickname }}</a>
+                        <p class="bio">{{ user.bio }}</p>
+                    </div>
+                </div>
+            </div>
+        </a-drawer>
         <!-- navbar -->
         <navbar :userBaseInfo="userBaseInfo" />
-
         <!-- banner -->
         <div class="main-wrapper">
             <div class="page-title">
@@ -23,7 +41,8 @@
                 <div class="text-center col-md-12">
                     <a-row>
                         <a-col :span="12">
-                            <a-avatar :size="64" :src="baseUrl + loveDetail.userFrom_avatar" />
+                            <a-avatar v-if="loveDetail.userFrom_uid == -1" :size="64" :src="baseUrl + loveDetail.userFrom_avatar" />
+                            <a-avatar v-else :size="64" :src="baseUrl + loveDetail.userFrom_avatar" @click="$router.push({ path: '/profile', query: { uid: loveDetail.userFrom_uid } })" style="cursor: pointer;" />
                             <div>
                                 <a v-if="loveDetail.userFrom_nickname == 'Anony'">匿名</a>
                                 <a v-else @click="$router.push({ path: '/profile', query: { uid: loveDetail.userFrom_uid } })">{{ loveDetail.userFrom_nickname }}</a>
@@ -31,11 +50,13 @@
                             </div>
                         </a-col>
                         <a-col :span="12">
-                            <a-avatar :size="64" :src="baseUrl + loveDetail.userTo_avatar" />
+                            <a-avatar v-if="loveDetail.userTo[0].uid == -1" :size="64" :src="baseUrl + loveDetail.userTo[0].avatar" />
+                            <a-avatar v-else :size="64" :src="baseUrl + loveDetail.userTo[0].avatar" @click="$router.push({ path: '/profile', query: { uid: loveDetail.userTo[0].uid } })" style="cursor: pointer;" />
+                            <a-avatar v-if="loveDetail.userTo.length > 1" :size="64" @click="moreUserTo" class="more-avatar">更多</a-avatar>
                             <div>
-                                <a v-if="loveDetail.userTo_nickname == 'Anony'">{{ loveDetail.nameTo }}</a>
-                                <a v-else @click="$router.push({ path: '/profile', query: { uid: loveDetail.userTo_uid } })">{{ loveDetail.userTo_nickname }}</a>
-                                <p class="bio">{{ loveDetail.userTo_bio }}</p>
+                                <a v-if="loveDetail.userTo[0].uid == -1">{{ loveDetail.userTo[0].nickname }}</a>
+                                <a v-else @click="$router.push({ path: '/profile', query: { uid: loveDetail.userTo[0].uid } })">{{ loveDetail.userTo[0].nickname }}</a>
+                                <p class="bio">{{ loveDetail.userTo[0].bio }}</p>
                             </div>
                         </a-col>
                     </a-row>
@@ -137,7 +158,9 @@ export default {
                 this.current = page
             }
         },
-        showAnchor: false
+        showAnchor: false,
+
+        visibleMoreUserTo: false
     }
   },
   async asyncData({ $axios, query, redirect }) {
@@ -227,6 +250,9 @@ export default {
                   }
               })
           }
+      },
+      moreUserTo() {
+          this.visibleMoreUserTo = true
       }
   },
   computed: mapState({
@@ -259,6 +285,14 @@ a:hover {
     position: absolute;
     left: 10px;
     font-size: 18px;
+}
+
+.more-avatar {
+    cursor: pointer;
+    color: white;
+}
+.more-avatar:hover {
+    color: blueviolet;
 }
 
 .ant-carousel >>> .slick-dots {

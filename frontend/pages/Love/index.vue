@@ -1,5 +1,24 @@
 <template>
     <div>
+        <!-- drawer - more userto -->
+        <a-drawer
+            title="所有被表白人"
+            placement="right"
+            :width="300"
+            :closable="false"
+            @close="visibleMoreUserTo = false"
+            :visible="visibleMoreUserTo"
+        >
+            <div class="row">
+                <div class="col-md-4 col-md-offset-4 col-xs-4 col-xs-offset-4 c text-center">
+                    <div v-for="user in loveList[currentLoveIndex].userTo" :key="user.nickname">
+                        <a-avatar :size="64" :src="baseUrl + user.avatar" />
+                        <a>{{ user.nickname }}</a>
+                        <p class="bio">{{ user.bio }}</p>
+                    </div>
+                </div>
+            </div>
+        </a-drawer>
         <!-- navbar -->
         <navbar :userBaseInfo="userBaseInfo" />
         <!-- banner -->
@@ -57,7 +76,7 @@
                         <RecycleScroller
                             :items="loveList"
                             :item-size="1"
-                            v-slot="{ item }"
+                            v-slot="{ item, index }"
                             v-infinite-scroll="infiniteLoadList"
                             infinite-scroll-disabled="busy"
                             :infinite-scroll-distance="20"
@@ -79,12 +98,13 @@
                                         <a-avatar :size="64" src="https://s2.ax1x.com/2019/05/25/Vkx8oR.jpg" />
                                     </a-col>
                                     <a-col :span="8">
-                                        <a-avatar v-if="item.userTo_uid == -1" :size="64" :src="baseUrl + item.userTo_avatar" />
-                                        <a-avatar v-else :size="64" :src="baseUrl + item.userTo_avatar" @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })" style="cursor: pointer;" />
+                                        <a-avatar v-if="item.userTo[0].uid == -1" :size="64" :src="baseUrl + item.userTo[0].avatar" />
+                                        <a-avatar v-else :size="64" :src="baseUrl + item.userTo[0].avatar" @click="$router.push({ path: 'profile', query: { uid: item.userTo[0].uid } })" style="cursor: pointer;" />
+                                        <a-avatar v-if="item.userTo.length > 1" :size="64" @click="moreUserTo(index)" class="more-avatar">更多</a-avatar>
                                         <div>
-                                            <a v-if="item.userTo_uid == -1">{{ item.nameTo }}</a>
-                                            <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userTo_uid } })">{{ item.userTo_nickname }}</a>
-                                            <p class="bio">{{ item.userTo_bio }}</p>
+                                            <a v-if="item.userTo[0].uid == -1">{{ item.userTo[0].nickname }}</a>
+                                            <a v-else @click="$router.push({ path: 'profile', query: { uid: item.userTo[0].uid } })">{{ item.userTo[0].nickname }}</a>
+                                            <p class="bio">{{ item.userTo[0].bio }}</p>
                                         </div>
                                     </a-col>
                                 </a-row>
@@ -103,7 +123,7 @@
                                         </span>
                                     </a-col>
                                     <a-col :span="8">
-                                        <a-button style="width: 100%" @click="$router.push({ path: 'love/detail', query: { id: item.id } })">
+                                        <a-button style="width: 100%" @click="$router.push({ path: '/love/detail', query: { id: item.id } })">
                                             <a-icon type="heart" />戳进去<a-icon type="heart" />
                                         </a-button>
                                     </a-col>
@@ -151,6 +171,9 @@ export default {
         order: 'normal',
         type_date: 'minus',
         type_thumbsUp: 'minus',
+
+        visibleMoreUserTo: false,
+        currentLoveIndex: 0
     }
   },
   async asyncData({ $axios }) {
@@ -317,6 +340,10 @@ export default {
         }
       }
     },
+    moreUserTo(index) {
+        this.visibleMoreUserTo = true
+        this.currentLoveIndex = index
+    }
   },
   computed: mapState({
       baseUrl: state => state.baseUrl
@@ -327,6 +354,14 @@ export default {
 <style scoped>
 a {
     text-decoration: none;
+}
+
+.more-avatar {
+    cursor: pointer;
+    color: white;
+}
+.more-avatar:hover {
+    color: blueviolet;
 }
 
 .content {
