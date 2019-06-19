@@ -30,6 +30,10 @@
                     <span class="date">发布时间: {{ moment(articleDetail.publicDate).format("llll") }}</span>
                     <br />
                     <span class="date">最后编辑: {{ moment(articleDetail.editDate).format("llll") }}</span>
+                    <!-- tags -->
+                    <div class="text-left" style="margin-top: 20px">
+                        <a-tag v-for="tag in articleDetail.tags" :key="tag">{{ tag }}</a-tag>
+                    </div>
                     <no-ssr placeholder='Loading'>
                         <mavon-editor
                             v-model="articleDetail.content"
@@ -41,16 +45,23 @@
                         />
                     </no-ssr>
                     <hr />
-                    <div class="icon-share">
-                        <a target='_blank' href="http://connect.qq.com/widget/shareqq/index.html?url=http://127.0.0.1&sharesource=qzone&title=湖南中医药大学失物墙&summary=描述&desc=简述">
-                            <icon-font type="icon-qq" />
-                        </a>
-                        <icon-font type="icon-wechat" />
-                        <a target='_blank' href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://127.0.0.1&sharesource=qzone&title=湖南中医药大学失物墙&summary=描述">
-                            <icon-font type="icon-qzone" />
-                        </a>
-                        <icon-font type="icon-pyq" />
-                        <icon-font type="icon-weibo" />
+                    <div>
+                        <!-- icon-left -->
+                        <div class="icon-left">
+                            <a-icon type="like-o" :theme="articleDetail.isThumbsUp ? 'filled' : 'outlined'" @click="ThumbsUp(articleDetail)" /> {{ articleDetail.thumbsUp }}
+                        </div>
+                        <!-- icon-share -->
+                        <div class="icon-share">
+                            <a target='_blank' href="http://connect.qq.com/widget/shareqq/index.html?url=http://127.0.0.1&sharesource=qzone&title=湖南中医药大学失物墙&summary=描述&desc=简述">
+                                <icon-font type="icon-qq" />
+                            </a>
+                            <icon-font type="icon-wechat" />
+                            <a target='_blank' href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://127.0.0.1&sharesource=qzone&title=湖南中医药大学失物墙&summary=描述">
+                                <icon-font type="icon-qzone" />
+                            </a>
+                            <icon-font type="icon-pyq" />
+                            <icon-font type="icon-weibo" />
+                        </div>
                     </div>
                     <div id="comment" style="margin-top: 50px">
                         <a-list
@@ -153,6 +164,29 @@ export default {
       }
   },
   methods: {
+      ThumbsUp (articleDetail) {
+        if (this.userBaseInfo.uid == -1) {
+            this.$message.warning('先登录吧～')
+        }
+        else {
+            if (articleDetail.isThumbsUp) {
+                articleDetail.isThumbsUp = false
+                articleDetail.thumbsUp -= 1
+                this.$axios.post('thumbsUpArticle', qs.stringify({
+                    id: articleDetail.id,
+                    isThumbsUp: false
+                }))
+            }
+            else {
+                articleDetail.isThumbsUp = true
+                articleDetail.thumbsUp += 1
+                this.$axios.post('thumbsUpArticle', qs.stringify({
+                    id: articleDetail.id,
+                    isThumbsUp: true
+                }))
+            }
+        }
+      },
       submitComment() {
           if (!this.commentContent) {
               this.$message.warning('说点什么吧～')
@@ -215,10 +249,15 @@ a {
 }
 
 .editor {
-    margin-top: 20px;
+    margin-top: 10px;
     z-index: inherit;
 }
 
+.icon-left {
+    position: absolute;
+    left: 10px;
+    font-size: 18px;
+}
 .icon-share {
     position: absolute;
     right: 10px;

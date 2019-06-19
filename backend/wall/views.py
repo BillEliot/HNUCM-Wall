@@ -6,6 +6,7 @@ from utils.utils import *
 from datetime import timedelta
 import os, random
 
+import json
 
 @csrf_exempt
 def getCaptcha(request):
@@ -138,6 +139,7 @@ def searchLoveItem(request):
             loves = Love.objects.filter(userFrom__nickname__contains=name)
         elif _object == 'to':
             loves = Love.objects.filter(userTo__nickname__contains=name)
+            loves = loves | Love.objects.filter(nameTo__contains=name)
 
         for love in loves:
             # cover
@@ -159,13 +161,24 @@ def searchLoveItem(request):
                 userFromAvatar = love.userFrom.avatar.url
                 userFromBio = love.userFrom.bio
             # userTo
+            userTos = []
             if love.userTo:
-                userToID = love.userTo.id
-                userToNickname = love.userTo.nickname
-                userToAvatar = love.userTo.avatar.url
-                userToBio = love.userTo.bio
-            else:
-                continue
+                for user in love.userTo.all():
+                    userTos.append({
+                        'uid': user.id,
+                        'nickname': user.nickname,
+                        'avatar': user.avatar.url,
+                        'bio': user.bio
+                    })
+            if love.nameTo:
+                for user in love.nameTo.split(';'):
+                    if user:
+                        userTos.append({
+                            'uid': -1,
+                            'nickname': user,
+                            'avatar': '/media/img/avatar/anony.jpg',
+                            'bio': 'TA还没有来呢～'
+                        })
             # is thumbsUp
             uid = request.session.get('uid', None)
             if uid:
@@ -179,11 +192,7 @@ def searchLoveItem(request):
                 'userFrom_nickname': userFromNickname,
                 'userFrom_avatar': userFromAvatar,
                 'userFrom_bio': userFromBio,
-                'userTo_uid': userToID,
-                'userTo_nickname': userToNickname,
-                'userTo_avatar': userToAvatar,
-                'userTo_bio': userToBio,
-                'nameTo': love.nameTo,
+                'userTo': userTos,
                 'content': love.content,
                 'cover': cover,
                 'thumbsUp': love.thumbsUpUser.count(),
@@ -277,22 +286,23 @@ def getUserProfile(request):
         for love in Love.objects.filter(userFrom=user):
             # not anonymous
             if not love.isAnony:
-                # userTo
                 if love.userTo:
-                    userToID = love.userTo.id
-                    userToNickname = love.userTo.nickname
-                    userToAvatar = love.userTo.avatar
-                else:
-                    userToID = -1
-                    userToNickname = "Anony"
-                    userToAvatar = '/media/img/avatar/anony.jpg'
-
-                loves.append({
-                    'userTo_uid': userToID,
-                    'userTo_nickname': userToNickname,
-                    'userTo_avatar': userToAvatar,
-                    'content': love.content
-                })
+                    for userTo in love.userTo.all():
+                        loves.append({
+                            'userTo_uid': userTo.id,
+                            'userTo_nickname': userTo.nickname,
+                            'userTo_avatar': userTo.avatar.url,
+                            'content': love.content
+                        })
+                if love.nameTo:
+                    for userTo in love.nameTo.split(';'):
+                        if userTo:
+                            loves.append({
+                                'userTo_uid': -1,
+                                'userTo_nickname': userTo,
+                                'userTo_avatar': '/media/img/avatar/anony.jpg',
+                                'content': love.content
+                            })
         # loses
         loses = []
         for lose in Lose.objects.filter(user=user):
@@ -517,7 +527,12 @@ def submitBank(request):
     freJudge = float(request.POST.get('judge')) / 100.0
     freQA = float(request.POST.get('qa')) / 100.0
     
-    questions = []
+    questions_singleA = []
+    questions_singleB = []
+    questions_multiple = []
+    questions_blank = []
+    questions_judge = []
+    questions_qa = []
     try:
         if (_type == 'total'):
             for bank in banks:
@@ -529,12 +544,12 @@ def submitBank(request):
                 judge = allQuestions.filter(questionType='judge')
                 qa = allQuestions.filter(questionType='qa')
 
-                questions.extend(list(singleA[0:int(singleA.count()*freSingleA)].values()))
-                questions.extend(list(singleB[0:int(singleB.count()*freSingleB)].values()))
-                questions.extend(list(multiple[0:int(multiple.count()*freMultiple)].values()))
-                questions.extend(list(blank[0:int(blank.count()*freMultiple)].values()))
-                questions.extend(list(judge[0:int(judge.count()*freJudge)].values()))
-                questions.extend(list(qa[0:int(qa.count()*freQA)].values()))
+                questions_singleA.extend(list(singleA[0:int(singleA.count()*freSingleA)].values()))
+                questions_singleB.extend(list(singleB[0:int(singleB.count()*freSingleB)].values()))
+                questions_multiple.extend(list(multiple[0:int(multiple.count()*freMultiple)].values()))
+                questions_blank.extend(list(blank[0:int(blank.count()*freMultiple)].values()))
+                questions_judge.extend(list(judge[0:int(judge.count()*freJudge)].values()))
+                questions_qa.extend(list(qa[0:int(qa.count()*freQA)].values()))
         elif (_type == 'random'):
             singleA, singleB, multiple, blank, judge, qa = []
             for bank in banks:
@@ -553,14 +568,84 @@ def submitBank(request):
             random.shuffle(judge)
             random.shuffle(qa)
             
-            questions.extend(list(singleA[0:int(numQuestion*freSingleA)].values()))
-            questions.extend(list(singleB[0:int(numQuestion*freSingleB)].values()))
-            questions.extend(list(multiple[0:int(numQuestion*freMultiple)].values()))
-            questions.extend(list(blank[0:int(numQuestion*freMultiple)].values()))
-            questions.extend(list(judge[0:int(numQuestion*freJudge)].values()))
-            questions.extend(list(qa[0:int(numQuestion*freQA)].values()))
+            questions_singleA.extend(list(singleA[0:int(numQuestion*freSingleA)].values()))
+            questions_singleB.extend(list(singleB[0:int(numQuestion*freSingleB)].values()))
+            questions_multiple.extend(list(multiple[0:int(numQuestion*freMultiple)].values()))
+            questions_blank.extend(list(blank[0:int(numQuestion*freMultiple)].values()))
+            questions_judge.extend(list(judge[0:int(numQuestion*freJudge)].values()))
+            questions_qa.extend(list(qa[0:int(numQuestion*freQA)].values()))
 
-        return JsonResponse({ 'info': questions })
+        # remove answers
+        for question in questions_singleA:
+            question['answer'] = ''
+        for question in questions_singleB:
+            question['answer'] = ''
+        for question in questions_multiple:
+            question['answer'] = ''
+        for question in questions_blank:
+            question['answer'] = ''
+        for question in questions_judge:
+            question['answer'] = ''
+        for question in questions_qa:
+            question['answer'] = ''
+
+        return JsonResponse({
+            'singleA': questions_singleA,
+            'singleB': questions_singleB,
+            'multiple': questions_multiple,
+            'blank': questions_blank,
+            'judge': questions_judge,
+            'qa': questions_qa
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def handExam(request):
+    questions = json.loads(request.body)
+    singleA = questions['singleA']
+    singleB = questions['singleB']
+    multiple = questions['multiple']
+    judge = questions['judge']
+    blank = questions['blank']
+
+    print(singleA)
+    print(multiple)
+    print(judge)
+    print(blank)
+
+    return HttpResponse(0)
+
+    try:
+        questions = []
+        for question in singleA:
+            answer = Bank.objects.get(id=question.id)
+            if answer == question.answer:
+                question['isCorrect'] = True
+            else:
+                question['isCorrect'] = False
+                question['correctAnswer'] = answer
+        for question in singleB:
+            pass
+        for question in multiple:
+            answer = Bank.objects.get(id=question.id)
+            answer = ''.join(answer.sort())
+            if answer == question.answer:
+                question['isCorrect'] = True
+            else:
+                question['isCorrect'] = False
+                question['correctAnswer'] = answer
+        for question in judge:
+            answer = Bank.objects.get(id=question.id)
+            if answer == question.answer:
+                question['isCorrect'] = True
+            else:
+                question['isCorrect'] = False
+                question['correctAnswer'] = answer
+        for question in blank:
+            pass
     except:
         return HttpResponse(1)
 
@@ -570,6 +655,7 @@ def submitBank(request):
 def submitArticle(request):
     uid = request.POST.get('uid')
     title = request.POST.get('title')
+    tags = request.POST.getlist('tages[]')
     content = request.POST.get('content')
     neededCoin = request.POST.get('neededCoin')
 
@@ -577,6 +663,7 @@ def submitArticle(request):
         Article.objects.create(
             user = User.objects.get(id=uid),
             title = title,
+            tags = ';'.join(tags),
             content = content,
             neededCoin = neededCoin
         )
@@ -666,6 +753,7 @@ def getLoveList(request):
             'comments': love.comments.count(),
             'isThumbsUp': isThumbsUp
         })
+
     return JsonResponse({ 'info': listLove })
 
 
@@ -792,10 +880,13 @@ def getArticleList(request):
                 'nickname': article.user.nickname,
                 'bio': article.user.bio,
                 'title': article.title,
+                'tags': article.tags.split(';')[:-1],
                 'content': article.content,
                 'neededCoin': article.neededCoin,
                 'publicDate': article.publicDate,
-                'editDate': article.editDate
+                'editDate': article.editDate,
+                'comments': article.comments.count(),
+                'thumbsUp': article.thumbsUpUser.count(),
             })
 
         return JsonResponse({
@@ -954,6 +1045,13 @@ def getArticleDetail(request):
 
     try:
         article = Article.objects.get(id=_id)
+        # is thumbsUp
+        uid = request.session.get('uid', None)
+        if uid:
+            user = User.objects.get(id=uid)
+            isThumbsUp = article.thumbsUpUser.filter(id=user.id).exists()
+        else:
+            isThumbsUp = False
         # comments
         comments = []
         for comment in article.comments.all():
@@ -971,10 +1069,13 @@ def getArticleDetail(request):
             'bio': article.user.bio,
             'avatar': article.user.avatar.url,
             'title': article.title,
+            'tags': article.tags.split(';')[:-1],
             'content': article.content,
             'publicDate': article.publicDate,
             'editDate': article.editDate,
-            'comments': comments
+            'comments': comments,
+            'thumbsUp': article.thumbsUpUser.count(),
+            'isThumbsUp': isThumbsUp
         })
     except:
         return HttpResponse(1)
@@ -982,7 +1083,7 @@ def getArticleDetail(request):
 
 
 @csrf_exempt
-def thumbsUp(request):
+def thumbsUpLove(request):
     _id = request.POST.get('id')
     isThumbsUp = request.POST.get('isThumbsUp')
 
@@ -995,6 +1096,28 @@ def thumbsUp(request):
                 love.thumbsUpUser.add(user)
             else:
                 love.thumbsUpUser.remove(user)
+            return HttpResponse(0)
+        except:
+            return HttpResponse(1)
+    else:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def thumbsUpArticle(request):
+    _id = request.POST.get('id')
+    isThumbsUp = request.POST.get('isThumbsUp')
+
+    uid = request.session.get('uid', None)
+    if uid:
+        user = User.objects.get(id=uid)
+        try:
+            article = Article.objects.get(id=_id)
+            if (isThumbsUp):
+                article.thumbsUpUser.add(user)
+            else:
+                article.thumbsUpUser.remove(user)
             return HttpResponse(0)
         except:
             return HttpResponse(1)

@@ -51,12 +51,16 @@
                         <a-list-item slot="renderItem" slot-scope="item, index">
                             <span slot="actions">需要硬币： {{ item.neededCoin }}</span>
                             <span slot="actions">
-                                <a-icon type="like-o" /> 122
+                                <a-icon type="like-o" /> {{ item.thumbsUp }}
                             </span>
                             <span slot="actions">
-                                <a-icon type="message" /> 289
+                                <a-icon type="message" /> {{ item.comments }}
                             </span>
                             <a slot="actions" @click="$router.push({ path: '/article/detail', query: { id: item.id } })">查看</a>
+                            <!-- tags -->
+                            <span>
+                                <a-tag v-for="tag in item.tags" :key="tag">{{ tag }}</a-tag>
+                            </span>
                             <div>
                                 <span>发布时间：{{ item.publicDate }}</span>
                                 <br />
@@ -87,6 +91,7 @@ import qs from 'qs'
 import Footer from '~/components/footer.vue'
 import navbar from '~/components/navbar'
 import { mapState } from 'vuex'
+import { max } from 'moment';
 
 export default {
   components: {

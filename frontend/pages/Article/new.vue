@@ -19,16 +19,25 @@
         <div class="container article">
             <div class="row">
                 <div class="col-md-12">
-                    <a-input placeholder="输入文章标题" v-model="article.title">
+                    <a-input placeholder="输入文章标题" v-model="title">
                         <a-icon slot="prefix" type="edit" />
                     </a-input>
+                    <a-select
+                        v-model="tags"
+                        mode="tags"
+                        :showArrow="false"
+                        placeholder="添加标签"
+                        notFoundContent="未添加标签"
+                        style="width: 100%; margin-top: 10px"
+                    >
+                    </a-select>
                     <no-ssr placeholder='Loading'>
-                        <mavon-editor :toolbars="toolbars" v-model="article.content" class="editor" />
+                        <mavon-editor :toolbars="toolbars" v-model="content" class="editor" />
                     </no-ssr>
                     <div class="extra">
                         <p>设置阅读本篇文章所需花费的硬币，<b>最低为0个硬币，最高为1000个硬币</b></p>
                         <a-input-number
-                            v-model="article.neededCoin"
+                            v-model="neededCoin"
                             :min="0"
                             :max="1000"
                             :formatter="value => `${value} 硬币`"
@@ -59,11 +68,11 @@ export default {
   },
   data() {
     return {
-        article: {
-            title: '',
-            content: '',
-            neededCoin: 0,
-        },
+        title: '',
+        tags: '中医',
+        content: '',
+        neededCoin: 0,
+
         toolbars: {
             bold: true,
             italic: true,
@@ -105,13 +114,14 @@ export default {
   },
   methods: {
       submitArticle() {
-          if (!!this.article.title && !!this.article.content) {
+          if (!!this.title && !!this.content) {
               this.$axios.post('submitArticle', qs.stringify({
                   uid: this.userBaseInfo.uid,
-                  title: this.article.title,
-                  content: this.article.content,
-                  neededCoin: this.article.neededCoin
-              }))
+                  title: this.title,
+                  tags: this.tags,
+                  content: this.content,
+                  neededCoin: this.neededCoin
+              }, { arrayFormat: 'brackets' }))
               .then((response) => {
                   if (response.data == 0) {
                       this.$message.success('发布成功')

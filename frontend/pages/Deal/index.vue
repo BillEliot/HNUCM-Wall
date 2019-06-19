@@ -37,6 +37,7 @@
                     <!-- List -->
                     <a-spin :spinning="spinning">
                         <RecycleScroller
+                            v-if="hackReset"
                             :items="dealList"
                             :item-size="1"
                             v-slot="{ item }"
@@ -87,6 +88,7 @@ export default {
   },
   data() {
     return {
+        hackReset: true,
         loading: false,
         spinning: false,
         busy: false,
@@ -230,6 +232,11 @@ export default {
                     this.type_price = 'minus'
                     this.type_isSold = 'minus'
                     this.dealList = response.data.info
+                    // hack reset
+                    this.hackReset = false
+                    this.$nextTick(() => {
+                        this.hackReset = true
+                    })
                     this.$notification.open({
                         message: '搜索结果',
                         description: `共搜索到 ${this.dealList.length} 条结果`,

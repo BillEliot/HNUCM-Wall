@@ -95,11 +95,13 @@ class Bank(models.Model):
 class Article(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     title = models.CharField(max_length=30)
+    tags = models.CharField(max_length=50, default='')
     content = models.TextField()
     neededCoin = models.PositiveIntegerField(default=0)
     publicDate = models.DateTimeField(auto_now_add=True)
     editDate = models.DateTimeField(auto_now=True)
     comments = models.ManyToManyField('Comment', blank=True)
+    thumbsUpUser = models.ManyToManyField('User', blank=True, related_name="user_thumbsUp")
 
     def __str__(self):
         return self.title

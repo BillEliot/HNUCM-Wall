@@ -126,7 +126,11 @@
                         >
                         </a-transfer>
                     </a-form-item>
-                    <a-form-item v-bind="formItemLayout" label="题目总数">
+                    <a-form-item
+                        v-bind="formItemLayout"
+                        label="题目总数"
+                        v-show="form_bank.getFieldValue('type') == 'random'"
+                    >
                         <a-row :gutter="16">
                             <a-col :span="20">
                                 <a-slider
@@ -254,6 +258,7 @@
 
 <script>
 import qs from 'qs'
+import moment from 'moment'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import Footer from '~/components/footer.vue'
 import navbar from '~/components/navbar'
@@ -395,7 +400,14 @@ export default {
                               this.$message.error('未知错误')
                           }
                           else {
-                              this.setBank({ 'questions': response.data.info, 'timer': values.timer })
+                              this.setBank({ 
+                                  'questions': response.data,
+                                  'timer': moment.duration({
+                                      seconds: values.timer ? values.timer.second() : 0,
+                                      minutes: values.timer ? values.timer.minute() : 0,
+                                      hours: values.timer ? values.timer.hour() : 0
+                                  })
+                              })
                               this.$router.push({ path: '/bank/bank' })
                           }
                       })

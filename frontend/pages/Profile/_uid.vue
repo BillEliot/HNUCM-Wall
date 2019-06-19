@@ -245,7 +245,8 @@
                                     <a-comment style="padding-left: 35px">
                                         <a-avatar v-if="item.userTo_uid == -1" slot="avatar" :src="baseUrl + item.userTo_avatar" />
                                         <a-avatar v-else slot="avatar" :src="baseUrl + item.userTo_avatar" @click="$router.push({ path: '/profile', query: { uid: item.userTo_uid } })" />
-                                        <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/profile', query: { uid: item.userTo_uid } })">To {{ item.userTo_nickname }}</a>
+                                        <a v-if="item.userTo_uid == -1" slot="author" style="font-size: 15px">To {{ item.userTo_nickname }}</a>
+                                        <a v-else slot="author" style="font-size: 15px" @click="$router.push({ path: '/profile', query: { uid: item.userTo_uid } })">To {{ item.userTo_nickname }}</a>
                                         <p slot="content" class="text-left">{{ item.content }}</p>
                                     </a-comment>
                                 </a-list-item>
@@ -436,6 +437,31 @@ export default {
         },
         submitProfile() {
 
+        }
+    },
+    watch: {
+        // the same path, but different query, force to refresh
+        '$route' () {
+            this.$axios.post('getUserProfile', qs.stringify({
+                uid: this.$route.query.uid
+            }))
+            .then((response) => {
+                if (response.data == 1) {
+                    this.$message.error('未知错误')
+                }
+                else {
+                    this.userProfile = response.data
+                }
+            })
+            this.$axios.get('getUserBaseInfo')
+            .then((response) => {
+                if (response.data == 1) {
+                    this.$message.error('未知错误')
+                }
+                else {
+                    this.userBaseInfo = response.data
+                }
+            })
         }
     },
     computed: mapState({

@@ -78,7 +78,7 @@
                         <div class="icon-left">
                             <a-icon type="like-o" :theme="loveDetail.isThumbsUp ? 'filled' : 'outlined'" @click="ThumbsUp(loveDetail)" /> {{ loveDetail.thumbsUp }}
                         </div>
-                        <div class="icon-right">
+                        <div class="icon-share">
                             <a target='_blank' href="http://connect.qq.com/widget/shareqq/index.html?url=http://127.0.0.1&sharesource=qzone&title=湖南中医药大学表白墙&summary=描述&desc=简述">
                                 <icon-font type="icon-qq" />
                             </a>
@@ -201,7 +201,7 @@ export default {
             if (loveDetail.isThumbsUp) {
                 loveDetail.isThumbsUp = false
                 loveDetail.thumbsUp -= 1
-                this.$axios.post('thumbsUp', qs.stringify({
+                this.$axios.post('thumbsUpLove', qs.stringify({
                     id: loveDetail.id,
                     isThumbsUp: false
                 }))
@@ -209,7 +209,7 @@ export default {
             else {
                 loveDetail.isThumbsUp = true
                 loveDetail.thumbsUp += 1
-                this.$axios.post('thumbsUp', qs.stringify({
+                this.$axios.post('thumbsUpLove', qs.stringify({
                     id: loveDetail.id,
                     isThumbsUp: true
                 }))
@@ -273,11 +273,11 @@ a:hover {
     text-decoration: none;
 }
 
-.icon-right {
+.icon-share {
     position: absolute;
     right: 10px;
 }
-.icon-right >>> .anticon {
+.icon-share >>> .anticon {
     font-size: 24px;
     cursor: pointer;
 }

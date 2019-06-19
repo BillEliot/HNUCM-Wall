@@ -39,6 +39,7 @@
                     <!-- List -->
                     <a-spin :spinning="spinning">
                         <RecycleScroller
+                            v-if="hackReset"
                             :items="loseList"
                             :item-size="1"
                             key-field="id"
@@ -84,6 +85,7 @@ export default {
   },
   data() {
     return {
+        hackReset: true,
         loading: false,
         spinning: false,
         busy: false,
@@ -199,6 +201,11 @@ export default {
                     this.type_loseTime = 'minus'
                     this.type_publicTime = 'minus'
                     this.loseList = response.data.info
+                    // hack reset
+                    this.hackReset = false
+                    this.$nextTick(() => {
+                        this.hackReset = true
+                    })
                     this.$notification.open({
                         message: '搜索结果',
                         description: `共搜索到 ${this.loseList.length} 条结果`,

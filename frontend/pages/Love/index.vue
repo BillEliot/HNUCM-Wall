@@ -8,12 +8,15 @@
             :closable="false"
             @close="visibleMoreUserTo = false"
             :visible="visibleMoreUserTo"
+            v-if="loveList.length > 0"
         >
             <div class="row">
                 <div class="col-md-4 col-md-offset-4 col-xs-4 col-xs-offset-4 c text-center">
                     <div v-for="user in loveList[currentLoveIndex].userTo" :key="user.nickname">
-                        <a-avatar :size="64" :src="baseUrl + user.avatar" />
-                        <a>{{ user.nickname }}</a>
+                        <a-avatar v-if="user.uid == -1" :size="64" :src="baseUrl + user.avatar" />
+                        <a-avatar v-else :size="64" :src="baseUrl + user.avatar" @click="$router.push({ path: '/profile', query: { uid: user.uid } })" style="cursor: pointer" />
+                        <a v-if="user.uid == -1">{{ user.nickname }}</a>
+                        <a v-else @click="$router.push({ path: '/profile', query: { uid: user.uid } })">{{ user.nickname }}</a>
                         <p class="bio">{{ user.bio }}</p>
                     </div>
                 </div>
@@ -74,6 +77,7 @@
                     <!-- List -->
                     <a-spin :spinning="spinning">
                         <RecycleScroller
+                            v-if="hackReset"
                             :items="loveList"
                             :item-size="1"
                             v-slot="{ item, index }"
@@ -160,6 +164,7 @@ export default {
   },
   data() {
     return {
+        hackReset: true,
         loading: false,
         spinning: false,
         busy: false,
@@ -255,6 +260,11 @@ export default {
                     this.type_date = 'minus'
                     this.type_thumbsUp = 'minus'
                     this.loveList = response.data.info
+                    // hack reset
+                    this.hackReset = false
+                    this.$nextTick(() => {
+                        this.hackReset = true
+                    })
                     this.$notification.open({
                         message: '搜索结果',
                         description: `共搜索到 ${this.loveList.length} 条结果`,
@@ -285,6 +295,11 @@ export default {
                     this.type_date = 'minus'
                     this.type_thumbsUp = 'minus'
                     this.loveList = response.data.info
+                    // hack reset
+                    this.hackReset = false
+                    this.$nextTick(() => {
+                        this.hackReset = true
+                    })
                     this.$notification.open({
                         message: '搜索结果',
                         description: `共搜索到 ${this.loveList.length} 条结果`,
@@ -343,7 +358,7 @@ export default {
     moreUserTo(index) {
         this.visibleMoreUserTo = true
         this.currentLoveIndex = index
-    }
+    },
   },
   computed: mapState({
       baseUrl: state => state.baseUrl
