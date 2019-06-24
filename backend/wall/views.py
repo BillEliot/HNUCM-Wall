@@ -267,6 +267,44 @@ def searchDealItem(request):
 
 
 @csrf_exempt
+def searchArticle(request):
+    name = request.POST.get('name')
+
+    listArticle = []
+    try:
+        for article in Article.objects.filter(title__contains=name):
+            listArticle.append({
+                'id': article.id,
+                'uid': article.user.id,
+                'avatar': article.user.avatar.url,
+                'nickname': article.user.nickname,
+                'bio': article.user.bio,
+                'title': article.title,
+                'tags': article.tags.split(';')[:-1],
+                'content': article.content,
+                'neededCoin': article.neededCoin,
+                'publicDate': article.publicDate,
+                'editDate': article.editDate,
+                'comments': article.comments.count(),
+                'thumbsUp': article.thumbsUpUser.count(),
+            })
+
+        return JsonResponse({
+            'list': listArticle,
+            'total': len(listArticle)
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def searchArticleByUser(request):
+    
+
+
+
+@csrf_exempt
 def getUserProfile(request):
     uid = request.POST.get('uid')
 
@@ -610,19 +648,12 @@ def handExam(request):
     multiple = questions['multiple']
     judge = questions['judge']
     blank = questions['blank']
-
-    print(singleA)
-    print(multiple)
-    print(judge)
-    print(blank)
-
-    return HttpResponse(0)
+    qa = questions['qa']
 
     try:
-        questions = []
         for question in singleA:
-            answer = Bank.objects.get(id=question.id)
-            if answer == question.answer:
+            answer = Bank.objects.get(id=question['id']).answer
+            if answer == question['answer']:
                 question['isCorrect'] = True
             else:
                 question['isCorrect'] = False
@@ -630,22 +661,36 @@ def handExam(request):
         for question in singleB:
             pass
         for question in multiple:
-            answer = Bank.objects.get(id=question.id)
-            answer = ''.join(answer.sort())
-            if answer == question.answer:
+            answer = Bank.objects.get(id=question['id']).answer
+            question['answer'].sort()
+            if answer == ''.join(question['answer']):
                 question['isCorrect'] = True
             else:
                 question['isCorrect'] = False
                 question['correctAnswer'] = answer
         for question in judge:
-            answer = Bank.objects.get(id=question.id)
-            if answer == question.answer:
+            answer = Bank.objects.get(id=question['id']).answer
+            if answer == question['answer']:
                 question['isCorrect'] = True
             else:
                 question['isCorrect'] = False
                 question['correctAnswer'] = answer
         for question in blank:
-            pass
+            answer = Bank.objects.get(id=question['id']).answer
+            if answer == question['answer']:
+                question['isCorrect'] = True
+            else:
+                question['isCorrect'] = False
+                question['correctAnswer'] = answer
+        
+        return JsonResponse({ 
+            'singleA': singleA,
+            'singleB': singleB,
+            'multiple': multiple,
+            'judge': judge,
+            'blank': blank,
+            'qa': qa
+         })
     except:
         return HttpResponse(1)
 
@@ -867,13 +912,34 @@ def getDealList(request):
 
 @csrf_exempt
 def getArticleList(request):
-    index = int(request.POST.get('index')) - 1
+    filterType = request.POST.get('filterType')
+    order = request.POST.get('order')
+    index = int(request.POST.get('index'))
 
-    listArtcile = []
+
+    listArticle = []
+    articles = []
+    if filterType == 'date':
+        if order == 'positive':
+            articles = Article.objects.order_by('publicDate')[index:index+9]
+        elif order == 'reverse':
+            articles = Article.objects.order_by('-publicDate')[index:index+9]
+    elif filterType == 'thumbsUp':
+        if order == 'positive':
+            articles = Article.objects.annotate(numThumbsUp = Count('thumbsUpUser')).order_by('numThumbsUp')[index:index+9]
+        elif order == 'reverse':
+            articles = Article.objects.annotate(numThumbsUp = Count('thumbsUpUser')).order_by('-numThumbsUp')[index:index+9]
+    elif filterType == 'coin':
+        if order == 'positive':
+            articles = Article.objects.order_by('neededCoin')[index:index+9]
+        elif order == 'reverse':
+            articles = Article.objects.order_by('-neededCoin')[index:index+9]
+    else:
+        articles = Article.objects.all()[index:index+9]
+
     try:
-        allArticles = Article.objects.all()
-        for article in allArticles[index:index+9]:
-            listArtcile.append({
+        for article in articles:
+            listArticle.append({
                 'id': article.id,
                 'uid': article.user.id,
                 'avatar': article.user.avatar.url,
@@ -890,8 +956,8 @@ def getArticleList(request):
             })
 
         return JsonResponse({
-            'list': listArtcile,
-            'total': allArticles.count()
+            'list': listArticle,
+            'total': Article.objects.count()
         })
     except:
         return HttpResponse(1)

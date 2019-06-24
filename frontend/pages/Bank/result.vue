@@ -1,75 +1,5 @@
 <template>
     <div>
-        <!-- answer card -->
-        <a-modal
-            title="答题卡"
-            v-model="visibleAnswerCard"
-            @ok="submit"
-            okText="交卷"
-            cancelText="取消"
-        >
-            <h4>单选-A</h4>
-            <div class="row">
-                <div class="com-md-1 text-center">
-                    <a-button
-                        v-for="question,index in questions.singleA"
-                        :key="index"
-                        :class="question.answer ? 'answer-finished' : 'answer-unfinished'"
-                    >
-                        {{ index+1 }}
-                    </a-button>
-                </div>
-            </div>
-            <h4>单选-B</h4>
-            <h4>多选</h4>
-            <div class="row">
-                <div class="com-md-1 text-center">
-                    <a-button
-                        v-for="question,index in questions.multiple"
-                        :key="index"
-                        :class="question.answer.length != 0 ? 'answer-finished' : 'answer-unfinished'"
-                    >
-                        {{ index+1 }}
-                    </a-button>
-                </div>
-            </div>
-            <h4>判断</h4>
-            <div class="row">
-                <div class="com-md-1 text-center">
-                    <a-button
-                        v-for="question,index in questions.judge"
-                        :key="index"
-                        class="answer-finished"
-                    >
-                        {{ index+1 }}
-                    </a-button>
-                </div>
-            </div>
-            <h4>填空</h4>
-            <div class="row">
-                <div class="com-md-1 text-center">
-                    <a-button
-                        v-for="question,index in questions.blank"
-                        :key="index"
-                        :class="question.answer.length != 0 && question.answer.filter((ans) => { return !!ans }).length == question.answer.length ? 'answer-finished' : 'answer-unfinished'"
-                    >
-                        {{ index+1 }}
-                    </a-button>
-                </div>
-            </div>
-            <h4>问答</h4>
-            <div class="row">
-                <div class="com-md-1 text-center">
-                    <a-button
-                        v-for="question,index in questions.qa"
-                        :key="index"
-                        :class="question.answer ? 'answer-finished' : 'answer-unfinished'"
-                    >
-                        {{ index+1 }}
-                    </a-button>
-                </div>
-            </div>
-        </a-modal>
         <!-- navbar -->
         <navbar :userBaseInfo="userBaseInfo" />
         <!-- banner -->
@@ -78,7 +8,7 @@
                 <div class="container">
                     <div class="title-holder">
                         <div class="title-text text-center">
-                            <h1>开始刷题</h1>
+                            <h1>答题结果</h1>
                             <p class="subheading">(￣_,￣ )</p>
                         </div>
                     </div>
@@ -86,23 +16,10 @@
             </div>
         </div>
         <div style="margin-top: 50px"></div>
-        <!-- anchor 
+        <!-- anchor
         <a-anchor :offsetTop="50" class="anchor">
             <a-anchor-link v-for="index in questions.singleA.length" :key="index" :href="'#' + (index-1)" :title="'第' + index + '题'" />
         </a-anchor> -->
-        <!-- float card -->
-        <div class="floatcard text-center">
-            <h4>剩余时间</h4>
-            <a-progress 
-                type="circle"
-                :percent="totalSeconds == -1 ? 100 : ((timer.hours()*3600+timer.minutes()*60+timer.seconds()) / totalSeconds).toFixed(4) * 100"
-            >
-            </a-progress>
-            <p class="timer">
-                {{ totalSeconds == -1 ? '无限制' : timer.hours() + 'h ' + timer.minutes() + 'm ' + timer.seconds() + 's' }}
-            </p>
-            <a-button v-if="totalSeconds != -1" type="primary">暂停</a-button>
-        </div>
         <!-- container -->
         <div class="container">
             <div class="row">
@@ -122,15 +39,21 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}</h4>
+                                                <h4 slot="title" :class="item.isCorrect ? 'correct' : 'uncorrect'">
+                                                    {{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}
+                                                </h4>
                                             </a-list-item-meta>
-                                            <a-radio-group v-model="item.answer" buttonStyle="solid">
+                                            <a-radio-group v-model="item.answer" buttonStyle="solid" disabled>
                                                 <a-radio-button value="A">A. {{ item.A }}</a-radio-button>
                                                 <a-radio-button value="B">B. {{ item.B }}</a-radio-button>
                                                 <a-radio-button value="C">C. {{ item.C }}</a-radio-button>
                                                 <a-radio-button value="D">D. {{ item.D }}</a-radio-button>
                                                 <a-radio-button v-if="item.E" value="E">E. {{ item.E }}</a-radio-button>
                                             </a-radio-group>
+                                            <div v-if="!item.isCorrect" class="fault-action">
+                                                <h4>正确答案：{{ item.correctAnswer }}</h4>
+                                                <a-button type="primary">加入错题本</a-button>
+                                            </div>
                                         </div>
                                     </a-list-item>
                                 </a-list>
@@ -152,15 +75,21 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}</h4>
+                                                <h4 slot="title" :class="item.isCorrect ? 'correct' : 'uncorrect'">
+                                                    {{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}
+                                                </h4>
                                             </a-list-item-meta>
-                                            <a-checkbox-group v-model="item.answer">
+                                            <a-checkbox-group v-model="item.answer" disabled>
                                                 <a-checkbox value="A">A. {{ item.A }}</a-checkbox>
                                                 <a-checkbox value="B">A. {{ item.B }}</a-checkbox>
                                                 <a-checkbox value="C">A. {{ item.C }}</a-checkbox>
                                                 <a-checkbox value="D">A. {{ item.D }}</a-checkbox>
                                                 <a-checkbox v-if="item.E" value="E">E. {{ item.E }}</a-checkbox>
                                             </a-checkbox-group>
+                                            <div v-if="!item.isCorrect" class="fault-action">
+                                                <h4>正确答案：{{ item.correctAnswer }}</h4>
+                                                <a-button type="primary">加入错题本</a-button>
+                                            </div>
                                         </div>
                                     </a-list-item>
                                 </a-list>
@@ -178,16 +107,22 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}</h4>
+                                                <h4 slot="title" :class="item.isCorrect ? 'correct' : 'uncorrect'">
+                                                    {{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}
+                                                </h4>
                                             </a-list-item-meta>
                                             <a-input
                                                 v-for="title, index in parseBlanks(item.title)"
                                                 :key="index"
-                                                :placeholder="title"
-                                                @change="changeBlank($event, item, index)"
+                                                :placeholder="item.answer[index]"
+                                                disabled
                                             >
                                                 <a-icon slot="prefix" type="question" />
                                             </a-input>
+                                            <div v-if="!item.isCorrect" class="fault-action">
+                                                <h4>正确答案：{{ item.correctAnswer }}</h4>
+                                                <a-button type="primary">加入错题本</a-button>
+                                            </div>
                                         </div>
                                     </a-list-item>
                                 </a-list>
@@ -205,12 +140,18 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}</h4>
+                                                <h4 slot="title" :class="item.isCorrect ? 'correct' : 'uncorrect'">
+                                                    {{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}
+                                                </h4>
                                             </a-list-item-meta>
-                                            <a-switch v-model="item.answer">
+                                            <a-switch v-model="item.answer" disabled>
                                                 <a-icon type="check" slot="checkedChildren"/>
                                                 <a-icon type="close" slot="unCheckedChildren"/>
                                             </a-switch>
+                                            <div v-if="!item.isCorrect" class="fault-action">
+                                                <h4>正确答案：{{ item.correctAnswer ? '正确' : '错误' }}</h4>
+                                                <a-button type="primary">加入错题本</a-button>
+                                            </div>
                                         </div>
                                     </a-list-item>
                                 </a-list>
@@ -228,12 +169,15 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}</h4>
+                                                <h4 slot="title">
+                                                    {{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}
+                                                </h4>
                                             </a-list-item-meta>
-                                            <a-textarea 
+                                            <a-textarea
                                                 v-model="item.answer"
                                                 placeholder="输入您的答案(注意：问答题系统不会进行核验，请对照答案自行校对)"
                                                 :rows="4"
+                                                disabled
                                             />
                                         </div>
                                     </a-list-item>
@@ -241,7 +185,6 @@
                             </a-tab-pane>
                         </a-tabs>
                     </a-spin>
-                    <a-button type="primary" style="width: 100%; margin-top: 50px;" @click="visibleAnswerCard = true">交卷</a-button>
                 </div>
             </div>
         </div>
@@ -267,29 +210,12 @@ export default {
   },
   data() {
     return {
-        loading: true,
-        visibleAnswerCard: false,
-        timerInterval: null,
-        totalSeconds: 0
+        loading: true
     }
   },
   async asyncData({ $axios, store, redirect }) {
     let userBaseInfo = null
     let questions = JSON.parse(JSON.stringify(store.state.bank.questions))
-    let timer = moment.duration(store.state.bank.timer)
-
-    // modify the type of questions_blank's answer
-    questions.blank.forEach((blank) => {
-        blank.answer = new Array()
-    })
-    // modify the type of questions_multiple's answer
-    questions.multiple.forEach((multiple) => {
-        multiple.answer = new Array()
-    })
-    // modify the type of questions_judge's answer
-    questions.judge.forEach((judge) => {
-        judge.answer = false
-    })
 
     await $axios.get('getUserBaseInfo')
     .then((response) => {
@@ -301,16 +227,10 @@ export default {
 
     return {
         userBaseInfo: userBaseInfo,
-        questions: questions,
-        timer: timer,
-        totalSeconds: timer.hours() * 3600 + timer.minutes() * 60 + timer.seconds()
+        questions: questions
     }
   },
   methods: {
-      ...mapMutations({
-          setQuestions: 'bank/setQuestions'
-      }),
-
       parseBlanks(blanks) {
           let regex = new RegExp(/{(.)}/, 'g')
           let result = []
@@ -319,84 +239,26 @@ export default {
               result.push(array[1])
           }
           return result
-      },
-      changeBlank(e, item, index) {
-          this.$set(item.answer, index, e.target.value)
-      },
-      submit() {
-          this.$confirm({
-              title: '确认',
-              content: '确定交卷？',
-              onOk: () => {
-                  this.$axios.post('handExam', JSON.stringify({
-                      singleA: this.questions.singleA,
-                      singleB: this.questions.singleB,
-                      multiple: this.questions.multiple,
-                      judge: this.questions.judge,
-                      blank: this.questions.blank,
-                      qa: this.questions.qa
-                  }))
-                  .then((response) => {
-                      this.setQuestions(response.data)
-                      this.$router.push({ path: '/bank/result' })
-                  })
-              }
-          })
       }
   },
   mounted() {
-      clearInterval(this.timerInterval)
-      this.timerInterval = setInterval(() => {
-          if (this.timer.hours() == 0 && this.timer.minutes() == 0 && this.timer.seconds() == 0) {
-              this.totalSeconds = -1
-          }
-          else {
-            this.timer.subtract(1, 's')
-            if (this.timer.hours() == 0 && this.timer.minutes() == 0 && this.timer.seconds() == 0) {
-                clearInterval(this.timerInterval)
-                this.$message.warning('kkk')
-            }
-          }
-      }, 1000)
       this.loading = false
-  },
-  destroyed() {
-      clearInterval(this.timerInterval)
   }
 }
 </script>
 
 <style scoped>
-.floatcard {
-    float: right;
-    position: fixed;
-    right: 60px;
-    top: 200px;
+.correct {
+    color: green;
 }
-.floatcard h4 {
+.uncorrect {
     color: red;
 }
 
-.timer {
-    color: red;
+.fault-action {
+    margin-top: 30px;
+    color: green;
     font-weight: bold;
-    font-size: 24px;
-}
-
-.answer-finished {
-    background-color: greenyellow;
-}
-.answer-unfinished {
-    background-color: red;
-}
-
-.anchor {
-    float: left;
-    margin-left: 60px;
-    width: 200px;
-}
-.anchor >>> .ant-anchor-link-title {
-    text-decoration: none;
 }
 
 .summary {
