@@ -65,7 +65,7 @@
                                 <a-tag v-else @click="showInputTag" style="background: #fff; borderStyle: dashed;">
                                     <a-icon type="plus" /> 添加Tag
                                 </a-tag>
-                                <a-button type="primary">搜索Tag</a-button>
+                                <a-button type="primary" @click="searchArticleByTag">搜索Tag</a-button>
                             </div>
                         </div>
                     </div>
@@ -322,7 +322,38 @@ export default {
             })
         }
         else {
-            this.$message.warning('输入要搜索的物品吧～')
+            this.$message.warning('输入要搜索的用户吧～')
+        }
+      },
+      searchArticleByTag() {
+          if (!!this.tags && this.tags.length != 0) {
+            this.spinning = true
+            this.isSearched = true
+            this.$axios.post('searchArticleByTag', qs.stringify({
+                tags: this.tags
+            }, { arrayFormat: 'brackets' }))
+            .then((response) => {
+                this.spinning = false
+                if (response.data == 1) {
+                    this.$message.error('未知错误')
+                }
+                else {
+                    this.type_date = 'minus'
+                    this.type_thumbsUp = 'minus'
+                    this.type_coin = 'minus'
+                    this.articleList = response.data.list
+                    this.pagination = response.data.total
+                    this.$notification.open({
+                        message: '搜索结果',
+                        description: `共搜索到 ${this.articleList.length} 条结果`,
+                        icon: <a-icon type="smile" style="color: #108ee9" />,
+                        duration: 0
+                    })
+                }
+            })
+        }
+        else {
+            this.$message.warning('输入要搜索的Tag吧～')
         }
       },
       getArticleList() {

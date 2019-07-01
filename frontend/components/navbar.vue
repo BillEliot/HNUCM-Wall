@@ -17,9 +17,34 @@
                 <a-menu-item key="deal:1" @click="$router.push({ path: '/deal' })">二手墙</a-menu-item>
                 <a-menu-item key="deal:2" @click="navigate('/deal/new')">发布物品</a-menu-item>
             </a-menu-item-group>
-            <a-menu-item-group title="吐槽">
-                <a-menu-item key="complain:1" @click="$router.push({ path: '/complain' })">吐槽墙</a-menu-item>
-                <a-menu-item key="complain:2" @click="navigate('/complain/new')">我要吐槽</a-menu-item>
+        </a-sub-menu>
+
+        <a-menu-item key="article" @click="$router.push({ path: '/article' })">
+            <a-icon type="crown" /> 大佬杂谈
+        </a-menu-item>
+
+        <a-sub-menu>
+            <span slot="title"><a-icon type="heat-map" />校园动态</span>
+            <a-menu-item-group title="热点">
+                <a-menu-item key="hot:1" @click="$router.push({ path: '/hot' })">校园热点</a-menu-item>
+            </a-menu-item-group>
+            <a-menu-item-group title="讲座">
+                <a-menu-item key="lecture:1" @click="$router.push({ path: '/lecture' })">讲座动态</a-menu-item>
+            </a-menu-item-group>
+        </a-sub-menu>
+
+        <a-sub-menu>
+            <span slot="title"><a-icon type="sliders" />校园团体</span>
+            <a-menu-item-group title="社团">
+                <a-menu-item key="club:1" @click="$router.push({ path: '/club' })">校园社团</a-menu-item>
+            </a-menu-item-group>
+            <a-menu-item-group title="学生组织">
+                <a-menu-item key="organization:1" @click="$router.push({ path: '/organization' })">校团委学生部门</a-menu-item>
+                <a-menu-item key="organization:2" @click="$router.push({ path: '/organization/club' })">学生社团联合会</a-menu-item>
+                <a-menu-item key="organization:3" @click="$router.push({ path: '/organization/troupe' })">大学生艺术团</a-menu-item>
+                <a-menu-item key="organization:4" @click="$router.push({ path: '/organization/science' })">大学生科学技术协会</a-menu-item>
+                <a-menu-item key="organization:5" @click="$router.push({ path: '/organization/union' })">校学生会</a-menu-item>
+                <a-menu-item key="organization:6" @click="$router.push({ path: '/organization/subunion' })">各院学生会</a-menu-item>
             </a-menu-item-group>
         </a-sub-menu>
 
@@ -27,8 +52,8 @@
             <a-icon type="star" /> 题库
         </a-menu-item>
 
-        <a-menu-item key="article" @click="$router.push({ path: '/article' })">
-            <a-icon type="crown" /> 大佬杂谈
+        <a-menu-item key="newStudent" @click="$router.push({ path: '/newStudent' })">
+            <a-icon type="sound" /> 新生指南
         </a-menu-item>
         <!-- auth -->
         <template v-if="userBaseInfo.uid != -1">
@@ -37,9 +62,10 @@
                 <a> {{ userBaseInfo.nickname }} <a-icon type="down" /></a>
                 <a-menu slot="overlay">
                     <a-menu-item>
-                    <router-link :to="{ path: '/profile', query: { uid: userBaseInfo.uid } }">个人信息</router-link>
+                        <router-link :to="{ path: '/profile', query: { uid: userBaseInfo.uid } }">个人信息</router-link>
                     </a-menu-item>
                     <a-menu-item @click="logout">注销</a-menu-item>
+                    <a-menu-item v-if="userBaseInfo.isAdmin" @click="$router.push({ path: '/admin' })">管理后台</a-menu-item>
                 </a-menu>
             </a-dropdown>
         </template>
@@ -99,12 +125,12 @@ a {
 }
 
 .auth-avatar {
-    position: absolute;
+    position: fixed;
     right: 10px;
-    top: 10%
+    top: 6px
 }
 .auth-dropdown {
-    position: absolute;
+    position: fixed;
     right: 50px
 }
 

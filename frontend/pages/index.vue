@@ -48,26 +48,26 @@
         <div class="row text-center">
           <div class="col-md-4">
             <div class="section-item">
-              <a-icon type="sound" theme="twoTone" class="section-icon" />
-              <h2>吐槽墙</h2>
-              <p>来这里发泄一下吧～</p>
-              <a href="#">进入</a>
+              <a-icon type="crown" theme="twoTone" class="section-icon" />
+              <h2>大佬杂谈</h2>
+              <p>大佬们的学习经验～</p>
+              <router-link to="/article">进入</router-link>
             </div>
           </div>
           <div class="col-md-4">
             <div class="section-item">
               <a-icon type="database" theme="twoTone" class="section-icon" />
               <h2>题库</h2>
-              <p>C位！万能的题库~</p>
+              <p>C位！万能的题库～</p>
               <router-link to="/bank">进入</router-link>
             </div>
           </div>
           <div class="col-md-4">
             <div class="section-item">
-              <a-icon type="crown" theme="twoTone" class="section-icon" />
-              <h2>大佬杂谈</h2>
-              <p>大佬们的学习经验～</p>
-              <router-link to="/article">进入</router-link>
+              <a-icon type="sound" theme="twoTone" class="section-icon" />
+              <h2>新生指南</h2>
+              <p>来了解大学生活的方方面面吧～</p>
+              <a href="#">进入</a>
             </div>
           </div>
         </div>

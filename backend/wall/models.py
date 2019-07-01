@@ -13,6 +13,7 @@ class User(models.Model):
     wechat = models.CharField(max_length=20, blank=True, null=True)
     coin = models.PositiveIntegerField(default=0)
     comments = models.ManyToManyField('Comment', blank=True, related_name='user_comments')
+    isAdmin = models.BooleanField(default=False)
 
 
 
@@ -105,6 +106,25 @@ class Article(models.Model):
 
     def __str__(self):
         return self.title
+
+
+
+class Club(models.Model):
+    name = models.CharField(max_length=30)
+    description = models.TextField()
+    cover = models.ImageField(upload_to='img/club', default='img/club/default.png')
+    president = models.CharField(max_length=20)
+    vicePresident = models.CharField(max_length=20)
+    presidentAssistant = models.CharField(max_length=20)
+    planDirector = models.CharField(max_length=20)
+    financeDirector = models.CharField(max_length=20)
+    feedbackDirector = models.CharField(max_length=20)
+    ITDirector = models.CharField(max_length=20)
+    propagandaDirector = models.CharField(max_length=20)
+    otherDirectors = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
 
 
 

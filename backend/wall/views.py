@@ -99,7 +99,8 @@ def getUserBaseInfo(request):
             return JsonResponse({
                 'uid': uid,
                 'nickname': user.nickname,
-                'avatar': user.avatar.url
+                'avatar': user.avatar.url,
+                'isAdmin': user.isAdmin
             })
         except:
             return HttpResponse(1)
@@ -107,7 +108,8 @@ def getUserBaseInfo(request):
         return JsonResponse({
                 'uid': -1,
                 'nickname': '赶快登陆吧～',
-                'avatar': '/media/img/avatar/anony.jpg'
+                'avatar': '/media/img/avatar/anony.jpg',
+                'isAdmin': False
             })
 
 
@@ -300,7 +302,66 @@ def searchArticle(request):
 
 @csrf_exempt
 def searchArticleByUser(request):
+    name = request.POST.get('name')
+
+    listArticle = []
+    try:
+        for article in Article.objects.filter(user__nickname__contains=name):
+            listArticle.append({
+                'id': article.id,
+                'uid': article.user.id,
+                'avatar': article.user.avatar.url,
+                'nickname': article.user.nickname,
+                'bio': article.user.bio,
+                'title': article.title,
+                'tags': article.tags.split(';')[:-1],
+                'content': article.content,
+                'neededCoin': article.neededCoin,
+                'publicDate': article.publicDate,
+                'editDate': article.editDate,
+                'comments': article.comments.count(),
+                'thumbsUp': article.thumbsUpUser.count(),
+            })
+
+        return JsonResponse({
+            'list': listArticle,
+            'total': len(listArticle)
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def searchArticleByTag(request):
+    tags = request.POST.getlist('tags[]')
+
+    allArticles = Article.objects.all()
+    for tag in tags:
+        allArticles = allArticles.filter(tags__contains=tag)
     
+    listArticle = []
+    for article in allArticles:
+        listArticle.append({
+            'id': article.id,
+            'uid': article.user.id,
+            'avatar': article.user.avatar.url,
+            'nickname': article.user.nickname,
+            'bio': article.user.bio,
+            'title': article.title,
+            'tags': article.tags.split(';')[:-1],
+            'content': article.content,
+            'neededCoin': article.neededCoin,
+            'publicDate': article.publicDate,
+            'editDate': article.editDate,
+            'comments': article.comments.count(),
+            'thumbsUp': article.thumbsUpUser.count(),
+        })
+
+    return JsonResponse({
+        'list': listArticle,
+        'total': len(listArticle)
+    })
 
 
 

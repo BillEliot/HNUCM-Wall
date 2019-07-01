@@ -16,6 +16,7 @@ urlpatterns = [
     path('searchDealItem', views.searchDealItem),
     path('searchArticle', views.searchArticle),
     path('searchArticleByUser', views.searchArticleByUser),
+    path('searchArticleByTag', views.searchArticleByTag),
     path('getLoveList', views.getLoveList),
     path('getLoseList', views.getLoseList),
     path('getDealList', views.getDealList),
