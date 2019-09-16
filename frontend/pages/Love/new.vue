@@ -150,6 +150,7 @@ export default {
   },
   async asyncData({ $axios, error }) {
       let userBaseInfo = null
+      
       await $axios.get('getUserBaseInfo')
       .then((response) => {
           userBaseInfo = response.data

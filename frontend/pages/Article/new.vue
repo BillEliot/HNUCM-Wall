@@ -97,17 +97,17 @@ export default {
         }
     }
   },
-  async asyncData({ $axios, redirect }) {
+  async asyncData({ $axios, error }) {
       let userBaseInfo = null
 
       await $axios.get('getUserBaseInfo')
       .then((response) => {
           userBaseInfo = response.data
           if (userBaseInfo.uid == -1) {
-              redirect({ path: '/article' })
+              error({ statusCode: 403, message: '先登录吧～' })
           }
       })
-      
+
       return {
           userBaseInfo: userBaseInfo
       }

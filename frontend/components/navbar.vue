@@ -47,13 +47,14 @@
                 <a-menu-item key="organization:6" @click="$router.push({ path: '/organization/subunion' })">各院学生会</a-menu-item>
             </a-menu-item-group>
         </a-sub-menu>
-
         <a-menu-item key="bank" @click="$router.push({ path: '/bank' })">
             <a-icon type="star" /> 题库
         </a-menu-item>
-
         <a-menu-item key="newStudent" @click="$router.push({ path: '/newStudent' })">
             <a-icon type="sound" /> 新生指南
+        </a-menu-item>
+        <a-menu-item key="Extension" @click="$router.push({ path: '/extension' })">
+            <a-icon type="rise" /> 推广
         </a-menu-item>
         <!-- auth -->
         <template v-if="userBaseInfo.uid != -1">

@@ -28,7 +28,7 @@
         <div class="row text-center">
           <div class="col-md-4">
             <a-card hoverable style="width: 320px">
-                <img slot="cover" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />
+                <img slot="cover" src="~assets/img/map.png" />
                 <a-card-meta title="学校地图">
                     <template slot="description">记好才不会迷路哦～</template>
                 </a-card-meta>
@@ -36,7 +36,7 @@
           </div>
           <div class="col-md-4">
             <a-card hoverable style="width: 320px">
-                <img slot="cover" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />
+                <img slot="cover" src="~assets/img/organization.png" />
                 <a-card-meta title="学生组织">
                     <template slot="description">记好各个组织的职能哦～</template>
                 </a-card-meta>
@@ -44,7 +44,7 @@
           </div>
           <div class="col-md-4">
             <a-card hoverable style="width: 320px">
-                <img slot="cover" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />
+                <img slot="cover" src="~assets/img/play.png" />
                 <a-card-meta title="吃喝玩乐">
                     <template slot="description">潇洒去吧～</template>
                 </a-card-meta>

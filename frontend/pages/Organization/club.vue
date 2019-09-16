@@ -8,7 +8,7 @@
                 <div class="container">
                     <div class="title-holder">
                         <div class="title-text text-center">
-                            <h1>校团委学生部门</h1>
+                            <h1>学生社团联合会</h1>
                         </div>
                     </div>
                 </div>
@@ -31,14 +31,14 @@
 
 <script>
 import qs from 'qs'
-import Footer from '~/components/footer.vue'
+import Footer from '~/components/footer'
 import navbar from '~/components/navbar'
 import { mapState } from 'vuex'
 
 export default {
   components: {
       Footer,
-      navbar
+      navbar,
   },
   data() {
     return {
