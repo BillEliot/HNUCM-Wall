@@ -11,8 +11,7 @@
                                     {
                                         rules: [{
                                             type: 'email', message: '请输入有效的EMail',
-                                        }, 
-                                        {
+                                        }, {
                                             required: true, message: '请输入EMail',
                                         }]
                                     }
@@ -190,7 +189,6 @@
 import qs from 'qs'
 import md5 from 'js-md5'
 import { mapState } from 'vuex'
-
 
 export default {
   name: 'Register',

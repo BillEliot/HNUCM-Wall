@@ -161,6 +161,7 @@
                 <div class="text-center col-md-4 col-md-offset-4">
                     <a-avatar :size="64" :src="baseUrl + userProfile.avatar" />
                     <h2>{{ userProfile.nickname }}</h2>
+                    <a-tag v-for="tag in userProfile.auth" :color="randomColor()" :key="tag">{{ tag }}</a-tag>
                     <p class="bio">{{ userProfile.bio }}</p>
                     <a-input placeholder="email" disabled v-model="userProfile.email">
                         <a-icon slot="prefix" type="mail" />
@@ -184,6 +185,7 @@
                         <!-- actions -->
                         <a-button @click="visibleDrawerProfile = true">编辑资料</a-button>
                         <a-button @click="visibleDrawerPassword = true">修改密码</a-button>
+                        <a-button @click="applyAuth">申请身份认证</a-button>
                     </div>
                 </div>
             </div>
@@ -287,7 +289,7 @@
                                 :header="`${userProfile.deals.length} 个交易物品`"
                                 itemLayout="horizontal"
                             >
-                                <div slot="footer"><b>这个人也太粗心了叭～</b></div>
+                                <div slot="footer"><b>TA的二手物品哦～</b></div>
                                 <a-list-item slot="renderItem" slot-scope="item, index">
                                     <a-comment style="padding-left: 35px">
                                         <p v-if="item.isSold" slot="avatar" class="found">已售出</p>
@@ -403,6 +405,10 @@ export default {
                 callback()
             }
         },
+        randomColor() {
+            let color = ['pink', 'red', 'orange', 'green', 'cyan', 'blue', 'purple']
+            return color[Math.round(Math.random() * (color.length - 1))]
+        },
         submitUserComment() {
             if (!this.commentContent) {
                 this.$message.warning('说点什么吧～')
@@ -437,6 +443,13 @@ export default {
         },
         submitProfile() {
 
+        },
+        applyAuth() {
+            this.$notification['success']({
+                message: '申请身份认证',
+                description: '请联系 qq1161142536 / eliotwjz@gmail.com 申请身份认证！',
+                duration: null
+            })
         }
     },
     watch: {

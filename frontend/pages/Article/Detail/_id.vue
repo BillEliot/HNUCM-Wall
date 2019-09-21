@@ -8,8 +8,10 @@
                 <div class="container">
                     <div class="title-holder">
                         <div class="title-text text-center">
-                            <h1>大佬杂谈</h1>
-                            <p class="subheading">努力提高自己吧～</p>
+                            <h1>{{ articleDetail.title }}</h1>
+                            <span class="date">发布时间: {{ moment(articleDetail.publicDate).format("llll") }}</span>
+                            <br />
+                            <span class="date">最后编辑: {{ moment(articleDetail.editDate).format("llll") }}</span>
                         </div>
                     </div>
                 </div>
@@ -26,10 +28,6 @@
                         <a @click="$router.push({ path: '/profile', query: { uid: articleDetail.uid } })">{{ articleDetail.nickname }}</a>
                         <p>{{ articleDetail.bio }}</p>
                     </div>
-                    <h1>{{ articleDetail.title }}</h1>
-                    <span class="date">发布时间: {{ moment(articleDetail.publicDate).format("llll") }}</span>
-                    <br />
-                    <span class="date">最后编辑: {{ moment(articleDetail.editDate).format("llll") }}</span>
                     <!-- tags -->
                     <div class="text-left" style="margin-top: 20px">
                         <a-tag v-for="tag in articleDetail.tags" :key="tag">{{ tag }}</a-tag>

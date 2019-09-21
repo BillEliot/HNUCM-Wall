@@ -12,8 +12,6 @@
                     <div class="col-md-2 col-sm-3 col-xs-6">
                         <h3>友情链接</h3>
                         <ul class="list-unstyled links">
-                            <li>优敏思-UMS</li>
-                            <li>UMS-OJ</li>
                             <li>Eliot's Blog</li>
                         </ul>
                     </div>
@@ -35,7 +33,6 @@
                     <div class="col-md-2 col-sm-3 col-xs-6">
                         <h3>联系我</h3>
                         <ul class="list-unstyled links">
-                            <li>2017级 中医学院 四班</li>
                             <li>eliotwjz@gmail.com</li>
                             <li>qq: 1161142536</li>
                             <li>wechat: ieliot</li>

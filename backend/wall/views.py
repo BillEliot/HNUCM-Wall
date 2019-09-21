@@ -4,7 +4,7 @@ from django.db.models import Count
 from .models import *
 from utils.utils import *
 from datetime import timedelta
-import os, random
+import os, random, datetime
 
 import json
 
@@ -432,6 +432,7 @@ def getUserProfile(request):
             'wechat': user.wechat,
             'class': user._class,
             'coin': user.coin,
+            'auth': user.auth.split(';'),
             'comments': comments,
             'loves': loves,
             'loses': loses,
@@ -780,6 +781,24 @@ def submitArticle(request):
 
 
 @csrf_exempt
+def submitHelp(request):
+    uid = request.POST.get('uid')
+    title = request.POST.get('title')
+    content = request.POST.get('content')
+
+    try:
+        Help.objects.create(
+            user = User.objects.get(id=uid),
+            title = title,
+            content = content
+        )
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def getLoveList(request):
     filterType = request.POST.get('filterType')
     order = request.POST.get('order')
@@ -1026,6 +1045,42 @@ def getArticleList(request):
 
 
 @csrf_exempt
+def getHelpList(request):
+    filterType = request.POST.get('filterType')
+    order = request.POST.get('order')
+    index = int(request.POST.get('index'))
+
+    listHelp = []
+    helps = []
+    if filterType == 'date':
+        if order == 'positive':
+            helps = Help.objects.order_by('date')[index:index+9]
+        elif order == 'reverse':
+            helps = Help.objects.order_by('-date')[index:index+9]
+    else:
+        helps = Help.objects.all()[index:index+9]
+
+    try:
+        for _help in helps:
+            listHelp.append({
+                'id': _help.id,
+                'user': { 'uid': _help.user.id, 'avatar': _help.user.avatar.url, 'nickname': _help.user.nickname, 'bio': _help.user.bio },
+                'title': _help.title,
+                'content': _help.content,
+                'date': _help.date,
+                'comments': _help.comments.count()
+            })
+
+        return JsonResponse({
+            'list': listHelp,
+            'total': Help.objects.count()
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def getLoveDetail(request):
     _id = request.POST.get('id')
 
@@ -1254,6 +1309,35 @@ def thumbsUpArticle(request):
 
 
 @csrf_exempt
+def getHelpDetail(request):
+    _id = request.POST.get('id')
+
+    try:
+        _help = Help.objects.get(id=_id)
+        # comments
+        comments = []
+        for comment in _help.comments.all():
+            comments.append({
+                'uid': comment.user.id,
+                'avatar': comment.user.avatar.url,
+                'nickname': comment.user.nickname,
+                'content': comment.content
+            })
+
+        return JsonResponse({
+            'id': _help.id,
+            'user': { 'uid': _help.user.id, 'avatar': _help.user.avatar.url, 'nickname': _help.user.nickname, 'bio': _help.user.bio },
+            'title': _help.title,
+            'content': _help.content,
+            'date': _help.date,
+            'comments': comments
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def getNumQuestion(request):
     banks = request.POST.getlist('banks[]')
 
@@ -1348,3 +1432,305 @@ def submitArticleComment(request):
     except:
         return HttpResponse(1)
 
+
+
+@csrf_exempt
+def submitHelpComment(request):
+    _id = request.POST.get('id')
+    uid = request.POST.get('uid')
+    content = request.POST.get('content')
+
+    try:
+        _help = Help.objects.get(id=_id)
+        user = User.objects.get(id=uid)
+        comment = Comment.objects.create(user=user, content=content)
+        _help.comments.add(comment)
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def getClubDetail(request):
+    name = request.POST.get('name')
+
+    try:
+        club = Club.objects.get(name=name)
+        return JsonResponse({
+            'name': club.name,
+            'description': club.description,
+            'president_uid': club.president.id,
+            'president_name': club.president.nickname,
+            'president_avatar': club.president.avatar,
+            'vicePresident_uid': club.vicePresident.id,
+            'vicePresident_name': club.vicePresident.nickname,
+            'vicePresident_avatar': club.vicePresident.avatar,
+            'presidentAssistant_uid': club.presidentAssistant.id,
+            'presidentAssistant_name': club.presidentAssistant.nickname,
+            'presidentAssistant_avatar': club.presidentAssistant.avatar,
+            'planDirector_uid': club.planDirector.id,
+            'planDirector_name': club.planDirector.nickname,
+            'planDirector_avatar': club.planDirector.avatar,
+            'financeDirector_uid': club.financeDirector.id,
+            'financeDirector_name': club.financeDirector.nickname,
+            'financeDirector_avatar': club.financeDirector.avatar,
+            'feedbackDirector_uid': club.feedbackDirector.id,
+            'feedbackDirector_name': club.feedbackDirector.nickname,
+            'feedbackDirector_avatar': club.feedbackDirector.avatar,
+            'ITDirector_uid': club.ITDirector.id,
+            'ITDirector_name': club.ITDirector.nickname,
+            'ITDirector_avatar': club.ITDirector.avatar,
+            'propagandaDirector_uid': club.propagandaDirector.id,
+            'propagandaDirector_name': club.propagandaDirector.nickname,
+            'propagandaDirector_avatar': club.propagandaDirector.avatar,
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def getHotList(request):
+    listHot = []
+    try:
+        for hot in Hot.objects.all():
+            listHot.append({
+                'key': hot.id,
+                'title': hot.title,
+                'publisher': { 'uid': hot.publisher.id, 'nickname': hot.publisher.nickname, 'avatar': hot.publisher.avatar.url },
+                'date': hot.date
+            })
+        return JsonResponse({ 'info': listHot })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def getHotDetail(request):
+    _id = request.POST.get('id')
+    try:
+        hot = Hot.objects.get(id=_id)
+        return JsonResponse({
+            'title': hot.title,
+            'content': hot.content,
+            'publisher': { 'uid': hot.publisher.id, 'nickname': hot.publisher.nickname, 'avatar': hot.publisher.avatar.url },
+            'date': hot.date
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def deleteHot(request):
+    _id = request.POST.get('id')
+    try:
+        hot = Hot.objects.get(id=_id)
+        hot.delete()
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def addHot(request):
+    title = request.POST.get('title')
+    content = request.POST.get('content')
+    publisherUID = request.POST.get('publisherUID')
+
+    try:
+        if Hot.objects.filter(title=title).exists():
+            hot = Hot.objects.get(title=title)
+            hot.title = title
+            hot.content = content
+            hot.publisher = User.objects.get(id=publisherUID)
+            hot.save()
+        else:
+            Hot.objects.create(
+                title = title,
+                content = content,
+                publisher = User.objects.get(id=publisherUID)
+            )
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def getUserList(request):
+    listUser = []
+    try:
+        for user in User.objects.all():
+            listUser.append({
+                'key': user.id,
+                'email': user.email,
+                'nickname': user.nickname,
+                'bio': user.bio,
+                'class': user._class,
+                'phone': user.phone,
+                'qq': user.qq,
+                'wechat': user.wechat,
+                'coin': user.coin,
+                'isAdmin': user.isAdmin,
+                'auth': user.auth
+            })
+        return JsonResponse({ 'info': listUser })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def getUserDetail(request):
+    _id = request.POST.get('id')
+    try:
+        user = User.objects.get(id=_id)
+        return JsonResponse({
+            'email': user.email,
+            'nickname': user.nickname,
+            'bio': user.bio,
+            'class': user._class.split('/'),
+            'phone': user.phone,
+            'qq': user.qq,
+            'wechat': user.wechat,
+            'coin': user.coin,
+            'isAdmin': user.isAdmin,
+            'auth': user.auth
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def updateUser(request):
+    uid = request.POST.get('uid')
+    email = request.POST.get('email')
+    nickname = request.POST.get('nickname')
+    bio = request.POST.get('bio')
+    _class = request.POST.get('class[0]') + '/' + request.POST.get('class[1]')
+    phone = request.POST.get('phone')
+    qq = request.POST.get('qq')
+    wechat = request.POST.get('wechat')
+    coin = request.POST.get('coin')
+    isAdmin = True if request.POST.get('isAdmin') == 'true' else False
+    auth = request.POST.get('auth')
+
+    try:
+        if User.objects.filter(id=uid).exists():
+            user = User.objects.get(id=uid)
+            user.email = email
+            user.nickname = nickname
+            user.bio = bio
+            user._class = _class
+            user.phone = phone
+            user.qq = qq
+            user.wechat = wechat
+            user.coin = coin
+            user.isAdmin = isAdmin
+            user.auth = auth
+
+            user.save()
+            return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+@csrf_exempt
+def deleteUser(request):
+    _id = request.POST.get('id')
+    try:
+        user = User.objects.get(id=_id)
+        user.delete()
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def getLectureList(request):
+    listLecture = []
+    try:
+        for lecture in Lecture.objects.all():
+            lectureDate = lecture.date
+            currentDate = datetime.datetime.now()
+
+            if currentDate < lectureDate:
+                state = 'wait'
+            elif currentDate > lectureDate:
+                state = 'done'
+            elif currentDate == lectureDate:
+                state = 'running'
+
+            listLecture.append({
+                'key': lecture.id,
+                'title': lecture.title,
+                'lecturer': lecture.lecturer,
+                'address': lecture.address,
+                'date': lecture.date,
+                'state': state
+            })
+        return JsonResponse({ 'info': listLecture })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def getLectureDetail(request):
+    _id = request.POST.get('id')
+    try:
+        lecture = Lecture.objects.get(id=_id)
+        return JsonResponse({
+            'title': lecture.title,
+            'lecturer': lecture.lecturer,
+            'address': lecture.address,
+            'date': lecture.date
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def addLecture(request):
+    title = request.POST.get('title')
+    lecturer = request.POST.get('lecturer')
+    address = request.POST.get('address')
+    date = datetime.datetime.strptime(request.POST.get('date'), '%Y-%m-%d %H:%M:%S')
+
+    try:
+        if Lecture.objects.filter(title=title).exists():
+            lecture = Lecture.objects.get(title=title)
+            lecture.title = title
+            lecture.lecturer = lecturer
+            lecture.address = address
+            lecture.date = date
+            lecture.save()
+        else:
+            Lecture.objects.create(
+                title = title,
+                lecturer = lecturer,
+                address = address,
+                date = date
+            )
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def deleteLecture(request):
+    _id = request.POST.get('id')
+    try:
+        lecture = Lecture.objects.get(id=_id)
+        lecture.delete()
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)

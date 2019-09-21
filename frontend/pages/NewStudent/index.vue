@@ -19,34 +19,47 @@
     <!-- statement -->
     <section class="section">
       <div class="container">
-        <div class="col-md-8 col-md-offset-2 text-center">
-          <h1>Direction</h1>
-          <p>ヽ(✿ﾟ▽ﾟ)ノ</p>
-          <hr />
-        </div>
         <!-- row_1 -->
         <div class="row text-center">
           <div class="col-md-4">
-            <a-card hoverable style="width: 320px">
+            <router-link to="/newStudent/map">
+              <a-card hoverable>
                 <img slot="cover" src="~assets/img/map.png" />
                 <a-card-meta title="学校地图">
                     <template slot="description">记好才不会迷路哦～</template>
                 </a-card-meta>
-            </a-card>
+              </a-card>
+            </router-link>
           </div>
+          <router-link to="/organization">
+            <div class="col-md-4">
+              <a-card hoverable>
+                  <img slot="cover" src="~assets/img/organization.png" />
+                  <a-card-meta title="学生组织">
+                      <template slot="description">记好各个组织的职能哦～</template>
+                  </a-card-meta>
+              </a-card>
+            </div>
+          </router-link>
+          <router-link to="/club">
+            <div class="col-md-4">
+              <a-card hoverable>
+                  <img slot="cover" src="~assets/img/clubNew.jpg" />
+                  <a-card-meta title="学生社团">
+                      <template slot="description">寻找小伙伴～</template>
+                  </a-card-meta>
+              </a-card>
+            </div>
+          </router-link>
+        </div>
+        <hr />
+        <!-- row_2 -->
+        <div class="row text-center">
           <div class="col-md-4">
-            <a-card hoverable style="width: 320px">
-                <img slot="cover" src="~assets/img/organization.png" />
-                <a-card-meta title="学生组织">
-                    <template slot="description">记好各个组织的职能哦～</template>
-                </a-card-meta>
-            </a-card>
-          </div>
-          <div class="col-md-4">
-            <a-card hoverable style="width: 320px">
+            <a-card hoverable>
                 <img slot="cover" src="~assets/img/play.png" />
-                <a-card-meta title="吃喝玩乐">
-                    <template slot="description">潇洒去吧～</template>
+                <a-card-meta title="敬请期待">
+                    <template slot="description">More～</template>
                 </a-card-meta>
             </a-card>
           </div>

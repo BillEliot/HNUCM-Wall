@@ -52,6 +52,10 @@ export default {
     {
       src: '~plugins/mavonEditor',
       ssr: false
+    },
+    {
+      src: '~plugins/VueAMap',
+      ssr: false
     }
   ],
 

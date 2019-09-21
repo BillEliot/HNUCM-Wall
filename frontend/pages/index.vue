@@ -13,7 +13,7 @@
     <section class="section">
       <div class="container">
         <div class="col-md-8 col-md-offset-2 text-center">
-          <h1>墙墙们</h1>
+          <h1>社区</h1>
           <p>ヽ(✿ﾟ▽ﾟ)ノ</p>
           <hr />
         </div>
@@ -48,6 +48,14 @@
         <div class="row text-center">
           <div class="col-md-4">
             <div class="section-item">
+              <a-icon type="switcher" theme="twoTone" class="section-icon" />
+              <h2>求助墙</h2>
+              <p>有问题找小伙伴们哦～</p>
+              <router-link to="/deal">进入</router-link>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="section-item">
               <a-icon type="crown" theme="twoTone" class="section-icon" />
               <h2>大佬杂谈</h2>
               <p>大佬们的学习经验～</p>
@@ -62,12 +70,31 @@
               <router-link to="/bank">进入</router-link>
             </div>
           </div>
+        </div>
+        <!-- row_3 -->
+        <div class="row text-center">
           <div class="col-md-4">
             <div class="section-item">
-              <a-icon type="sound" theme="twoTone" class="section-icon" />
-              <h2>新生指南</h2>
-              <p>来了解大学生活的方方面面吧～</p>
-              <a href="#">进入</a>
+              <a-icon type="star" theme="twoTone" class="section-icon" />
+              <h2>校园热点</h2>
+              <p>吃第一口瓜～</p>
+              <router-link to="/hot">进入</router-link>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="section-item">
+              <a-icon type="api" theme="twoTone" class="section-icon" />
+              <h2>讲座动态</h2>
+              <p>抢在第一位～</p>
+              <router-link to="/lecture">进入</router-link>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="section-item">
+              <a-icon type="gold" theme="twoTone" class="section-icon" />
+              <h2>社团</h2>
+              <p>找找心爱的社团吧～</p>
+              <a href="/club">进入</a>
             </div>
           </div>
         </div>
@@ -86,7 +113,7 @@
         <div class="row">
           <div class="col-md-6">
             <h4><a-icon type="check" /> 墙墙们有什么用？</h4>
-            <p>墙墙可你帮你表白，帮你寻找失物，帮你出售二手物品，还可以任你吐槽发泄！</p>
+            <p>墙墙可以帮你表白，寻找失物，出售二手物品，求助别人！</p>
             <h4><a-icon type="check" /> 题库使用效果怎么样？</h4>
             <p>我们的题库收录了几乎练习册上的所有题目，当然您也可以上传自己的题目，更厉害的是，你可以组织一场自我考试！</p>
           </div>

@@ -8,7 +8,7 @@
                 <div class="container">
                     <div class="title-holder">
                         <div class="title-text text-center">
-                            <h1>校团委学生部门</h1>
+                            <h1>院级学生会</h1>
                         </div>
                     </div>
                 </div>

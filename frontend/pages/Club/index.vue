@@ -31,6 +31,9 @@
                     <hr />
                     <club_learning v-if="page == 1"></club_learning>
                     <club_practice v-if="page == 2"></club_practice>
+                    <club_culture v-if="page == 3"></club_culture>
+                    <club_sports v-if="page == 4"></club_sports>
+                    <club_art v-if="page == 5"></club_art>
                 </div>
             </div>
         </div>
@@ -48,13 +51,19 @@ import { mapState } from 'vuex'
 
 import club_learning from '~/components/club/club_learning'
 import club_practice from '~/components/club/club_practice'
+import club_culture from '~/components/club/club_culture'
+import club_sports from '~/components/club/club_sports'
+import club_art from '~/components/club/club_art'
 
 export default {
   components: {
       Footer,
       navbar,
       club_learning,
-      club_practice
+      club_practice,
+      club_culture,
+      club_sports,
+      club_art,
   },
   data() {
     return {

@@ -12,15 +12,16 @@ class User(models.Model):
     qq = models.CharField(max_length=20, blank=True, null=True)
     wechat = models.CharField(max_length=20, blank=True, null=True)
     coin = models.PositiveIntegerField(default=0)
-    comments = models.ManyToManyField('Comment', blank=True, related_name='user_comments')
+    comments = models.ManyToManyField('Comment', blank=True, related_name='comments')
     isAdmin = models.BooleanField(default=False)
+    auth = models.CharField(max_length=50, blank=True, null=True)
 
 
 
 class Love(models.Model):
     isAnony = models.BooleanField(default=False)
-    userFrom = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user_from')
-    userTo = models.ManyToManyField('User', blank=True, related_name='user_to')
+    userFrom = models.ForeignKey('User', on_delete=models.CASCADE, related_name='userFrom')
+    userTo = models.ManyToManyField('User', blank=True, related_name='userTo')
     nameTo = models.CharField(max_length=20, default='TA')
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
@@ -102,7 +103,19 @@ class Article(models.Model):
     publicDate = models.DateTimeField(auto_now_add=True)
     editDate = models.DateTimeField(auto_now=True)
     comments = models.ManyToManyField('Comment', blank=True)
-    thumbsUpUser = models.ManyToManyField('User', blank=True, related_name="user_thumbsUp")
+    thumbsUpUser = models.ManyToManyField('User', blank=True, related_name="thumbsUp")
+
+    def __str__(self):
+        return self.title
+
+
+
+class Help(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    title = models.CharField(max_length=30)
+    content = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+    comments = models.ManyToManyField('Comment', blank=True)
 
     def __str__(self):
         return self.title
@@ -112,19 +125,41 @@ class Article(models.Model):
 class Club(models.Model):
     name = models.CharField(max_length=30)
     description = models.TextField()
-    cover = models.ImageField(upload_to='img/club', default='img/club/default.png')
-    president = models.CharField(max_length=20)
-    vicePresident = models.CharField(max_length=20)
-    presidentAssistant = models.CharField(max_length=20)
-    planDirector = models.CharField(max_length=20)
-    financeDirector = models.CharField(max_length=20)
-    feedbackDirector = models.CharField(max_length=20)
-    ITDirector = models.CharField(max_length=20)
-    propagandaDirector = models.CharField(max_length=20)
-    otherDirectors = models.CharField(max_length=50)
+    president = models.ForeignKey('User', on_delete=models.CASCADE, related_name='president')
+    vicePresident = models.ForeignKey('User', on_delete=models.CASCADE, related_name='vicePresident')
+    presidentAssistant = models.ForeignKey('User', on_delete=models.CASCADE, related_name='presidentAssistant')
+    planDirector = models.ManyToManyField('User', blank=True, related_name='planDirector')
+    financeDirector = models.ManyToManyField('User', blank=True, related_name='financeDirector')
+    feedbackDirector = models.ManyToManyField('User', blank=True, related_name='feedbackDirector')
+    ITDirector = models.ManyToManyField('User', blank=True, related_name='ITDirector')
+    propagandaDirector = models.ManyToManyField('User', blank=True, related_name='propagandaDirector')
+    learningDirector = models.ManyToManyField('User', blank=True, related_name='learningDirector')
 
     def __str__(self):
         return self.name
+
+
+
+class Hot(models.Model):
+    title = models.CharField(max_length=30)
+    content = models.TextField()
+    publisher = models.ForeignKey('User', on_delete=models.CASCADE)
+    date = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+
+
+class Lecture(models.Model):
+    title = models.CharField(max_length=30)
+    lecturer = models.CharField(max_length=20)
+    address = models.CharField(max_length=30)
+    date = models.DateTimeField()
+    state = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.title
 
 
 
@@ -142,5 +177,4 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ('-id',)
-
 

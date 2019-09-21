@@ -81,14 +81,6 @@ export default {
             dataIndex: 'state',
             key: 'state',
             scopedSlots: { customRender: 'state' },
-        }],
-        data: [{
-            key: '1',
-            title: 'John Brown',
-            author: 'aaa',
-            location: '三教',
-            date: '111',
-            state: 'running'
         }]
     }
   },

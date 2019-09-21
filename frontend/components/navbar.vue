@@ -17,6 +17,10 @@
                 <a-menu-item key="deal:1" @click="$router.push({ path: '/deal' })">二手墙</a-menu-item>
                 <a-menu-item key="deal:2" @click="navigate('/deal/new')">发布物品</a-menu-item>
             </a-menu-item-group>
+            <a-menu-item-group title="求助">
+                <a-menu-item key="help:1" @click="$router.push({ path: '/help' })">求助墙</a-menu-item>
+                <a-menu-item key="help:2" @click="navigate('/help/new')">发布求助</a-menu-item>
+            </a-menu-item-group>
         </a-sub-menu>
 
         <a-menu-item key="article" @click="$router.push({ path: '/article' })">
@@ -44,17 +48,20 @@
                 <a-menu-item key="organization:3" @click="$router.push({ path: '/organization/troupe' })">大学生艺术团</a-menu-item>
                 <a-menu-item key="organization:4" @click="$router.push({ path: '/organization/science' })">大学生科学技术协会</a-menu-item>
                 <a-menu-item key="organization:5" @click="$router.push({ path: '/organization/union' })">校学生会</a-menu-item>
-                <a-menu-item key="organization:6" @click="$router.push({ path: '/organization/subunion' })">各院学生会</a-menu-item>
+                <a-menu-item key="organization:6" @click="$router.push({ path: '/organization/subunion' })">院级学生会</a-menu-item>
             </a-menu-item-group>
         </a-sub-menu>
         <a-menu-item key="bank" @click="$router.push({ path: '/bank' })">
-            <a-icon type="star" /> 题库
+            <a-icon type="database" /> 题库
         </a-menu-item>
         <a-menu-item key="newStudent" @click="$router.push({ path: '/newStudent' })">
             <a-icon type="sound" /> 新生指南
         </a-menu-item>
-        <a-menu-item key="Extension" @click="$router.push({ path: '/extension' })">
+        <a-menu-item key="extension" @click="$router.push({ path: '/extension' })">
             <a-icon type="rise" /> 推广
+        </a-menu-item>
+        <a-menu-item key="about" @click="$router.push({ path: '/about' })">
+            <a-icon type="rocket" /> 关于
         </a-menu-item>
         <!-- auth -->
         <template v-if="userBaseInfo.uid != -1">
@@ -71,11 +78,11 @@
             </a-dropdown>
         </template>
         <template v-else>
-            <router-link to="/login">
-                <a-button type="primary" class="auth-login">登录</a-button>
+            <router-link to="/login" class="auth-login">
+                <a-button type="primary">登录</a-button>
             </router-link>
-            <router-link to="/register">
-                <a-button class="auth-register">注册</a-button>
+            <router-link to="/register" class="auth-register">
+                <a-button>注册</a-button>
             </router-link>
         </template>
     </a-menu>
@@ -99,12 +106,12 @@ export default {
         this.userBaseInfo.avatar = '/media/img/avatar/anony.jpg'
       },
       navigate(path) {
-          if (this.userBaseInfo.uid == -1) {
-              this.$message.warning('先登录吧～')
-          }
-          else {
-              this.$router.push({ path: path })
-          }
+        if (this.userBaseInfo.uid == -1) {
+            this.$message.warning('先登录吧～')
+        }
+        else {
+            this.$router.push({ path: path })
+        }
       }
   },
   computed: mapState({
@@ -114,37 +121,50 @@ export default {
 </script>
 
 <style scoped>
-.nav {
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 99;
-}
-
 a {
   text-decoration: none
 }
 
-.auth-avatar {
+.nav {
     position: fixed;
-    right: 10px;
-    top: 6px
-}
-.auth-dropdown {
-    position: fixed;
-    right: 50px
+    width: 100%;
+    top: 0;
+    min-height: 36px;
+    z-index: 99;
 }
 
-@media (min-width: 375px) {
+.auth-login {
+    position: relative;
+}
+.auth-register {
+    position: relative;
+}
+
+.auth-avatar {
+    position: relative;
+}
+.auth-dropdown {
+    position: relative;
+}
+
+@media screen and (min-width: 992px) {
     .auth-login {
         position: absolute;
         right: 10px;
-        top: 10%
     }
     .auth-register {
         position: absolute;
         right: 80px;
-        top: 10%
+    }
+
+    .auth-avatar {
+        position: absolute;
+        right: 110px;
+        top: 5px;
+    }
+    .auth-dropdown {
+        position: absolute;
+        right: 10px;
     }
 }
 </style>

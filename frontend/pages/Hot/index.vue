@@ -20,13 +20,17 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 col-sm-12">
-                    <a-table :columns="columns" :dataSource="data">
+                    <a-table :columns="columns" :dataSource="hotList">
                         <!-- title -->
-                        <a slot="_title" slot-scope="text">{{ text }}</a>
-                        <!-- author -->
-                        <span slot="author" slot-scope="author">
-                            <a-avatar :src="author.avatar" />
-                            {{ author.nickname }}
+                        <router-link slot="_title" slot-scope="text, record" :to="{ path: '/hot/detail', query: { id: record.key }}">
+                            {{ text }}
+                        </router-link>
+                        <!-- publisher -->
+                        <span slot="publisher" slot-scope="publisher">
+                            <a-avatar :src="baseUrl + publisher.avatar" />
+                            <router-link :to="{ path: '/profile', query: { uid: publisher.uid }}">
+                                {{ publisher.nickname }}
+                            </router-link>
                         </span>
                     </a-table>
                 </div>
@@ -57,38 +61,34 @@ export default {
             title: '标题',
             key: 'title',
             scopedSlots: { customRender: '_title' },
-        }, {
-            dataIndex: 'author',
+        },
+        {
+            dataIndex: 'publisher',
             title: '发布者',
-            key: 'author',
-            scopedSlots: { customRender: 'author' },
-        }, {
-            title: '日期',
+            scopedSlots: { customRender: 'publisher' },
+        },
+        {
             dataIndex: 'date',
-            key: 'date',
-        }],
-        data: [{
-            key: '1',
-            title: 'John Brown',
-            author: { nickname: 'Eliot', avatar: '' },
-            date: '111'
-        }, {
-            key: '2',
-            title: 'Jim Green',
-            author: { nickname: 'Eliot', avatar: '' }
+            title: '日期'
         }]
     }
   },
   async asyncData({ $axios }) {
     let userBaseInfo = null
+    let hotList = []
 
     await $axios.get('getUserBaseInfo')
     .then((response) => {
         userBaseInfo = response.data
     })
+    await $axios.get('getHotList')
+    .then((response) => {
+        hotList = response.data.info
+    })
 
     return {
         userBaseInfo: userBaseInfo,
+        hotList: hotList
     }
   },
   methods: {
