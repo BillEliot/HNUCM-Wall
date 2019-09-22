@@ -84,7 +84,6 @@
                                 <span slot="actions">
                                     <a-icon type="message" /> {{ item.comments }}
                                 </span>
-                                <a slot="actions" @click="$router.push({ path: '/article/detail', query: { id: item.id } })">阅读</a>
                                 <!-- tags -->
                                 <span>
                                     <a-tag v-for="tag in item.tags" :key="tag">{{ tag }}</a-tag>
@@ -100,13 +99,16 @@
                                 <div class="avatar-card text-center">
                                     <a-avatar
                                         :size="64"
-                                        :src="baseUrl + item.avatar"
-                                        @click="$router.push({ path: '/profile', query: { uid: item.uid } })"
+                                        :src="baseUrl + item.user.avatar"
+                                        @click="$router.push({ path: '/profile', query: { uid: item.user.uid } })"
                                         class="avatar"
                                     />
                                     <br />
-                                    <a @click="$router.push({ path: '/profile', query: { uid: item.uid } })">{{ item.nickname }}</a>
-                                    <span>{{ item.bio }}</span>
+                                    <a @click="$router.push({ path: '/profile', query: { uid: item.user.uid } })">{{ item.user.nickname }}</a>
+                                    <br />
+                                    <span>{{ item.user.bio }}</span>
+                                    <br />
+                                    <a-tag v-for="tag in item.user.auth" :color="randomColor()" :key="tag">{{ tag }}</a-tag>
                                 </div>
                             </a-list-item>
                         </a-list>
@@ -203,6 +205,10 @@ export default {
     }
   },
   methods: {
+      randomColor() {
+          let color = ['pink', 'red', 'orange', 'green', 'cyan', 'blue', 'purple']
+          return color[Math.round(Math.random() * (color.length - 1))]
+      },
       filterDate() {
           this.isSearched = false
           this.spinning = true
@@ -427,6 +433,7 @@ a {
 @media screen and (min-width: 992px) {
     .avatar-card {
         margin-top: -10%;
+        width: 200px;
     }
 }
 

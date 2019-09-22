@@ -20,13 +20,15 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 col-sm-12">
-                    <a-table :columns="columns" :dataSource="data">
-                        <!-- title -->
-                        <a slot="_title" slot-scope="text">{{ text }}</a>
+                    <a-table :columns="columns" :dataSource="lectureList">
                         <!-- author -->
                         <span slot="author" slot-scope="author">
                             <a-avatar :src="author.avatar" />
                             {{ author.nickname }}
+                        </span>
+                        <!-- date -->
+                        <span slot="date" slot-scope="date">
+                            {{ moment(date).format('lll') }}
                         </span>
                         <!-- state -->
                         <span slot="state" slot-scope="state">
@@ -46,6 +48,7 @@
 
 <script>
 import qs from 'qs'
+import moment from 'moment'
 import Footer from '~/components/footer.vue'
 import navbar from '~/components/navbar'
 import { mapState } from 'vuex'
@@ -60,43 +63,44 @@ export default {
     return {
         columns: [{
             dataIndex: 'title',
-            title: '标题',
-            key: 'title',
-            scopedSlots: { customRender: '_title' },
+            title: '标题'
         }, {
-            dataIndex: 'author',
-            title: '讲座人',
-            key: 'author',
+            dataIndex: 'lecturer',
+            title: '讲座人'
         }, {
-            title: '讲座地点',
-            dataIndex: 'location',
-            key: 'location',
+            dataIndex: 'address',
+            title: '讲座地点'
         }, {
-            title: '讲座日期',
             dataIndex: 'date',
-            key: 'date',
-        },
-        {
-            title: '讲座状态',
+            title: '讲座日期',
+            scopedSlots: { customRender: 'date' }
+        }, {
             dataIndex: 'state',
-            key: 'state',
-            scopedSlots: { customRender: 'state' },
+            title: '讲座状态',
+            scopedSlots: { customRender: 'state' }
         }]
     }
   },
   async asyncData({ $axios }) {
     let userBaseInfo = null
+    let lectureList = []
 
     await $axios.get('getUserBaseInfo')
     .then((response) => {
         userBaseInfo = response.data
     })
+    await $axios.get('getLectureList')
+    .then((response) => {
+        lectureList = response.data.info
+    })
 
     return {
         userBaseInfo: userBaseInfo,
+        lectureList: lectureList
     }
   },
   methods: {
+      moment
   },
   computed: mapState({
       baseUrl: state => state.baseUrl

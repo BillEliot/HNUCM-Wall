@@ -13,6 +13,7 @@ class User(models.Model):
     wechat = models.CharField(max_length=20, blank=True, null=True)
     coin = models.PositiveIntegerField(default=0)
     comments = models.ManyToManyField('Comment', blank=True, related_name='comments')
+    messages = models.ManyToManyField('Message', blank=True, related_name='messages')
     isAdmin = models.BooleanField(default=False)
     auth = models.CharField(max_length=50, blank=True, null=True)
 
@@ -158,6 +159,9 @@ class Lecture(models.Model):
     date = models.DateTimeField()
     state = models.CharField(max_length=10)
 
+    class Meta:
+        ordering = ('-date',)
+
     def __str__(self):
         return self.title
 
@@ -170,6 +174,7 @@ class Image(models.Model):
         return self.name
 
 
+
 class Comment(models.Model):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
@@ -178,3 +183,18 @@ class Comment(models.Model):
     class Meta:
         ordering = ('-id',)
 
+
+
+class Message(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    # thumbsUp or comment
+    messageType = models.CharField(max_length=10)
+    # love, lose, deal, help, article
+    messageFrom = models.CharField(max_length=10)
+    messageID = models.IntegerField()
+    commentContent = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+    isRead = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('-date',)

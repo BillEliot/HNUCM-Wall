@@ -23,9 +23,12 @@
           </a-card>
           <hr />
           <a-card title="商务广告">
+            <p>广告投放、商务合作邮箱：eliotwjz@gmail.com</p>
           </a-card>
           <hr />
           <a-card title="捐赠">
+            <img src="~assets/img/alipay.jpg" class="alipay">
+            <img src="~assets/img/wechatpay.jpg" class="wechatpay">
           </a-card>
       </div>
     </section>
@@ -79,5 +82,13 @@ a {
 .section {
   padding: 2em 0;
   position: relative;
+}
+.alipay {
+  width: 30%;
+  float: left;
+}
+.wechatpay {
+  width: 30%;
+  float: right;
 }
 </style>

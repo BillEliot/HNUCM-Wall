@@ -33,13 +33,17 @@
                         placeholder="输入地址"
                     />
                 </a-form-item>
-                <a-form-item label="讲座日期">
+                <a-form-item label="讲座时间">
                     <a-date-picker
                         v-decorator="['date', {
-                            rules: [{ required: true, message: '请输入讲座日期' }]
+                            rules: [{ required: true, message: '请输入讲座时间' }]
                         }]"
-                        format="YYYY-MM-DD"
+                        format="YYYY-MM-DD HH:mm:ss"
                         :disabledDate="disabledDate"
+                        :disabledTime="disabledDateTime"
+                        :showTime="true"
+                        placeholder="输入时间"
+                        style="width: 100%"
                     />
                 </a-form-item>
             </a-form>
@@ -125,6 +129,10 @@ export default {
       disabledDate(current) {
         return current < moment().subtract(1, 'days').endOf('day')
       },
+      disabledDateTime() {
+        return {
+        }
+      },
       refresh() {
           this.$axios.get('getLectureList')
           .then((res) => {
@@ -149,7 +157,7 @@ export default {
                       title: res.data.title,
                       lecturer: res.data.lecturer,
                       address: res.data.address,
-                      date: moment(res.data.date, 'YYYY-MM-DD')
+                      date: moment(res.data.date, 'YYYY-MM-DD HH:mm:ss')
                   })
               }
           })
@@ -163,7 +171,7 @@ export default {
                       title: values.title,
                       lecturer: values.lecturer,
                       address: values.address,
-                      date: values.date.format("YYYY-MM-DD")
+                      date: values.date.format("YYYY-MM-DD HH:mm:ss")
                   }))
                   .then((res) => {
                       if (res.data == 0) {

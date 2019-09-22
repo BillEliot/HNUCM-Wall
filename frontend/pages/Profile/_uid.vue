@@ -6,7 +6,7 @@
             :width="360"
             @close="visibleDrawerProfile = false"
             :visible="visibleDrawerProfile"
-            :closable = "false"
+            :wrapStyle="{ height: 'calc(100% - 108px)', overflow: 'auto', paddingBottom: '108px' }"
         >
             <a-form :form="form_profile" layout="vertical">
                 <a-form-item label="昵称">
@@ -60,18 +60,28 @@
                         v-decorator="[
                             'class',
                             {
-                                initialValue: ['zhongyi', 'wuyi'],
                                 rules: [{ type: 'array', required: true, message: '请选择您的班级' }],
                             }
                         ]"
                         :options="classes"
+                        placeholder="你的班级"
                     />
                 </a-form-item>
-                <a-form-item class="submit">
-                    <a-button @click="visibleDrawerProfile = false" style="margin-right: 10px">取消</a-button>
-                    <a-button @click="submitProfile" type="primary" html-type="submit">确定</a-button>
-                </a-form-item>
             </a-form>
+            <div 
+                :style="{
+                    position: 'absolute',
+                    left: 0,
+                    bottom: 0,
+                    width: '100%',
+                    borderTop: '1px solid #e9e9e9',
+                    padding: '10px 16px',
+                    background: '#fff',
+                    textAlign: 'right',
+                }">
+                <a-button @click="visibleDrawerProfile = false" style="margin-right: 10px">取消</a-button>
+                <a-button @click="submitProfile" type="primary" html-type="submit">确定</a-button>
+            </div>
         </a-drawer>
         <!-- drawer - change password -->
         <a-drawer
@@ -79,7 +89,7 @@
             :width="360"
             @close="visibleDrawerPassword = false"
             :visible="visibleDrawerPassword"
-            :closable = "false"
+            :wrapStyle="{ height: 'calc(100% - 108px)', overflow: 'auto', paddingBottom: '108px' }"
         >
             <a-form :form="form_password" layout="vertical">
                 <a-form-item label="原密码">
@@ -92,6 +102,7 @@
                                 }]
                             }
                         ]"
+                        type="password"
                         placeholder="原密码"
                     />
                 </a-form-item>
@@ -108,6 +119,7 @@
                                 }]
                             }
                         ]"
+                        type="password"
                         placeholder="密码"
                     />
                 </a-form-item>
@@ -124,15 +136,26 @@
                                 }]
                             }
                         ]"
+                        type="password"
                         placeholder="重复输入密码"
                         @blur="blurPassword2"
                     />
                 </a-form-item>
-                <a-form-item class="submit">
-                    <a-button @click="visibleDrawerPassword = false" style="margin-right: 10px">取消</a-button>
-                    <a-button @click="submitProfile" type="primary" html-type="submit">确定</a-button>
-                </a-form-item>
             </a-form>
+            <div 
+                :style="{
+                    position: 'absolute',
+                    left: 0,
+                    bottom: 0,
+                    width: '100%',
+                    borderTop: '1px solid #e9e9e9',
+                    padding: '10px 16px',
+                    background: '#fff',
+                    textAlign: 'right',
+            }">
+                <a-button @click="visibleDrawerPassword = false" style="margin-right: 10px">取消</a-button>
+                <a-button @click="changePassword" type="primary" html-type="submit">确定</a-button>
+            </div>
         </a-drawer>
         <!-- navbar -->
         <navbar :userBaseInfo="userBaseInfo" />
@@ -181,11 +204,11 @@
                     <a-input placeholder="硬币" disabled v-model="userProfile.coin + ' 枚硬币'">
                         <a-icon slot="prefix" type="gold" />
                     </a-input>
-                    <div style="margin-top: 20px">
+                    <div v-if="userBaseInfo.uid != -1 && userBaseInfo.uid == $route.query.uid" style="margin-top: 20px">
                         <!-- actions -->
-                        <a-button @click="visibleDrawerProfile = true">编辑资料</a-button>
+                        <a-button @click="OnVisibleDrawerProfile()">编辑资料</a-button>
                         <a-button @click="visibleDrawerPassword = true">修改密码</a-button>
-                        <a-button @click="applyAuth">申请身份认证</a-button>
+                        <a-button @click="applyAuth()">申请身份认证</a-button>
                     </div>
                 </div>
             </div>
@@ -194,7 +217,7 @@
                 <div class="col-md-12">
                     <a-tabs defaultActiveKey="1">
                         <!-- comments -->
-                        <a-tab-pane key="1">
+                        <a-tab-pane key="1" v-if="userBaseInfo.uid != -1 && userBaseInfo.uid == $route.query.uid">
                             <span slot="tab">
                                 <a-icon type="highlight" />留言板
                             </span>
@@ -300,6 +323,27 @@
                                 </a-list-item>
                             </a-list>
                         </a-tab-pane>
+                        <!-- help -->
+                        <a-tab-pane key="5">
+                            <span slot="tab">
+                                <a-icon type="question-circle" />TA的求助
+                            </span>
+                            <a-list
+                                v-if="userProfile.helps.length"
+                                :pagination="helpPagination"
+                                :dataSource="userProfile.helps"
+                                :header="`${userProfile.helps.length} 个求助`"
+                                itemLayout="horizontal"
+                            >
+                                <div slot="footer"><b>TA的求助哦～</b></div>
+                                <a-list-item slot="renderItem" slot-scope="item, index">
+                                    <a-comment style="padding-left: 35px">
+                                        <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/deal/detail', query: { id: item.id } })">{{ item.title }}</a>
+                                        <p slot="content" class="text-left">{{ item.content }}</p>
+                                    </a-comment>
+                                </a-list-item>
+                            </a-list>
+                        </a-tab-pane>
                     </a-tabs>
                 </div>
             </div>
@@ -312,6 +356,7 @@
 
 <script>
 import qs from "qs";
+import md5 from 'js-md5'
 import { mapState } from 'vuex'
 import Footer from '~/components/footer'
 import navbar from '~/components/navbar'
@@ -341,6 +386,13 @@ export default {
                 }
             },
             losePagination: {
+                current: 1,
+                pageSize: 10,
+                onChange (page) {
+                    this.current = page
+                }
+            },
+            helpPagination: {
                 current: 1,
                 pageSize: 10,
                 onChange (page) {
@@ -413,6 +465,9 @@ export default {
             if (!this.commentContent) {
                 this.$message.warning('说点什么吧～')
             }
+            else if (this.userBaseInfo.uid == this.$route.query.uid) {
+                this.$message.warning('不能自己给自己留言哦～')
+            }
             else {
                 this.commenting = true
                 this.$axios.post('submitUserComment', qs.stringify({
@@ -441,8 +496,77 @@ export default {
                 })
             }
         },
-        submitProfile() {
-
+        OnVisibleDrawerProfile() {
+            this.visibleDrawerProfile = true
+            this.$axios.post('getUserDetail', qs.stringify({
+                uid: this.userBaseInfo.uid
+            }))
+            .then((res) => {
+                if (res.data == 1) {
+                    this.$message.error('未知错误')
+                }
+                else {
+                    this.form_profile.setFieldsValue({
+                        nickname: res.data.nickname,
+                        bio: res.data.bio,
+                        phone: res.data.phone,
+                        qq: res.data.qq,
+                        wechat: res.data.wechat,
+                        class: res.data.class
+                    })
+                }
+            })
+        },
+        submitProfile(e) {
+            e.preventDefault()
+            this.form_profile.validateFieldsAndScroll((err, values) => {
+                if (!err) {
+                    this.$axios.post('updateUser', qs.stringify({
+                        uid: this.userBaseInfo.uid,
+                        nickname: values.nickname,
+                        bio: values.bio,
+                        class: values.class,
+                        phone: values.phone,
+                        qq: values.qq,
+                        wechat: values.wechat,
+                    }))
+                    .then((res) => {
+                        if (res.data == 0) {
+                            this.$message.success('修改成功')
+                            this.form_profile.resetFields()
+                            this.visibleDrawerProfile = false
+                        }
+                        else if (res.data == 1) {
+                            this.$message.error('未知错误')
+                        }
+                    })
+                }
+            })
+        },
+        changePassword(e) {
+            e.preventDefault()
+            this.form_password.validateFieldsAndScroll((err, values) => {
+                if (!err) {
+                    this.$axios.post('changePassword', qs.stringify({
+                        uid: this.userBaseInfo.uid,
+                        originPassword: md5(values.originPassword),
+                        password: md5(values.password)
+                    }))
+                    .then((res) => {
+                        if (res.data == 0) {
+                            this.$message.success('修改成功')
+                            this.form_password.resetFields()
+                            this.visibleDrawerPassword = false
+                        }
+                        else if (res.data == 1) {
+                            this.$message.error('密码错误')
+                        }
+                        else if (res.data == 2) {
+                            this.$message.error('未知错误')
+                        }
+                    })
+                }
+            })
         },
         applyAuth() {
             this.$notification['success']({
@@ -490,17 +614,6 @@ a {
 }
 a:hover {
     color: blue;
-}
-
-.submit {
-    position: 'absolute';
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    border-top: 1px solid #e9e9e9;
-    padding: 10px 16px;
-    background: #fff;
-    text-align: right;
 }
 
 .follow {

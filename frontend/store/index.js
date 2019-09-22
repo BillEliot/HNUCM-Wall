@@ -1,5 +1,6 @@
 export const state = () => ({
-  baseUrl: 'http://localhost:8000',
+  // baseUrl: 'http://localhost:8000',
+  baseUrl: '',
   classes: [{
     value: 'zhongyi',
     label: '中医学院',

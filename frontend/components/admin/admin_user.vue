@@ -6,7 +6,7 @@
             :width="360"
             @close="visible = false"
             :visible="visible"
-            :wrapStyle="{ height: 'calc(100% - 108px)',overflow: 'auto',paddingBottom: '108px' }"
+            :wrapStyle="{ height: 'calc(100% - 108px)', overflow: 'auto', paddingBottom: '108px' }"
         >
             <a-form :form="form" layout="vertical">
                 <a-form-item label="uid">
@@ -113,7 +113,7 @@
                 >
                     取消
                 </a-button>
-                <a-button @click="updateUser" type="primary">确定</a-button>
+                <a-button @click="updateUserAdmin" type="primary">确定</a-button>
             </div>
         </a-drawer>
         <!-- end -->
@@ -208,7 +208,7 @@ export default {
       update(id) {
           this.visible = true
           this.$axios.post('getUserDetail', qs.stringify({
-              id: id
+              uid: id
           }))
           .then((res) => {
               if (res.data == 1) {
@@ -232,11 +232,11 @@ export default {
           })
           this.visible = true
       },
-      updateUser(e) {
+      updateUserAdmin(e) {
           e.preventDefault()
           this.form.validateFieldsAndScroll((err, values) => {
               if (!err) {
-                  this.$axios.post('updateUser', qs.stringify({
+                  this.$axios.post('updateUserAdmin', qs.stringify({
                       uid: values.uid,
                       email: values.email,
                       nickname: values.nickname,

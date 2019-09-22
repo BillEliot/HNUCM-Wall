@@ -93,13 +93,14 @@ def logout(request):
 def getUserBaseInfo(request):
     uid = request.session.get('uid', None)
 
-    if (uid):
+    if uid:
         try:
             user = User.objects.get(id=uid)
             return JsonResponse({
                 'uid': uid,
                 'nickname': user.nickname,
                 'avatar': user.avatar.url,
+                'unreadCount': user.messages.filter(isRead=False).count(),
                 'isAdmin': user.isAdmin
             })
         except:
@@ -111,6 +112,74 @@ def getUserBaseInfo(request):
                 'avatar': '/media/img/avatar/anony.jpg',
                 'isAdmin': False
             })
+
+
+
+@csrf_exempt
+def updateUser(request):
+    uid = request.POST.get('uid')
+    nickname = request.POST.get('nickname')
+    bio = request.POST.get('bio')
+    _class = request.POST.get('class[0]') + '/' + request.POST.get('class[1]')
+    phone = request.POST.get('phone')
+    qq = request.POST.get('qq')
+    wechat = request.POST.get('wechat')
+
+    try:
+        user = User.objects.get(id=uid)
+        user.nickname = nickname
+        user.bio = bio
+        user._class = _class
+        user.phone = phone
+        user.qq = qq
+        user.wechat = wechat
+
+        user.save()
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def changePassword(request):
+    uid = request.POST.get('uid')
+    originPassword = request.POST.get('originPassword')
+    password = request.POST.get('password')
+
+    try:
+        user = User.objects.get(id=uid)
+        if user.password == originPassword:
+            user.password = password
+            user.save()
+            return HttpResponse(0)
+        else:
+            return HttpResponse(1)
+    except:
+        return HttpResponse(2)
+
+
+
+@csrf_exempt
+def getMessage(request):
+    uid = request.session.get('uid', None)
+    messageList = []
+    try:
+        for message in User.objects.get(id=uid).messages.all():
+            messageList.append({
+                'user': { 'uid': message.user.id, 'nickname': message.user.nickname, 'bio': message.user.bio, 'avatar': message.user.avatar.url },
+                'messageType': message.messageType,
+                'messageFrom': message.messageFrom,
+                'messageID': message.messageID,
+                'commentContent': message.commentContent,
+                'date': message.date
+            })
+            if not message.isRead:
+                message.isRead = True
+                message.save()
+        return JsonResponse({ 'info': messageList })
+    except:
+        return HttpResponse(1)
 
 
 
@@ -420,6 +489,14 @@ def getUserProfile(request):
                 'name': deal.name,
                 'description': deal.description
             })
+        # helps
+        helps = []
+        for _help in Help.objects.filter(user=user):
+            helps.append({
+                'id': _help.id,
+                'title': _help.title,
+                'content': _help.content
+            })
 
         return JsonResponse({
             'uid': user.id,
@@ -432,11 +509,12 @@ def getUserProfile(request):
             'wechat': user.wechat,
             'class': user._class,
             'coin': user.coin,
-            'auth': user.auth.split(';'),
+            'auth': user.auth.split(';') if user.auth else None,
             'comments': comments,
             'loves': loves,
             'loses': loses,
-            'deals': deals
+            'deals': deals,
+            'helps': helps
         })
     except:
         return HttpResponse(1)
@@ -1021,10 +1099,7 @@ def getArticleList(request):
         for article in articles:
             listArticle.append({
                 'id': article.id,
-                'uid': article.user.id,
-                'avatar': article.user.avatar.url,
-                'nickname': article.user.nickname,
-                'bio': article.user.bio,
+                'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') },
                 'title': article.title,
                 'tags': article.tags.split(';')[:-1],
                 'content': article.content,
@@ -1271,13 +1346,22 @@ def thumbsUpLove(request):
 
     uid = request.session.get('uid', None)
     if uid:
-        user = User.objects.get(id=uid)
         try:
+            user = User.objects.get(id=uid)
             love = Love.objects.get(id=_id)
             if (isThumbsUp):
                 love.thumbsUpUser.add(user)
+                # message
+                message = Message.objects.create(
+                    user=user,
+                    messageType='thumbsUp',
+                    messageFrom='love',
+                    messageID=_id
+                )
+                love.user.messages.add(message)
             else:
                 love.thumbsUpUser.remove(user)
+                love.user.messages.remove(Message.objects.get(messageID=_id))
             return HttpResponse(0)
         except:
             return HttpResponse(1)
@@ -1293,13 +1377,22 @@ def thumbsUpArticle(request):
 
     uid = request.session.get('uid', None)
     if uid:
-        user = User.objects.get(id=uid)
         try:
+            user = User.objects.get(id=uid)
             article = Article.objects.get(id=_id)
             if (isThumbsUp):
                 article.thumbsUpUser.add(user)
+                # message
+                message = Message.objects.create(
+                    user=user,
+                    messageType='thumbsUp',
+                    messageFrom='love',
+                    messageID=_id
+                )
+                article.user.messages.add(message)
             else:
                 article.thumbsUpUser.remove(user)
+                article.user.messages.remove(Message.objects.get(messageID=_id))
             return HttpResponse(0)
         except:
             return HttpResponse(1)
@@ -1373,10 +1466,20 @@ def submitLoveComment(request):
     content = request.POST.get('content')
 
     try:
+        # comment
         love = Love.objects.get(id=_id)
         user = User.objects.get(id=uid)
         comment = Comment.objects.create(user=user, content=content)
         love.comments.add(comment)
+        # message
+        message = Message.objects.create(
+            user=user,
+            messageType='comment',
+            messageFrom='love',
+            messageID=_id,
+            commentContent=content,
+        )
+        love.user.messages.add(message)
         return HttpResponse(0)
     except:
         return HttpResponse(1)
@@ -1390,10 +1493,20 @@ def submitLoseComment(request):
     content = request.POST.get('content')
 
     try:
+        # comment
         lose = Lose.objects.get(id=_id)
         user = User.objects.get(id=uid)
         comment = Comment.objects.create(user=user, content=content)
         lose.comments.add(comment)
+        # message
+        message = Message.objects.create(
+            user=user,
+            messageType='comment',
+            messageFrom='lose',
+            messageID=_id,
+            commentContent=content,
+        )
+        lose.user.messages.add(message)
         return HttpResponse(0)
     except:
         return HttpResponse(1)
@@ -1407,10 +1520,20 @@ def submitDealComment(request):
     content = request.POST.get('content')
 
     try:
+        # comment
         deal = Deal.objects.get(id=_id)
         user = User.objects.get(id=uid)
         comment = Comment.objects.create(user=user, content=content)
         deal.comments.add(comment)
+        # message
+        message = Message.objects.create(
+            user=user,
+            messageType='comment',
+            messageFrom='deal',
+            messageID=_id,
+            commentContent=content,
+        )
+        deal.user.messages.add(message)
         return HttpResponse(0)
     except:
         return HttpResponse(1)
@@ -1424,10 +1547,20 @@ def submitArticleComment(request):
     content = request.POST.get('content')
 
     try:
+        # comment
         article = Article.objects.get(id=_id)
         user = User.objects.get(id=uid)
         comment = Comment.objects.create(user=user, content=content)
         article.comments.add(comment)
+        # message
+        message = Message.objects.create(
+            user=user,
+            messageType='comment',
+            messageFrom='article',
+            messageID=_id,
+            commentContent=content,
+        )
+        article.user.messages.add(message)
         return HttpResponse(0)
     except:
         return HttpResponse(1)
@@ -1441,10 +1574,20 @@ def submitHelpComment(request):
     content = request.POST.get('content')
 
     try:
+        # comment
         _help = Help.objects.get(id=_id)
         user = User.objects.get(id=uid)
         comment = Comment.objects.create(user=user, content=content)
         _help.comments.add(comment)
+        # message
+        message = Message.objects.create(
+            user=user,
+            messageType='comment',
+            messageFrom='help',
+            messageID=_id,
+            commentContent=content,
+        )
+        _help.user.messages.add(message)
         return HttpResponse(0)
     except:
         return HttpResponse(1)
@@ -1586,7 +1729,7 @@ def getUserList(request):
 
 @csrf_exempt
 def getUserDetail(request):
-    _id = request.POST.get('id')
+    _id = request.POST.get('uid')
     try:
         user = User.objects.get(id=_id)
         return JsonResponse({
@@ -1607,7 +1750,7 @@ def getUserDetail(request):
 
 
 @csrf_exempt
-def updateUser(request):
+def updateUserAdmin(request):
     uid = request.POST.get('uid')
     email = request.POST.get('email')
     nickname = request.POST.get('nickname')
@@ -1675,7 +1818,7 @@ def getLectureList(request):
                 'date': lecture.date,
                 'state': state
             })
-        return JsonResponse({ 'info': listLecture })
+            return JsonResponse({ 'info': listLecture })
     except:
         return HttpResponse(1)
 

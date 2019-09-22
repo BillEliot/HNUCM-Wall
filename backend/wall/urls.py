@@ -11,6 +11,14 @@ urlpatterns = [
     path('getCaptcha', views.getCaptcha),
     path('searchUser', views.searchUser),
     path('submitUserComment', views.submitUserComment),
+    path('updateUser', views.updateUser),
+    path('changePassword', views.changePassword),
+    path('getMessage', views.getMessage),
+    # Admin - User
+    path('getUserList', views.getUserList),
+    path('getUserDetail', views.getUserDetail),
+    path('updateUserAdmin', views.updateUserAdmin),
+    path('deleteUser', views.deleteUser),
     # Love
     path('searchLoveItem', views.searchLoveItem),
     path('getLoveList', views.getLoveList),
@@ -56,11 +64,6 @@ urlpatterns = [
     path('getHotDetail', views.getHotDetail),
     path('addHot', views.addHot),
     path('deleteHot', views.deleteHot),
-    # Admin - User
-    path('getUserList', views.getUserList),
-    path('getUserDetail', views.getUserDetail),
-    path('updateUser', views.updateUser),
-    path('deleteUser', views.deleteUser),
     # Lecture
     path('getLectureList', views.getLectureList),
     path('getLectureDetail', views.getLectureDetail),

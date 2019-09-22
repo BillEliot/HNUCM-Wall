@@ -65,10 +65,15 @@
         </a-menu-item>
         <!-- auth -->
         <template v-if="userBaseInfo.uid != -1">
-            <a-avatar :src="baseUrl + userBaseInfo.avatar" class="auth-avatar" />
+            <a-badge :count="userBaseInfo.unreadCount" class="auth-avatar">
+                <a-avatar :src="baseUrl + userBaseInfo.avatar" />
+            </a-badge>
             <a-dropdown class="auth-dropdown">
                 <a> {{ userBaseInfo.nickname }} <a-icon type="down" /></a>
                 <a-menu slot="overlay">
+                    <a-menu-item>
+                        <router-link :to="{ path: '/profile/message', query: { uid: userBaseInfo.uid } }">我的消息</router-link>
+                    </a-menu-item>
                     <a-menu-item>
                         <router-link :to="{ path: '/profile', query: { uid: userBaseInfo.uid } }">个人信息</router-link>
                     </a-menu-item>
