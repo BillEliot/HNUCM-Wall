@@ -105,6 +105,7 @@
                                     <a-avatar slot="avatar" :src="baseUrl + item.avatar" @click="$router.push({ path: '/profile', query: { uid: item.uid } })"></a-avatar>
                                     <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/profile', query: { uid: item.uid } })">{{ item.nickname }}</a>
                                     <p slot="content" class="text-left">{{ item.content }}</p>
+                                    <span class="date">{{ moment(item.date).format('lll') }}</span>
                                 </a-comment>
                             </a-list-item>
                         </a-list>
@@ -133,6 +134,7 @@
 
 <script>
 import qs from 'qs'
+import moment from 'moment'
 import { Icon } from 'ant-design-vue'
 import { mapState } from 'vuex'
 import navbar from '~/components/navbar'
@@ -193,6 +195,7 @@ export default {
       }
   },
   methods: {
+      moment,
       ThumbsUp (loveDetail) {
         if (this.userBaseInfo.uid == -1) {
             this.$message.warning('先登录吧～')
@@ -318,6 +321,11 @@ a:hover {
 }
 .ant-carousel >>> .slick-thumb li.slick-active img{
     filter: grayscale(0%);
+}
+
+.date {
+    font-style: italic;
+    color: gray;
 }
 
 @media (min-width: 992px) {

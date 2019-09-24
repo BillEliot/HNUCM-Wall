@@ -338,7 +338,7 @@
                                 <div slot="footer"><b>TA的求助哦～</b></div>
                                 <a-list-item slot="renderItem" slot-scope="item, index">
                                     <a-comment style="padding-left: 35px">
-                                        <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/deal/detail', query: { id: item.id } })">{{ item.title }}</a>
+                                        <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/help/detail', query: { id: item.id } })">{{ item.title }}</a>
                                         <p slot="content" class="text-left">{{ item.content }}</p>
                                     </a-comment>
                                 </a-list-item>

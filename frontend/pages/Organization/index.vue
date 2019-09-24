@@ -135,4 +135,8 @@ a {
 li {
     list-style-type: none;
 }
+
+img {
+    width: 100%
+}
 </style>

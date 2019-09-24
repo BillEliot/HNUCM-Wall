@@ -39,7 +39,6 @@
                                 <span slot="actions">
                                     <a-icon type="message" /> {{ item.comments }}
                                 </span>
-                                <a slot="actions" @click="$router.push({ path: '/help/detail', query: { id: item.id } })">查看</a>
                                 <div>
                                     <span>发布时间：{{ moment(item.date).format('lll') }}</span>
                                 </div>

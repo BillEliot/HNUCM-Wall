@@ -32,26 +32,27 @@
                   <router-link to="/register">
                     <a style="float: left">没有账号？注册一个吧～</a>
                   </router-link>
-                  <a-button type="primary" html-type="submit" style="width: 100%">登录</a-button>
+                  <a-button style="width: 40%; float: left" @click="$router.push({ path: '/' })">返回主页</a-button>
+                  <a-button type="primary" html-type="submit" style="width: 40%; float: right">登录</a-button>
                 </a-form-item>
               </a-form>
             </a-tab-pane>
             <a-tab-pane tab="短信验证码登录" key="2" forceRender>
-                <a-form :form="form_SMS" @submit="sendSMS">
-                    <a-form-item label="手机号" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
-                        <a-input v-decorator="[
-                              'phone',
-                              { rules: [{ required: true, message: '请输入手机号'}] }
-                            ]" 
-                            type="number"
-                            placeholder="请输入手机号">
-                            <a-icon slot="prefix" type="phone" style="color:rgba(0,0,0,.25)" />
-                        </a-input>
-                    </a-form-item>
-                    <a-form-item>
-                        <a-button type="primary" html-type="submit" style="width: 100%">发送</a-button>
-                    </a-form-item>
-                </a-form>
+              <a-form :form="form_SMS" @submit="sendSMS">
+                <a-form-item label="手机号" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
+                  <a-input v-decorator="[
+                        'phone',
+                        { rules: [{ required: true, message: '请输入手机号'}] }
+                      ]" 
+                      type="number"
+                      placeholder="请输入手机号">
+                      <a-icon slot="prefix" type="phone" style="color:rgba(0,0,0,.25)" />
+                  </a-input>
+                </a-form-item>
+                <a-form-item>
+                  <a-button type="primary" html-type="submit" style="width: 100%">发送</a-button>
+                </a-form-item>
+              </a-form>
             </a-tab-pane>
           </a-tabs>
         </div>
@@ -66,7 +67,6 @@
 
   export default {
     name: "Login",
-    //middleware: 'auth',
     data() {
       return {
         form_login: this.$form.createForm(this),

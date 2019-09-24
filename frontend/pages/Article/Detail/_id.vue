@@ -23,10 +23,12 @@
             <div class="row">
                 <div class="text-center col-md-12">
                     <div class="author">
-                        <a-avatar :size="64" :src="baseUrl + articleDetail.avatar" />
+                        <a-avatar :size="64" :src="baseUrl + articleDetail.user.avatar" />
                         <br />
-                        <a @click="$router.push({ path: '/profile', query: { uid: articleDetail.uid } })">{{ articleDetail.nickname }}</a>
-                        <p>{{ articleDetail.bio }}</p>
+                        <a @click="$router.push({ path: '/profile', query: { uid: articleDetail.user.uid } })">{{ articleDetail.user.nickname }}</a>
+                        <br />
+                        <a-tag v-for="tag in articleDetail.user.auth" :color="randomColor()" :key="tag">{{ tag }}</a-tag>
+                        <p>{{ articleDetail.user.bio }}</p>
                     </div>
                     <!-- tags -->
                     <div class="text-left" style="margin-top: 20px">
@@ -75,6 +77,7 @@
                                     <a-avatar slot="avatar" :src="baseUrl + item.avatar" @click="$router.push({ path: '/profile', query: { uid: item.uid } })"></a-avatar>
                                     <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/profile', query: { uid: item.uid } })">{{ item.nickname }}</a>
                                     <p slot="content" class="text-left">{{ item.content }}</p>
+                                    <span class="date">{{ moment(item.date).format('lll') }}</span>
                                 </a-comment>
                             </a-list-item>
                         </a-list>
@@ -162,6 +165,11 @@ export default {
       }
   },
   methods: {
+      moment,
+      randomColor() {
+        let color = ['pink', 'red', 'orange', 'green', 'cyan', 'blue', 'purple']
+        return color[Math.round(Math.random() * (color.length - 1))]
+      },
       ThumbsUp (articleDetail) {
         if (this.userBaseInfo.uid == -1) {
             this.$message.warning('先登录吧～')
@@ -263,5 +271,10 @@ a {
 .icon-share >>> .anticon {
     font-size: 24px;
     cursor: pointer;
+}
+
+.date {
+    font-style: italic;
+    color: gray;
 }
 </style>

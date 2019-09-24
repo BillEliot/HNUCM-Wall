@@ -179,6 +179,7 @@ class Comment(models.Model):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     content = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ('-id',)

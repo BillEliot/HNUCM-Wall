@@ -28,6 +28,11 @@
           <a-list-item-meta :description="item.commentContent">
             <div v-if="item.messageType == 'thumbsUp'" slot="title">
               <router-link :to="{ path: '/profile', query: { uid: item.user.uid }}">{{ item.user.nickname }}</router-link> 给你点赞了 在
+              <div v-if="item.messageFrom == 'love'" class="message-title"><router-link :to="{ path: '/love/detail', query: { id: item.messageID }}">表白墙</router-link></div>
+              <div v-else-if="item.messageFrom == 'lose'" class="message-title"><router-link :to="{ path: '/lose/detail', query: { id: item.messageID }}">失物墙</router-link></div>
+              <div v-else-if="item.messageFrom == 'deal'" class="message-title"><router-link :to="{ path: '/deal/detail', query: { id: item.messageID }}">二手交易</router-link></div>
+              <div v-else-if="item.messageFrom == 'help'" class="message-title"><router-link :to="{ path: '/help/detail', query: { id: item.messageID }}">求助墙</router-link></div>
+              <div v-else-if="item.messageFrom == 'article'" class="message-title"><router-link :to="{ path: '/article/detail', query: { id: item.messageID }}">大佬杂谈</router-link></div>
             </div>
             <div v-else-if="item.messageType == 'comment'" slot="title">
               <router-link :to="{ path: '/profile', query: { uid: item.user.uid }}">{{ item.user.nickname }}</router-link> 评论了你 在

@@ -99,7 +99,7 @@
                                         </div>
                                     </a-col>
                                     <a-col :span="8">
-                                        <a-avatar :size="64" src="https://s2.ax1x.com/2019/05/25/Vkx8oR.jpg" />
+                                        <!-- placeholder -->
                                     </a-col>
                                     <a-col :span="8">
                                         <a-avatar v-if="item.userTo[0].uid == -1" :size="64" :src="baseUrl + item.userTo[0].avatar" />
@@ -340,7 +340,7 @@ export default {
             if (item.isThumbsUp) {
             item.isThumbsUp = false
             item.thumbsUp -= 1
-            this.$axios.post('thumbsUp', qs.stringify({
+            this.$axios.post('thumbsUpLove', qs.stringify({
                 id: item.id,
                 isThumbsUp: false
             }))
@@ -348,7 +348,7 @@ export default {
         else {
             item.isThumbsUp = true
             item.thumbsUp += 1
-            this.$axios.post('thumbsUp', qs.stringify({
+            this.$axios.post('thumbsUpLove', qs.stringify({
                 id: item.id,
                 isThumbsUp: true
             }))

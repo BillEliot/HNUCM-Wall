@@ -24,6 +24,8 @@
                         <a-avatar :size="64" :src="baseUrl + helpDetail.user.avatar" />
                         <br />
                         <a @click="$router.push({ path: '/profile', query: { uid: helpDetail.user.uid } })">{{ helpDetail.user.nickname }}</a>
+                        <br />
+                        <a-tag v-for="tag in helpDetail.user.auth" :color="randomColor()" :key="tag">{{ tag }}</a-tag>
                         <p>{{ helpDetail.user.bio }}</p>
                     </div>
                     <no-ssr placeholder='Loading'>
@@ -65,6 +67,7 @@
                                     <a-avatar slot="avatar" :src="baseUrl + item.avatar" @click="$router.push({ path: '/profile', query: { uid: item.uid } })"></a-avatar>
                                     <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/profile', query: { uid: item.uid } })">{{ item.nickname }}</a>
                                     <p slot="content" class="text-left">{{ item.content }}</p>
+                                    <span class="date">{{ moment(item.date).format('lll') }}</span>
                                 </a-comment>
                             </a-list-item>
                         </a-list>
@@ -152,6 +155,11 @@ export default {
       }
   },
   methods: {
+      moment,
+      randomColor() {
+        let color = ['pink', 'red', 'orange', 'green', 'cyan', 'blue', 'purple']
+        return color[Math.round(Math.random() * (color.length - 1))]
+      },
       submitComment() {
           if (!this.commentContent) {
               this.$message.warning('说点什么吧～')
@@ -230,5 +238,10 @@ a {
 .icon-share >>> .anticon {
     font-size: 24px;
     cursor: pointer;
+}
+
+.date {
+    font-style: italic;
+    color: gray;
 }
 </style>

@@ -1,197 +1,208 @@
 <template>
-    <div class="container">
-		<div class="row">
-            <div class="col-md-6 col-md-offset-3">
-                <div class="fh5co-form">
-                    <a-form :form="form_register" @submit="register">
-                        <a-form-item v-bind="formItemLayout" label="E-mail">
-                            <a-input
-                                v-decorator="[
-                                    'email',
-                                    {
-                                        rules: [{
-                                            type: 'email', message: '请输入有效的EMail',
-                                        }, {
-                                            required: true, message: '请输入EMail',
-                                        }]
-                                    }
-                                ]"
-                            >
-                                <a-icon slot="prefix" type="mail" style="color:rgba(0,0,0,.25)" />
-                            </a-input>
-                        </a-form-item>
-                        <a-form-item v-bind="formItemLayout" label="密码">
-                            <a-input
-                                v-decorator="[
-                                    'password',
-                                    {
-                                        rules: [{
-                                            required: true, message: '请输入密码',
-                                        },
+    <div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="fh5co-form">
+                        <a-button type="primary" @click="$router.push({ path: '/' })">
+                           <a-icon type="left" />返回主页
+                        </a-button>
+                        <hr />
+                        <a-form :form="form_register" @submit="register">
+                            <a-form-item v-bind="formItemLayout" label="E-mail">
+                                <a-input
+                                    v-decorator="[
+                                        'email',
                                         {
-                                            validator: validator_password,
-                                        }],
-                                    }
-                                ]"
-                                type="password"
-                            >
-                                <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)" />
-                            </a-input>
-                        </a-form-item>
-                        <a-form-item v-bind="formItemLayout" label="确认密码">
-                            <a-input
-                                v-decorator="[
-                                    'password2',
-                                    {
-                                        rules: [{
-                                            required: true, message: '请输入密码',
-                                        }, 
+                                            rules: [{
+                                                type: 'email', message: '请输入有效的EMail',
+                                            }, {
+                                                required: true, message: '请输入EMail',
+                                            }]
+                                        }
+                                    ]"
+                                >
+                                    <a-icon slot="prefix" type="mail" style="color:rgba(0,0,0,.25)" />
+                                </a-input>
+                            </a-form-item>
+                            <a-form-item v-bind="formItemLayout" label="密码">
+                                <a-input
+                                    v-decorator="[
+                                        'password',
                                         {
-                                            validator: validator_password2,
-                                        }],
-                                    }
-                                ]"
-                                type="password"
-                                @blur="blur_password2"
-                            >
-                                <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)" />
-                            </a-input>
-                        </a-form-item>
-                        <a-form-item v-bind="formItemLayout">
-                            <span slot="label">
-                                昵称&nbsp;
-                                <a-tooltip title="其他人将会看到您的昵称">
-                                    <a-icon type="question-circle-o" />
-                                </a-tooltip>
-                            </span>
-                            <a-input
-                                v-decorator="[
-                                    'nickname',
-                                    {
-                                        rules: [{ required: true, message: '请输入昵称', whitespace: true }]
-                                    }
-                                ]"
-                            >
-                                <a-icon slot="prefix" type="user" style="color:rgba(0,0,0,.25)" />
-                            </a-input>
-                        </a-form-item>
-                        <a-form-item v-bind="formItemLayout">
-                            <span slot="label">
-                                个性签名&nbsp;
-                                <a-tooltip title="简略的最自己的描述">
-                                    <a-icon type="question-circle-o" />
-                                </a-tooltip>
-                            </span>
-                            <a-input
-                                v-decorator="[
-                                    'bio',
-                                    {
-                                        rules: [{ required: true, message: '请输入个性签名', whitespace: true }]
-                                    }
-                                ]"
-                            >
-                                <a-icon slot="prefix" type="edit" style="color:rgba(0,0,0,.25)" />
-                            </a-input>
-                        </a-form-item>
-                        <a-form-item v-bind="formItemLayout" label="班级">
-                            <a-cascader
-                                v-decorator="[
-                                    'class',
-                                    {
-                                        initialValue: ['zhongyi', 'wuyi'],
-                                        rules: [{ type: 'array', required: true, message: '请选择您的班级' }],
-                                    }
-                                ]"
-                                :options="classes"
-                            />
-                        </a-form-item>
-                        <a-form-item v-bind="formItemLayout" label="手机" extra="可以和TA更密切的交流">
-                            <a-input
-                                v-decorator="[
-                                    'phone',
-                                    {
-                                        rules: [{
-                                            validator: validator_phone
-                                        }]
-                                    }
-                                ]"
-                                type="number"
-                            >
-                                <a-icon slot="prefix" type="phone" style="color:rgba(0,0,0,.25)" />
-                            </a-input>
-                        </a-form-item>
-                        <a-form-item v-bind="formItemLayout" label="QQ" extra="可以和TA更密切的交流">
-                            <a-input
-                                v-decorator="[
-                                    'qq'
-                                ]"
-                                type="number"
-                            >
-                                <a-icon slot="prefix" type="qq" style="color:rgba(0,0,0,.25)" />
-                            </a-input>
-                        </a-form-item>
-                        <a-form-item v-bind="formItemLayout" label="微信" extra="可以和TA更密切的交流">
-                            <a-input
-                                v-decorator="[
-                                    'wechat',
-                                ]"
-                            >
-                                <a-icon slot="prefix" type="wechat" style="color:rgba(0,0,0,.25)" />
-                            </a-input>
-                        </a-form-item>
-                        <a-form-item v-bind="formItemLayout" label="验证码" extra="验证码会发往您的邮箱">
-                            <a-row :gutter="8">
-                                <a-col :span="12">
-                                    <a-input
-                                        v-decorator="[
-                                            'captcha',
-                                            { rules: [{ required: true, message: '请输入验证码' }] }
-                                        ]"
-                                    />
-                                    </a-col>
+                                            rules: [{
+                                                required: true, message: '请输入密码',
+                                            },
+                                            {
+                                                validator: validator_password,
+                                            }],
+                                        }
+                                    ]"
+                                    type="password"
+                                >
+                                    <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)" />
+                                </a-input>
+                            </a-form-item>
+                            <a-form-item v-bind="formItemLayout" label="确认密码">
+                                <a-input
+                                    v-decorator="[
+                                        'password2',
+                                        {
+                                            rules: [{
+                                                required: true, message: '请输入密码',
+                                            }, 
+                                            {
+                                                validator: validator_password2,
+                                            }],
+                                        }
+                                    ]"
+                                    type="password"
+                                    @blur="blur_password2"
+                                >
+                                    <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)" />
+                                </a-input>
+                            </a-form-item>
+                            <a-form-item v-bind="formItemLayout">
+                                <span slot="label">
+                                    昵称&nbsp;
+                                    <a-tooltip title="其他人将会看到您的昵称">
+                                        <a-icon type="question-circle-o" />
+                                    </a-tooltip>
+                                </span>
+                                <a-input
+                                    v-decorator="[
+                                        'nickname',
+                                        {
+                                            rules: [{ required: true, message: '请输入昵称', whitespace: true }]
+                                        }
+                                    ]"
+                                >
+                                    <a-icon slot="prefix" type="user" style="color:rgba(0,0,0,.25)" />
+                                </a-input>
+                            </a-form-item>
+                            <a-form-item v-bind="formItemLayout">
+                                <span slot="label">
+                                    个性签名&nbsp;
+                                    <a-tooltip title="简略的最自己的描述">
+                                        <a-icon type="question-circle-o" />
+                                    </a-tooltip>
+                                </span>
+                                <a-input
+                                    v-decorator="[
+                                        'bio',
+                                        {
+                                            rules: [{ required: true, message: '请输入个性签名', whitespace: true }]
+                                        }
+                                    ]"
+                                >
+                                    <a-icon slot="prefix" type="edit" style="color:rgba(0,0,0,.25)" />
+                                </a-input>
+                            </a-form-item>
+                            <a-form-item v-bind="formItemLayout" label="班级">
+                                <a-cascader
+                                    v-decorator="[
+                                        'class',
+                                        {
+                                            initialValue: ['zhongyi', 'wuyi'],
+                                            rules: [{ type: 'array', required: true, message: '请选择您的班级' }],
+                                        }
+                                    ]"
+                                    :options="classes"
+                                />
+                            </a-form-item>
+                            <a-form-item v-bind="formItemLayout" label="手机" extra="可以和TA更密切的交流">
+                                <a-input
+                                    v-decorator="[
+                                        'phone',
+                                        {
+                                            rules: [{
+                                                validator: validator_phone
+                                            }]
+                                        }
+                                    ]"
+                                    type="number"
+                                >
+                                    <a-icon slot="prefix" type="phone" style="color:rgba(0,0,0,.25)" />
+                                </a-input>
+                            </a-form-item>
+                            <a-form-item v-bind="formItemLayout" label="QQ" extra="可以和TA更密切的交流">
+                                <a-input
+                                    v-decorator="[
+                                        'qq'
+                                    ]"
+                                    type="number"
+                                >
+                                    <a-icon slot="prefix" type="qq" style="color:rgba(0,0,0,.25)" />
+                                </a-input>
+                            </a-form-item>
+                            <a-form-item v-bind="formItemLayout" label="微信" extra="可以和TA更密切的交流">
+                                <a-input
+                                    v-decorator="[
+                                        'wechat',
+                                    ]"
+                                >
+                                    <a-icon slot="prefix" type="wechat" style="color:rgba(0,0,0,.25)" />
+                                </a-input>
+                            </a-form-item>
+                            <a-form-item v-bind="formItemLayout" label="验证码" extra="验证码会发往您的邮箱">
+                                <a-row :gutter="8">
                                     <a-col :span="12">
-                                    <a-button @click="getCaptcha">获取</a-button>
-                                </a-col>
-                            </a-row>
-                        </a-form-item>
-                        <a-form-item v-bind="tailFormItemLayout">
-                            <a-checkbox
-                                v-decorator="[
-                                    'agreement',
-                                    { valuePropName: 'checked' }
-                                ]"
-                            >
-                                我同意
-                            </a-checkbox>
-                            <a @click="showDrawer_agreement=true">用户条款</a>
-                            <a-drawer
-                                title="用户条款"
-                                placement="right"
-                                :closable="false"
-                                @close="showDrawer_agreement=false"
-                                :visible="showDrawer_agreement"
-                            >
-                                <p>Some contents...</p>
-                            </a-drawer>
-                        </a-form-item>
-                        <a-form-item v-bind="tailFormItemLayout">
-                            <a>已有账号？现在登录～</a>
-                            <a-button type="primary" html-type="submit" :disabled="!form_register.getFieldValue('agreement')" style="width: 100%">注册</a-button>
-                        </a-form-item>
-                    </a-form>
+                                        <a-input
+                                            v-decorator="[
+                                                'captcha',
+                                                { rules: [{ required: true, message: '请输入验证码' }] }
+                                            ]"
+                                        />
+                                        </a-col>
+                                        <a-col :span="12">
+                                        <a-button @click="getCaptcha">获取</a-button>
+                                    </a-col>
+                                </a-row>
+                            </a-form-item>
+                            <a-form-item v-bind="tailFormItemLayout">
+                                <a-checkbox
+                                    v-decorator="[
+                                        'agreement',
+                                        { valuePropName: 'checked' }
+                                    ]"
+                                >
+                                    我同意
+                                </a-checkbox>
+                                <a @click="showDrawer_agreement=true">用户条款</a>
+                                <a-drawer
+                                    title="用户条款"
+                                    placement="right"
+                                    :closable="false"
+                                    @close="showDrawer_agreement=false"
+                                    :visible="showDrawer_agreement"
+                                >
+                                    <p>Some contents...</p>
+                                </a-drawer>
+                            </a-form-item>
+                            <a-form-item v-bind="tailFormItemLayout">
+                                <a>已有账号？现在登录～</a>
+                                <a-button type="primary" html-type="submit" :disabled="!form_register.getFieldValue('agreement')" style="width: 100%">注册</a-button>
+                            </a-form-item>
+                        </a-form>
+                    </div>
                 </div>
             </div>
         </div>
-	</div>
+        <Footer />
+    </div>
 </template>
 
 <script>
 import qs from 'qs'
 import md5 from 'js-md5'
 import { mapState } from 'vuex'
+import Footer from '~/components/footer.vue'
 
 export default {
   name: 'Register',
+  components: {
+      Footer
+  },
   data () {
     return {
         form_register: this.$form.createForm(this),

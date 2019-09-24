@@ -4,9 +4,9 @@ from django.db.models import Count
 from .models import *
 from utils.utils import *
 from datetime import timedelta
-import os, random, datetime
-
+import os, random, datetime, pytz, math
 import json
+
 
 @csrf_exempt
 def getCaptcha(request):
@@ -697,7 +697,7 @@ def submitDeal(request):
 def submitBank(request):
     _type = request.POST.get('type')
     banks = request.POST.getlist('banks[]')
-    numQuestion = request.POST.get('numQuestion')
+    numQuestion = int(request.POST.get('numQuestion'))
     freSingleA = float(request.POST.get('singleA')) / 100.0
     freSingleB = float(request.POST.get('singleB')) / 100.0
     freMultiple = float(request.POST.get('multiple')) / 100.0
@@ -712,7 +712,7 @@ def submitBank(request):
     questions_judge = []
     questions_qa = []
     try:
-        if (_type == 'total'):
+        if _type == 'total':
             for bank in banks:
                 allQuestions = Bank.objects.filter(bank=bank)
                 singleA = allQuestions.filter(questionType='singleA')
@@ -722,22 +722,29 @@ def submitBank(request):
                 judge = allQuestions.filter(questionType='judge')
                 qa = allQuestions.filter(questionType='qa')
 
-                questions_singleA.extend(list(singleA[0:int(singleA.count()*freSingleA)].values()))
-                questions_singleB.extend(list(singleB[0:int(singleB.count()*freSingleB)].values()))
-                questions_multiple.extend(list(multiple[0:int(multiple.count()*freMultiple)].values()))
-                questions_blank.extend(list(blank[0:int(blank.count()*freMultiple)].values()))
-                questions_judge.extend(list(judge[0:int(judge.count()*freJudge)].values()))
-                questions_qa.extend(list(qa[0:int(qa.count()*freQA)].values()))
-        elif (_type == 'random'):
-            singleA, singleB, multiple, blank, judge, qa = []
-            for bank in banks:
+                questions_singleA.extend(list(singleA.values()[0:int(singleA.count()*freSingleA)]))
+                questions_singleB.extend(list(singleB.values()[0:int(singleB.count()*freSingleB)]))
+                questions_multiple.extend(list(multiple.values()[0:int(multiple.count()*freMultiple)]))
+                questions_blank.extend(list(blank.values()[0:int(blank.count()*freMultiple)]))
+                questions_judge.extend(list(judge.values()[0:int(judge.count()*freJudge)]))
+                questions_qa.extend(list(qa.values()[0:int(qa.count()*freQA)]))
+        elif _type == 'random':
+            for index, bank in enumerate(banks):
                 allQuestions = Bank.objects.filter(bank=bank)
-                singleA.extend(allQuestions.filter(questionType='singleA'))
-                singleB.extend(allQuestions.filter(questionType='singleB'))
-                multiple.extend(allQuestions.filter(questionType='multiple'))
-                blank.extend(allQuestions.filter(questionType='blank'))
-                judge.extend(allQuestions.filter(questionType='judge'))
-                qa.extend(allQuestions.filter(questionType='qa'))
+                if index == 0:
+                    singleA = allQuestions.filter(questionType='singleA')
+                    singleB = allQuestions.filter(questionType='singleB')
+                    multiple = allQuestions.filter(questionType='multiple')
+                    blank = allQuestions.filter(questionType='blank')
+                    judge = allQuestions.filter(questionType='judge')
+                    qa = allQuestions.filter(questionType='qa')
+                else:
+                    singleA = singleA | allQuestions.filter(questionType='singleA')
+                    singleB = singleB | allQuestions.filter(questionType='singleB')
+                    multiple = multiple | allQuestions.filter(questionType='multiple')
+                    blank = blank | allQuestions.filter(questionType='blank')
+                    judge = judge | allQuestions.filter(questionType='judge')
+                    qa = qa | allQuestions.filter(questionType='qa')
             # random all questions
             random.shuffle(singleA)
             random.shuffle(singleB)
@@ -745,13 +752,13 @@ def submitBank(request):
             random.shuffle(blank)
             random.shuffle(judge)
             random.shuffle(qa)
-            
-            questions_singleA.extend(list(singleA[0:int(numQuestion*freSingleA)].values()))
-            questions_singleB.extend(list(singleB[0:int(numQuestion*freSingleB)].values()))
-            questions_multiple.extend(list(multiple[0:int(numQuestion*freMultiple)].values()))
-            questions_blank.extend(list(blank[0:int(numQuestion*freMultiple)].values()))
-            questions_judge.extend(list(judge[0:int(numQuestion*freJudge)].values()))
-            questions_qa.extend(list(qa[0:int(numQuestion*freQA)].values()))
+
+            questions_singleA.extend(list(singleA.values()[0:math.ceil(numQuestion*freSingleA)]))
+            questions_singleB.extend(list(singleB.values()[0:math.ceil(numQuestion*freSingleB)]))
+            questions_multiple.extend(list(multiple.values()[0:math.ceil(numQuestion*freMultiple)]))
+            questions_blank.extend(list(blank.values()[0:math.ceil(numQuestion*freBlank)]))
+            questions_judge.extend(list(judge.values()[0:math.ceil(numQuestion*freJudge)]))
+            questions_qa.extend(list(qa.values()[0:math.ceil(numQuestion*freQA)]))
 
         # remove answers
         for question in questions_singleA:
@@ -1205,7 +1212,8 @@ def getLoveDetail(request):
                 'uid': comment.user.id,
                 'avatar': comment.user.avatar.url,
                 'nickname': comment.user.nickname,
-                'content': comment.content
+                'content': comment.content,
+                'date': comment.date
             })
 
         return JsonResponse({
@@ -1239,7 +1247,8 @@ def getLoseDetail(request):
                 'uid': comment.user.id,
                 'avatar': comment.user.avatar.url,
                 'nickname': comment.user.nickname,
-                'content': comment.content
+                'content': comment.content,
+                'date': comment.date
             })
         
         return JsonResponse({
@@ -1274,7 +1283,8 @@ def getDealDetail(request):
                 'uid': comment.user.id,
                 'avatar': comment.user.avatar.url,
                 'nickname': comment.user.nickname,
-                'content': comment.content
+                'content': comment.content,
+                'date': comment.date
             })
         
         return JsonResponse({
@@ -1316,15 +1326,13 @@ def getArticleDetail(request):
                 'uid': comment.user.id,
                 'avatar': comment.user.avatar.url,
                 'nickname': comment.user.nickname,
-                'content': comment.content
+                'content': comment.content,
+                'date': comment.date
             })
 
         return JsonResponse({
             'id': article.id,
-            'uid': article.user.id,
-            'nickname': article.user.nickname,
-            'bio': article.user.bio,
-            'avatar': article.user.avatar.url,
+            'user': { 'uid': article.user.id, 'nickname': article.user.nickname, 'bio': article.user.bio, 'avatar': article.user.avatar.url, 'auth': article.user.auth.split(';') if article.user.auth else None },
             'title': article.title,
             'tags': article.tags.split(';')[:-1],
             'content': article.content,
@@ -1358,10 +1366,14 @@ def thumbsUpLove(request):
                     messageFrom='love',
                     messageID=_id
                 )
-                love.user.messages.add(message)
+                love.userFrom.messages.add(message)
+                for userTo in love.userTo.all():
+                    userTo.messages.add(message)
             else:
                 love.thumbsUpUser.remove(user)
-                love.user.messages.remove(Message.objects.get(messageID=_id))
+                love.userFrom.messages.remove(Message.objects.get(messageID=_id))
+                for userTo in love.userTo.all():
+                    userTo.messages.remove(Message.objects.get(messageID=_id))
             return HttpResponse(0)
         except:
             return HttpResponse(1)
@@ -1414,12 +1426,13 @@ def getHelpDetail(request):
                 'uid': comment.user.id,
                 'avatar': comment.user.avatar.url,
                 'nickname': comment.user.nickname,
-                'content': comment.content
+                'content': comment.content,
+                'date': comment.date
             })
 
         return JsonResponse({
             'id': _help.id,
-            'user': { 'uid': _help.user.id, 'avatar': _help.user.avatar.url, 'nickname': _help.user.nickname, 'bio': _help.user.bio },
+            'user': { 'uid': _help.user.id, 'avatar': _help.user.avatar.url, 'nickname': _help.user.nickname, 'bio': _help.user.bio, 'auth': _help.user.auth.split(';') if _help.user.auth else None },
             'title': _help.title,
             'content': _help.content,
             'date': _help.date,
@@ -1479,7 +1492,9 @@ def submitLoveComment(request):
             messageID=_id,
             commentContent=content,
         )
-        love.user.messages.add(message)
+        love.userFrom.messages.add(message)
+        for userTo in love.userTo.all():
+            userTo.messages.add(message)
         return HttpResponse(0)
     except:
         return HttpResponse(1)
@@ -1801,7 +1816,7 @@ def getLectureList(request):
     try:
         for lecture in Lecture.objects.all():
             lectureDate = lecture.date
-            currentDate = datetime.datetime.now()
+            currentDate = datetime.datetime.now().replace(tzinfo=pytz.timezone('UTC'))
 
             if currentDate < lectureDate:
                 state = 'wait'
