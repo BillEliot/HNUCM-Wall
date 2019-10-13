@@ -90,6 +90,17 @@ def logout(request):
 
 
 @csrf_exempt
+def checkUniqueEmail(request):
+    email = request.POST.get('email')
+    try:
+        User.objects.get(email=email)
+        return HttpResponse(False)
+    except:
+        return HttpResponse(True)
+
+
+
+@csrf_exempt
 def getUserBaseInfo(request):
     uid = request.session.get('uid', None)
 
@@ -1080,7 +1091,6 @@ def getArticleList(request):
     filterType = request.POST.get('filterType')
     order = request.POST.get('order')
     index = int(request.POST.get('index'))
-
 
     listArticle = []
     articles = []

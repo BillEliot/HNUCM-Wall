@@ -7,6 +7,7 @@ class User(models.Model):
     password = models.CharField(max_length=50)
     nickname = models.CharField(max_length=20)
     bio = models.CharField(max_length=100)
+    gender = models.CharField(max_length=5, default='男')
     _class = models.CharField(max_length=20)
     phone = models.CharField(max_length=20, blank=True, null=True)
     qq = models.CharField(max_length=20, blank=True, null=True)
