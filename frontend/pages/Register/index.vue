@@ -98,6 +98,18 @@
                                     <a-icon slot="prefix" type="edit" style="color:rgba(0,0,0,.25)" />
                                 </a-input>
                             </a-form-item>
+                            <a-form-item v-bind="formItemLayout" label="性别">
+                                <a-select
+                                    v-decorator="['gender', {
+                                        rules: [{ required: true, message: '请选择您的性别' }],
+                                        initialValue: '男'
+                                    }]"
+                                    placeholder="性别"
+                                >
+                                    <a-select-option value="男">男</a-select-option>
+                                    <a-select-option value="女">女</a-select-option>
+                                </a-select>
+                            </a-form-item>
                             <a-form-item v-bind="formItemLayout" label="班级">
                                 <a-cascader
                                     v-decorator="[
@@ -144,18 +156,20 @@
                                     <a-icon slot="prefix" type="wechat" style="color:rgba(0,0,0,.25)" />
                                 </a-input>
                             </a-form-item>
-                            <a-form-item v-bind="formItemLayout" label="验证码" extra="验证码会发往您的邮箱">
+                            <a-form-item v-bind="formItemLayout" label="验证码" extra="验证码会发往您的邮箱(邮件可能会在垃圾箱，所以我们推荐您使用微信小程序注册)">
                                 <a-row :gutter="8">
                                     <a-col :span="12">
                                         <a-input
-                                            v-decorator="[
-                                                'captcha',
-                                                { rules: [{ required: true, message: '请输入验证码' }] }
-                                            ]"
+                                            v-decorator="['captcha', {
+                                                rules: [{ required: true, message: '请输入验证码' }]
+                                            }]"
                                         />
-                                        </a-col>
-                                        <a-col :span="12">
+                                    </a-col>
+                                    <a-col :span="12">
                                         <a-button @click="getCaptcha">获取</a-button>
+                                    </a-col>
+                                    <a-col :span="12">
+                                        <a>微信小程序</a>
                                     </a-col>
                                 </a-row>
                             </a-form-item>
@@ -266,6 +280,7 @@ export default {
                     password: md5(values.password),
                     nickname: values.nickname,
                     bio: values.bio,
+                    gender: values.gender,
                     class: values.class,
                     phone: values.phone,
                     qq: values.qq,
@@ -322,5 +337,8 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+a {
+    text-decoration: none;
+}
 </style>

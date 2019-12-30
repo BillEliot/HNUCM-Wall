@@ -35,11 +35,13 @@
                             <p v-else class="notsold">未售出</p>
                         </a-col>
                     </a-row>
-                    <a-avatar :size="64" :src="baseUrl + dealDetail.avatar" />
-                        <div>
-                            <a @click="$router.push({ path: '/profile', query: { uid: dealDetail.uid } })">{{ dealDetail.nickname }}</a>
-                            <p class="bio">{{ dealDetail.bio }}</p>
-                        </div>
+                    <a-avatar :size="64" :src="baseUrl + dealDetail.user.avatar" />
+                    <div>
+                        <a @click="$router.push({ path: '/profile', query: { uid: dealDetail.user.uid } })">{{ dealDetail.user.nickname }}</a>
+                        <br />
+                        <a-tag v-for="tag in dealDetail.user.auth" :color="randomColor()" :key="tag">{{ tag }}</a-tag>
+                        <p class="bio">{{ dealDetail.user.bio }}</p>
+                    </div>
                     <hr />
                     <a-card :title="dealDetail.name">
                         <p>{{ dealDetail.description }}</p>
@@ -171,6 +173,10 @@ export default {
   },
   methods: {
       moment,
+      randomColor() {
+          let color = ['pink', 'red', 'orange', 'green', 'cyan', 'blue', 'purple']
+          return color[Math.round(Math.random() * (color.length - 1))]
+      },
       submitComment() {
           if (!this.commentContent) {
               this.$message.warning('说点什么吧～')

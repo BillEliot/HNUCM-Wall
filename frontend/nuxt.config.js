@@ -36,29 +36,26 @@ export default {
   /*
   ** Plugins to load before mounting the App
   */
-  plugins: [
-    {
-      src: '~plugins/AntDesign',
-      ssr: true
-    },
-    {
-      src: '~plugins/VueInfiniteScroll',
-      ssr: false
-    },
-    {
-      src: '~plugins/VueVirtualScroller',
-      ssr: true
-    },
-    {
-      src: '~plugins/mavonEditor',
-      ssr: false
-    },
-    {
-      src: '~plugins/VueAMap',
-      ssr: false
-    }
-  ],
-
+  plugins: [{
+    src: '~plugins/AntDesign',
+    ssr: true
+  },
+  {
+    src: '~plugins/VueInfiniteScroll',
+    ssr: false
+  },
+  {
+    src: '~plugins/VueVirtualScroller',
+    ssr: true
+  },
+  {
+    src: '~plugins/mavonEditor',
+    ssr: false
+  },
+  {
+    src: '~plugins/VueAMap',
+    ssr: false
+  }],
   /*
   ** Nuxt.js modules
   */

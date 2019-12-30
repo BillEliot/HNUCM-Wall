@@ -1,182 +1,182 @@
 export const state = () => ({
   baseUrl: process.env.NODE_ENV == 'production' ? '' : 'http://localhost:8000',
   classes: [{
-    value: 'zhongyi',
+    value: '中医学院',
     label: '中医学院',
     children: [{
-      value: 'wuyi',
+      value: '五年制一班',
       label: '五年制一班',
     }, {
-      value: 'wuer',
+      value: '五年制二班',
       label: '五年制二班',
     }, {
-      value: 'wusan',
+      value: '五年制三班',
       label: '五年制三班',
     }, {
-      value: 'wusi',
+      value: '五年制四班',
       label: '五年制四班',
     }, {
-      value: 'wuwu',
+      value: '五年制五班',
       label: '五年制五班',
     }, {
-      value: 'wuliu',
+      value: '五年制六班',
       label: '五年制六班',
     }, {
-      value: 'wuqi',
+      value: '五年制七班',
       label: '五年制七班',
     }, {
-      value: 'bayi',
+      value: '八年制一班',
       label: '八年制一班',
     }, {
-      value: 'baer',
+      value: '八年制二班',
       label: '八年制二班',
     }, {
-      value: 'basan',
+      value: '八年制三班',
       label: '八年制三班',
     }],
   }, {
-    value: 'zhenjiutuina',
+    value: '针灸推拿学院',
     label: '针灸推拿学院',
     children: [{
-      value: 'zhenyi',
+      value: '针灸推拿一班',
       label: '针灸推拿一班',
     }, {
-      value: 'zhener',
+      value: '针灸推拿二班',
       label: '针灸推拿二班',
     }, {
-      value: 'zhensan',
+      value: '针灸推拿三班',
       label: '针灸推拿三班',
     }, {
-      value: 'zhensi',
+      value: '针灸推拿四班',
       label: '针灸推拿四班',
     }, {
-      value: 'zhenwu',
+      value: '针灸推拿五班',
       label: '针灸推拿五班',
     }, {
-      value: 'kangyi',
+      value: '康复治疗一班',
       label: '康复治疗一班',
     }, {
-      value: 'kanger',
+      value: '康复治疗二班',
       label: '康复治疗二班',
     }, {
-      value: 'yun',
+      value: '运动康复班',
       label: '运动康复班',
     }]
   }, {
-    value: 'zhongyi',
+    value: '中西医结合学院',
     label: '中西医结合学院',
     children: [{
-      value: 'zhongyi',
+      value: '中西医临床医学一班',
       label: '中西医临床医学一班',
     }, {
-      value: 'zhonger',
+      value: '中西医临床医学二班',
       label: '中西医临床医学二班',
     }, {
-      value: 'zhongsan',
+      value: '中西医临床医学三班',
       label: '中西医临床医学三班',
     }, {
-      value: 'zhongsi',
+      value: '中西医临床医学四班',
       label: '中西医临床医学四班',
     }, {
-      value: 'zhongwu',
+      value: '中西医临床医学五班',
       label: '中西医临床医学五班',
     }]
   }, {
-    value: 'zhongyi',
+    value: '人文与管理学院',
     label: '人文与管理学院',
     children: [{
-      value: 'yingyi',
+      value: '英语一班',
       label: '英语一班',
     }, {
-      value: 'yinger',
+      value: '英语二班',
       label: '英语二班',
     }, {
-      value: 'shiyi',
+      value: '市场营销一班',
       label: '市场营销一班',
     }, {
-      value: 'shier',
+      value: '市场营销二班',
       label: '市场营销二班',
     }, {
-      value: 'yingyi',
+      value: '应用心理学一班',
       label: '应用心理学一班',
     }, {
-      value: 'yinger',
+      value: '应用心理学二班',
       label: '应用心理学二班',
     }, {
-      value: 'gong',
+      value: '公共事业管理班',
       label: '公共事业管理班',
     }]
   }, {
-    value: 'zhongyi',
+    value: '马克思主义学院',
     label: '马克思主义学院',
   }, {
-    value: 'zhongyi',
+    value: '信息科学与工程学院',
     label: '信息科学与工程学院',
     children: [{
-      value: 'jiyi',
+      value: '计算机科学与技术一班',
       label: '计算机科学与技术一班',
     }, {
-      value: 'jier',
+      value: '计算机科学与技术二班',
       label: '计算机科学与技术二班',
     }, {
-      value: 'xin',
+      value: '信息管理与信息系统班',
       label: '信息管理与信息系统班',
     }, {
-      value: 'yi',
+      value: '医学信息工程班',
       label: '医学信息工程班',
     }]
   }, {
-    value: 'zhongyi',
+    value: '护理学院',
     label: '护理学院',
     children: [{
-      value: 'huyi',
+      value: '护理学一班',
       label: '护理学一班',
     }, {
-      value: 'huer',
+      value: '护理学二班',
       label: '护理学二班',
     }, {
-      value: 'husan',
+      value: '护理学三班',
       label: '护理学三班',
     }, {
-      value: 'husi',
+      value: '护理学四班',
       label: '护理学四班',
     }, {
-      value: 'huwu',
+      value: '护理学五班',
       label: '护理学五班',
     }, {
-      value: 'huliu',
+      value: '护理学六班',
       label: '护理学六班',
     }]
   }, {
-    value: 'zhongyi',
+    value: '医学院',
     label: '医学院',
     
   }, {
-    value: 'zhongyi',
+    value: '药学院',
     label: '药学院',
   }, {
-    value: 'zhongyi',
+    value: '湘杏学院',
     label: '湘杏学院',
   }, {
-    value: 'zhongyi',
+    value: '研究生院',
     label: '研究生院',
   }, {
-    value: 'zhongyi',
+    value: '国际教育学院',
     label: '国际教育学院',
   }, {
-    value: 'zhongyi',
+    value: '继续教育学院',
     label: '继续教育学院',
   }, {
-    value: 'zhongyi',
+    value: '体育艺术学院',
     label: '体育艺术学院',
   }, {
-    value: 'zhongyi',
+    value: '第一中医临床学院',
     label: '第一中医临床学院',
   }, {
-    value: 'zhongyi',
+    value: '第二中医临床学院',
     label: '第二中医临床学院',
   }, {
-    value: 'zhongyi',
+    value: '临床医学院',
     label: '临床医学院',
   }]
 })

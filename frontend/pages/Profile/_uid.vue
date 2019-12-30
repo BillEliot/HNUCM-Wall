@@ -9,11 +9,23 @@
             :wrapStyle="{ height: 'calc(100% - 108px)', overflow: 'auto', paddingBottom: '108px' }"
         >
             <a-form :form="form_profile" layout="vertical">
+                <a-form-item label="头像">
+                    <a-upload
+                        name="avatar"
+                        listType="picture-card"
+                        :showUploadList="false"
+                        :action="baseUrl + '/api/uploadAvatar'"
+                        :data="{ uid: userBaseInfo.uid, platform: 'web' }"
+                        :beforeUpload="beforeAvatarUpload"
+                        @change="handleChange_avatarUpload"
+                    >
+                        <a-icon :type="loading_uploadAvatar ? 'loading' : 'plus'" />
+                        <div>修改头像</div>
+                    </a-upload>
+                </a-form-item>
                 <a-form-item label="昵称">
                     <a-input
-                        v-decorator="[
-                            'nickname',
-                            {
+                        v-decorator="['nickname', {
                                 rules: [{ required: true, message: '请输入你的昵称' }]
                             }
                         ]"
@@ -22,9 +34,7 @@
                 </a-form-item>
                 <a-form-item label="个性签名">
                     <a-input
-                        v-decorator="[
-                            'bio',
-                            {
+                        v-decorator="['bio', {
                                 rules: [{ required: true, message: '请输入你的个性签名' }]
                             }
                         ]"
@@ -33,36 +43,39 @@
                 </a-form-item>
                 <a-form-item label="手机">
                     <a-input
-                        v-decorator="[
-                            'phone'
-                        ]"
+                        v-decorator="['phone']"
                         placeholder="你的手机号"
                     />
                 </a-form-item>
                 <a-form-item label="qq">
                     <a-input
-                        v-decorator="[
-                            'qq'
-                        ]"
+                        v-decorator="['qq']"
                         placeholder="你的qq"
                     />
                 </a-form-item>
                 <a-form-item label="微信">
                     <a-input
-                        v-decorator="[
-                            'wechat'
-                        ]"
+                        v-decorator="['wechat']"
                         placeholder="你的微信"
                     />
                 </a-form-item>
+                <a-form-item label="性别">
+                    <a-select
+                        v-decorator="['gender', {
+                            rules: [{ required: true, message: '请选择您的性别' }],
+                            initialValue: '男'
+                        }]"
+                        placeholder="性别"
+                    >
+                        <a-select-option value="男">男</a-select-option>
+                        <a-select-option value="女">女</a-select-option>
+                    </a-select>
+                </a-form-item>
                 <a-form-item label="班级">
                     <a-cascader
-                        v-decorator="[
-                            'class',
-                            {
-                                rules: [{ type: 'array', required: true, message: '请选择您的班级' }],
-                            }
-                        ]"
+                        v-decorator="['class', {
+                            rules: [{ type: 'array', required: true, message: '请选择您的班级' }],
+                        }]"
                         :options="classes"
                         placeholder="你的班级"
                     />
@@ -108,9 +121,7 @@
                 </a-form-item>
                 <a-form-item label="密码">
                     <a-input
-                        v-decorator="[
-                            'password',
-                            {
+                        v-decorator="['password', {
                                 rules: [{ 
                                     required: true, message: '请输入密码' 
                                 },
@@ -198,6 +209,10 @@
                     <a-input placeholder="微信" disabled v-model="userProfile.wechat">
                         <a-icon slot="prefix" type="wechat" />
                     </a-input>
+                    <a-input placeholder="性别" disabled v-model="userProfile.gender">
+                        <a-icon v-if="userProfile.gender == '男'" slot="prefix" type="man" />
+                        <a-icon v-else slot="prefix" type="woman" />
+                    </a-input>
                     <a-cascader :options="classes" placeholder="班级" disabled v-model="userProfile.class.split('/')" style="width: 100%; text-align: left">
                         <a-icon type="table" slot="suffixIcon" />
                     </a-cascader>
@@ -235,6 +250,7 @@
                                             <a-avatar slot="avatar" :src="baseUrl + item.avatar" @click="$router.push({ path: '/profile', query: { uid: item.uid } })"></a-avatar>
                                             <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/profile', query: { uid: item.uid } })">{{ item.nickname }}</a>
                                             <p slot="content" class="text-left">{{ item.content }}</p>
+                                            <span>{{ item.date }}</span>
                                         </a-comment>
                                     </a-list-item>
                                 </a-list>
@@ -270,9 +286,9 @@
                                     <a-comment style="padding-left: 35px">
                                         <a-avatar v-if="item.userTo_uid == -1" slot="avatar" :src="baseUrl + item.userTo_avatar" />
                                         <a-avatar v-else slot="avatar" :src="baseUrl + item.userTo_avatar" @click="$router.push({ path: '/profile', query: { uid: item.userTo_uid } })" />
-                                        <a v-if="item.userTo_uid == -1" slot="author" style="font-size: 15px">To {{ item.userTo_nickname }}</a>
-                                        <a v-else slot="author" style="font-size: 15px" @click="$router.push({ path: '/profile', query: { uid: item.userTo_uid } })">To {{ item.userTo_nickname }}</a>
+                                        <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/love/detail', query: { id: item.id } })">To {{ item.userTo_nickname }}</a>
                                         <p slot="content" class="text-left">{{ item.content }}</p>
+                                        <span>{{ item.date }}</span>
                                     </a-comment>
                                 </a-list-item>
                             </a-list>
@@ -296,6 +312,7 @@
                                         <p v-else slot="avatar" class="notfound">未找到</p>
                                         <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/lose/detail', query: { id: item.id } })">{{ item.name }}</a>
                                         <p slot="content" class="text-left">{{ item.description }}</p>
+                                        <span>{{ item.date }}</span>
                                     </a-comment>
                                 </a-list-item>
                             </a-list>
@@ -319,6 +336,7 @@
                                         <p v-else slot="avatar" class="notfound">未售出</p>
                                         <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/deal/detail', query: { id: item.id } })">{{ item.name }}</a>
                                         <p slot="content" class="text-left">{{ item.description }}</p>
+                                        <span>{{ item.date }}</span>
                                     </a-comment>
                                 </a-list-item>
                             </a-list>
@@ -337,10 +355,11 @@
                             >
                                 <div slot="footer"><b>TA的求助哦～</b></div>
                                 <a-list-item slot="renderItem" slot-scope="item, index">
-                                    <a-comment style="padding-left: 35px">
-                                        <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/help/detail', query: { id: item.id } })">{{ item.title }}</a>
-                                        <p slot="content" class="text-left">{{ item.content }}</p>
-                                    </a-comment>
+                                    <div>
+                                        <a style="font-size: 15px" @click="$router.push({ path: '/help/detail', query: { id: item.id } })">{{ item.title }}</a>
+                                        <p class="text-left">{{ item.content }}</p>
+                                        <span>{{ item.date }}</span>
+                                    </div>
                                 </a-list-item>
                             </a-list>
                         </a-tab-pane>
@@ -403,7 +422,8 @@ export default {
             visibleDrawerPassword: false,
             form_profile: this.$form.createForm(this),
             form_password: this.$form.createForm(this),
-            confirmDirty: false
+            confirmDirty: false,
+            loading_uploadAvatar: false
         }
     },
     async asyncData({ $axios, query, error }) {
@@ -525,7 +545,8 @@ export default {
                         uid: this.userBaseInfo.uid,
                         nickname: values.nickname,
                         bio: values.bio,
-                        class: values.class,
+                        gender: values.gender,
+                        class: values.class[0] + '/' + values.class[1],
                         phone: values.phone,
                         qq: values.qq,
                         wechat: values.wechat,
@@ -535,6 +556,7 @@ export default {
                             this.$message.success('修改成功')
                             this.form_profile.resetFields()
                             this.visibleDrawerProfile = false
+                            this.$router.go(0)
                         }
                         else if (res.data == 1) {
                             this.$message.error('未知错误')
@@ -567,6 +589,36 @@ export default {
                     })
                 }
             })
+        },
+        beforeAvatarUpload (avatar) {
+            const isSupportFormat = avatar.type === 'image/jpeg' || avatar.type === 'image/png'
+            if (!isSupportFormat) {
+                this.$message.error('仅支持jpeg或png格式图片')
+            }
+            const isLt2M = avatar.size / 1024 / 1024 < 2;
+            if (!isLt2M) {
+                this.$message.error('图片大小必须小于2MB')
+            }
+
+            return isSupportFormat && isLt2M
+        },
+        handleChange_avatarUpload (info) {
+            if (info.file.status === 'uploading') {
+                this.loading_uploadAvatar = true
+                return
+            }
+            if (info.file.status === 'done') {
+                if (info.file.response == 0) {
+                    this.$message.success('修改图像成功')
+                    this.loading_uploadAvatar = false
+                    this.visibleDrawerProfile = false
+                    this.$router.go(0)
+                }
+                else {
+                    this.$message.error('未知错误')
+                    this.loading_uploadAvatar = false
+                }
+            }
         },
         applyAuth() {
             this.$notification['success']({

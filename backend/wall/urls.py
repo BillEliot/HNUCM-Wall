@@ -4,7 +4,9 @@ from . import views
 urlpatterns = [
     # Auth
     path('register', views.register),
+    path('registerWX', views.registerWX),
     path('login', views.login),
+    path('loginWX', views.loginWX),
     path('logout',views.logout),
     path('checkUniqueEmail', views.checkUniqueEmail),
     path('getUserBaseInfo', views.getUserBaseInfo),
@@ -15,6 +17,8 @@ urlpatterns = [
     path('updateUser', views.updateUser),
     path('changePassword', views.changePassword),
     path('getMessage', views.getMessage),
+    path('bindWX', views.bindWX),
+    path('uploadAvatar', views.uploadAvatar),
     # Admin - User
     path('getUserList', views.getUserList),
     path('getUserDetail', views.getUserDetail),

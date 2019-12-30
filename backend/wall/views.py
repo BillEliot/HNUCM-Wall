@@ -1,10 +1,11 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count
+from django.conf import settings
 from .models import *
 from utils.utils import *
 from datetime import timedelta
-import os, random, datetime, pytz, math
+import os, random, datetime, pytz, math, requests, hashlib
 import json
 
 
@@ -28,6 +29,7 @@ def register(request):
     password = request.POST.get('password')
     nickname = request.POST.get('nickname')
     bio = request.POST.get('bio')
+    gender = request.POST.get('gender')
     _class = request.POST.get('class[0]') + '/' + request.POST.get('class[1]')
     phone = request.POST.get('phone')
     qq = request.POST.get('qq')
@@ -49,6 +51,44 @@ def register(request):
 
     try:
         User.objects.create(
+            email = email,
+            password = password,
+            nickname = nickname,
+            bio = bio,
+            gender = gender,
+            _class = _class,
+            phone = phone,
+            qq = qq,
+            wechat = wechat
+        )
+        return HttpResponse(0)
+    except:
+        return HttpResponse(5)
+
+
+
+@csrf_exempt
+def registerWX(requests):
+    openid = requests.POST.get('openid')
+    email = request.POST.get('email')
+    password = request.POST.get('password')
+    nickname = request.POST.get('nickname')
+    bio = request.POST.get('bio')
+    gender = requests.POST.get('gender')
+    _class = request.POST.get('class')
+    phone = request.POST.get('phone')
+    qq = request.POST.get('qq')
+    wechat = request.POST.get('wechat')
+
+    # check nickname
+    if nickname == 'Anony' or nickname == 'anony':
+        return HttpResponse(3)
+    if User.objects.filter(nickname=nickname).exists():
+        return HttpResponse(4)
+
+    try:
+        User.objects.create(
+            openid = openid,
             email = email,
             password = password,
             nickname = nickname,
@@ -79,6 +119,86 @@ def login(request):
             return HttpResponse(2)
     else:
         return HttpResponse(1)
+
+
+
+@csrf_exempt
+def loginWX(request):
+    code = request.POST.get('code')
+
+    query = 'https://api.weixin.qq.com/sns/jscode2session?appid=wx432cc355bf1c49c4&secret=8610be32becb59dab068e5d1c31bb069&js_code=%s&grant_type=authorization_code' % code
+    info = requests.get(query).json()
+    openid = info['openid']
+    try:
+        user = User.objects.get(openid=openid)
+        return JsonResponse({
+            'openid': openid,
+            'uid': user.id,
+            'nickname': user.nickname,
+            'avatar': user.avatar.url,
+            'unreadCount': user.messages.filter(isRead=False).count(),
+        })
+    except:
+        return JsonResponse({
+            'openid': openid,
+            'uid': -1,
+            'nickname': '赶快登陆吧～',
+            'avatar': '/media/img/avatar/anony.jpg',
+            'unreadCount': 0,
+        })
+
+
+
+@csrf_exempt
+def uploadAvatar(request):
+    avatar = request.FILES.get("avatar", None)
+    uid = int(request.POST.get('uid'))
+    platform = request.POST.get('platform')
+
+    try:
+        # Encode the filename if the platform is web
+        if platform == 'web':
+            name, suffix = avatar.name.split('.')
+            avatar.name = hashlib.new('md5', name.encode('utf8')).hexdigest() + '.' + suffix
+
+        user = User.objects.get(id = uid)
+        if avatar:
+            avatar_path = settings.BASE_DIR + '/media/img/avatar/' + avatar.name
+            avatar_file = open(avatar_path, 'wb+')
+            # save file
+            for chunk in avatar.chunks():
+                avatar_file.write(chunk)
+            avatar_file.close()
+            # remove original avatar
+            if user.avatar.url != '/media/img/avatar/default.png' and os.path.exists(settings.BASE_DIR + user.avatar.url):
+                os.remove(settings.BASE_DIR + user.avatar.url)
+            user.avatar = 'img/avatar/' + avatar.name
+            user.save()
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def bindWX(request):
+    openid = request.POST.get('openid')
+    email = request.POST.get('email')
+    password = hashlib.new('md5', request.POST.get('password').encode('utf8')).hexdigest()
+    
+    try:
+        user = User.objects.get(email=email)
+        if user.password == password:
+            user.openid = openid
+            user.save()
+            return JsonResponse({
+                'openid': openid,
+                'unreadCount': user.messages.filter(isRead=False).count(),
+            })
+        else:
+            return HttpResponse(1)
+    except:
+        return HttpResponse(2)
 
 
 
@@ -131,7 +251,8 @@ def updateUser(request):
     uid = request.POST.get('uid')
     nickname = request.POST.get('nickname')
     bio = request.POST.get('bio')
-    _class = request.POST.get('class[0]') + '/' + request.POST.get('class[1]')
+    _class = request.POST.get('class')
+    gender = request.POST.get('gender')
     phone = request.POST.get('phone')
     qq = request.POST.get('qq')
     wechat = request.POST.get('wechat')
@@ -141,6 +262,7 @@ def updateUser(request):
         user.nickname = nickname
         user.bio = bio
         user._class = _class
+        user.gender = gender
         user.phone = phone
         user.qq = qq
         user.wechat = wechat
@@ -173,7 +295,7 @@ def changePassword(request):
 
 @csrf_exempt
 def getMessage(request):
-    uid = request.session.get('uid', None)
+    uid = request.POST.get('uid')
     messageList = []
     try:
         for message in User.objects.get(id=uid).messages.all():
@@ -357,10 +479,7 @@ def searchArticle(request):
         for article in Article.objects.filter(title__contains=name):
             listArticle.append({
                 'id': article.id,
-                'uid': article.user.id,
-                'avatar': article.user.avatar.url,
-                'nickname': article.user.nickname,
-                'bio': article.user.bio,
+                'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                 'title': article.title,
                 'tags': article.tags.split(';')[:-1],
                 'content': article.content,
@@ -389,10 +508,7 @@ def searchArticleByUser(request):
         for article in Article.objects.filter(user__nickname__contains=name):
             listArticle.append({
                 'id': article.id,
-                'uid': article.user.id,
-                'avatar': article.user.avatar.url,
-                'nickname': article.user.nickname,
-                'bio': article.user.bio,
+                'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                 'title': article.title,
                 'tags': article.tags.split(';')[:-1],
                 'content': article.content,
@@ -458,7 +574,8 @@ def getUserProfile(request):
                 'uid': comment.user.id,
                 'avatar': comment.user.avatar.url,
                 'nickname': comment.user.nickname,
-                'content': comment.content
+                'content': comment.content,
+                'date': comment.date
             })
         # loves
         loves = []
@@ -468,19 +585,23 @@ def getUserProfile(request):
                 if love.userTo:
                     for userTo in love.userTo.all():
                         loves.append({
+                            'id': love.id,
                             'userTo_uid': userTo.id,
                             'userTo_nickname': userTo.nickname,
                             'userTo_avatar': userTo.avatar.url,
-                            'content': love.content
+                            'content': love.content,
+                            'date': love.date
                         })
                 if love.nameTo:
                     for userTo in love.nameTo.split(';'):
                         if userTo:
                             loves.append({
+                                'id': love.id,
                                 'userTo_uid': -1,
                                 'userTo_nickname': userTo,
                                 'userTo_avatar': '/media/img/avatar/anony.jpg',
-                                'content': love.content
+                                'content': love.content,
+                                'date': love.date
                             })
         # loses
         loses = []
@@ -489,7 +610,8 @@ def getUserProfile(request):
                 'id': lose.id,
                 'isFound': lose.isFound,
                 'name': lose.name,
-                'description': lose.description
+                'description': lose.description,
+                'date': lose.publicDate
             })
         # deals
         deals = []
@@ -498,7 +620,8 @@ def getUserProfile(request):
                 'id': deal.id,
                 'isSold': deal.isSold,
                 'name': deal.name,
-                'description': deal.description
+                'description': deal.description,
+                'date': deal.date
             })
         # helps
         helps = []
@@ -506,7 +629,8 @@ def getUserProfile(request):
             helps.append({
                 'id': _help.id,
                 'title': _help.title,
-                'content': _help.content
+                'content': _help.content,
+                'date': _help.date
             })
 
         return JsonResponse({
@@ -518,6 +642,7 @@ def getUserProfile(request):
             'phone': user.phone,
             'qq': user.qq,
             'wechat': user.wechat,
+            'gender': user.gender,
             'class': user._class,
             'coin': user.coin,
             'auth': user.auth.split(';') if user.auth else None,
@@ -899,6 +1024,7 @@ def getLoveList(request):
     filterType = request.POST.get('filterType')
     order = request.POST.get('order')
     index = int(request.POST.get('index'))
+    uid = request.POST.get('uid')
 
     if (index >= Love.objects.count()):
         return JsonResponse({ 'info': [] })
@@ -955,8 +1081,8 @@ def getLoveList(request):
                         'bio': 'TA还没有来呢～'
                     })
         # is thumbsUp
-        uid = request.session.get('uid', None)
-        if uid:
+        # uid = request.session.get('uid', None)
+        if int(uid) != -1:
             user = User.objects.get(id=uid)
             isThumbsUp = love.thumbsUpUser.filter(id=user.id).exists()
         else:
@@ -1116,7 +1242,7 @@ def getArticleList(request):
         for article in articles:
             listArticle.append({
                 'id': article.id,
-                'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') },
+                'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                 'title': article.title,
                 'tags': article.tags.split(';')[:-1],
                 'content': article.content,
@@ -1264,10 +1390,7 @@ def getLoseDetail(request):
         return JsonResponse({
             'id': lose.id,
             'isFound': lose.isFound,
-            'uid': lose.user.id,
-            'nickname': lose.user.nickname,
-            'bio': lose.user.bio,
-            'avatar': lose.user.avatar.url,
+            'user': { 'uid': lose.user.id, 'nickname': lose.user.nickname, 'bio': lose.user.bio, 'avatar': lose.user.avatar.url, 'auth': lose.user.auth.split(';') if lose.user.auth else None },
             'publicDate': lose.publicDate,
             'loseDate': lose.loseDate,
             'name': lose.name,
@@ -1300,10 +1423,7 @@ def getDealDetail(request):
         return JsonResponse({
             'id': deal.id,
             'isSold': deal.isSold,
-            'uid': deal.user.id,
-            'nickname': deal.user.nickname,
-            'bio': deal.user.bio,
-            'avatar': deal.user.avatar.url,
+            'user': { 'uid': deal.user.id, 'nickname': deal.user.nickname, 'bio': deal.user.bio, 'avatar': deal.user.avatar.url, 'auth': deal.user.auth.split(';') if deal.user.auth else None },
             'name': deal.name,
             'price': deal.price,
             'new': deal.new,
@@ -1360,14 +1480,15 @@ def getArticleDetail(request):
 @csrf_exempt
 def thumbsUpLove(request):
     _id = request.POST.get('id')
-    isThumbsUp = request.POST.get('isThumbsUp')
+    isThumbsUp = True if request.POST.get('isThumbsUp') == 'true' else False
+    uid = request.POST.get('uid')
 
-    uid = request.session.get('uid', None)
+    # uid = request.session.get('uid', None)
     if uid:
         try:
             user = User.objects.get(id=uid)
             love = Love.objects.get(id=_id)
-            if (isThumbsUp):
+            if isThumbsUp:
                 love.thumbsUpUser.add(user)
                 # message
                 message = Message.objects.create(

@@ -44,6 +44,7 @@
             </div>
             <a-avatar slot="avatar" :src="baseUrl + item.user.avatar" class="avatar" />
           </a-list-item-meta>
+          <span>{{ item.date }}</span>
         </a-list-item>
       </a-list>
     </div>
@@ -81,7 +82,9 @@ export default {
         redirect('/')
       }
     })
-    await $axios.get('getMessage')
+    await $axios.post('getMessage', qs.stringify({
+      uid: userBaseInfo.uid
+    }))
     .then((response) => {
       messageList = response.data.info
     })

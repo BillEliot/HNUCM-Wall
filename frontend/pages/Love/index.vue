@@ -191,7 +191,8 @@ export default {
     })
 
     await $axios.post('getLoveList', qs.stringify({
-        index: '0'
+        index: '0',
+        uid: userBaseInfo.uid
     }))
     .then((response) => {
         loveList = response.data.info
@@ -318,7 +319,8 @@ export default {
         this.$axios.post('getLoveList', qs.stringify({
             filterType: this.filterType,
             order: this.order,
-            index: this.loveList.length
+            index: this.loveList.length,
+            uid: this.userBaseInfo.uid
         }))
         .then((response) => {
             this.loading = false
@@ -338,22 +340,24 @@ export default {
         }
         else {
             if (item.isThumbsUp) {
-            item.isThumbsUp = false
-            item.thumbsUp -= 1
-            this.$axios.post('thumbsUpLove', qs.stringify({
-                id: item.id,
-                isThumbsUp: false
-            }))
+                item.isThumbsUp = false
+                item.thumbsUp -= 1
+                this.$axios.post('thumbsUpLove', qs.stringify({
+                    id: item.id,
+                    isThumbsUp: false,
+                    uid: this.userBaseInfo.uid
+                }))
+            }
+            else {
+                item.isThumbsUp = true
+                item.thumbsUp += 1
+                this.$axios.post('thumbsUpLove', qs.stringify({
+                    id: item.id,
+                    isThumbsUp: true,
+                    uid: this.userBaseInfo.uid
+                }))
+            }
         }
-        else {
-            item.isThumbsUp = true
-            item.thumbsUp += 1
-            this.$axios.post('thumbsUpLove', qs.stringify({
-                id: item.id,
-                isThumbsUp: true
-            }))
-        }
-      }
     },
     moreUserTo(index) {
         this.visibleMoreUserTo = true

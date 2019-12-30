@@ -30,11 +30,13 @@
                             <p v-else class="notfound">未找到</p>
                         </a-col>
                     </a-row>
-                    <a-avatar :size="64" :src="baseUrl + loseDetail.avatar" />
-                        <div>
-                            <a @click="$router.push({ path: '/profile', query: { uid: loseDetail.uid } })">{{ loseDetail.nickname }}</a>
-                            <p class="bio">{{ loseDetail.bio }}</p>
-                        </div>
+                    <a-avatar :size="64" :src="baseUrl + loseDetail.user.avatar" />
+                    <div>
+                        <a @click="$router.push({ path: '/profile', query: { uid: loseDetail.user.uid } })">{{ loseDetail.user.nickname }}</a>
+                        <br />
+                        <a-tag v-for="tag in loseDetail.user.auth" :color="randomColor()" :key="tag">{{ tag }}</a-tag>
+                        <p class="bio">{{ loseDetail.user.bio }}</p>
+                    </div>
                     <hr />
                     <a-card :title="loseDetail.name">
                         <p>{{ loseDetail.description }}</p>
@@ -164,6 +166,10 @@ export default {
   },
   methods: {
       moment,
+      randomColor() {
+          let color = ['pink', 'red', 'orange', 'green', 'cyan', 'blue', 'purple']
+          return color[Math.round(Math.random() * (color.length - 1))]
+      },
       submitComment() {
           if (!this.commentContent) {
               this.$message.warning('说点什么吧～')

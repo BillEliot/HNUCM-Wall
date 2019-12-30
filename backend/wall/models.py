@@ -2,6 +2,7 @@ from django.db import models
 
 
 class User(models.Model):
+    openid = models.CharField(max_length=50, default=0)
     avatar = models.ImageField(upload_to='img/avatar', default='img/avatar/default.png')
     email = models.EmailField()
     password = models.CharField(max_length=50)
