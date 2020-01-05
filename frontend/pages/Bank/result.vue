@@ -10,6 +10,11 @@
                         <div class="title-text text-center">
                             <h1>答题结果</h1>
                             <p class="subheading">(￣_,￣ )</p>
+                            <a-statistic :value="questions.correctQuestions" class="statistic">
+                                <template v-slot:suffix>
+                                    <span> / {{ questions.allQuestions }}</span>
+                                </template>
+                            </a-statistic>
                         </div>
                     </div>
                 </div>
@@ -40,7 +45,7 @@
                                         <div :id="index">
                                             <a-list-item-meta>
                                                 <h4 slot="title" :class="item.isCorrect ? 'correct' : 'uncorrect'">
-                                                    {{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}
+                                                    {{ (index+1) + '、 ' + item.title + '()' }}
                                                 </h4>
                                             </a-list-item-meta>
                                             <a-radio-group v-model="item.answer" buttonStyle="solid" disabled>
@@ -60,7 +65,35 @@
                             </a-tab-pane>
                             <!-- singleB -->
                             <a-tab-pane tab="单选-B" key="singleB">
-                                
+                                <span class="summary">共选取 {{ questions.singleB.length }} 道题目</span>
+                                <a-list
+                                    itemLayout="vertical"
+                                    size="large"
+                                    :pagination="null"
+                                    :dataSource="questions.singleB"
+                                >
+                                    <div slot="footer">题目数据来于<b>HNUCM</b>练习册</div>
+                                    <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
+                                        <div :id="index">
+                                            <a-list-item-meta>
+                                                <h4 slot="title" :class="item.isCorrect ? 'correct' : 'uncorrect'">
+                                                    {{ (index+1) + '、 ' + item.title + '()' }}
+                                                </h4>
+                                            </a-list-item-meta>
+                                            <a-radio-group v-model="item.answer" buttonStyle="solid" disabled>
+                                                <a-radio-button value="A">A. {{ item.A }}</a-radio-button>
+                                                <a-radio-button value="B">B. {{ item.B }}</a-radio-button>
+                                                <a-radio-button value="C">C. {{ item.C }}</a-radio-button>
+                                                <a-radio-button value="D">D. {{ item.D }}</a-radio-button>
+                                                <a-radio-button v-if="item.E" value="E">E. {{ item.E }}</a-radio-button>
+                                            </a-radio-group>
+                                            <div v-if="!item.isCorrect" class="fault-action">
+                                                <h4>正确答案：{{ item.correctAnswer }}</h4>
+                                                <a-button type="primary">加入错题本</a-button>
+                                            </div>
+                                        </div>
+                                    </a-list-item>
+                                </a-list>
                             </a-tab-pane>
                             <!-- multiple -->
                             <a-tab-pane tab="多选" key="multiple">
@@ -76,7 +109,7 @@
                                         <div :id="index">
                                             <a-list-item-meta>
                                                 <h4 slot="title" :class="item.isCorrect ? 'correct' : 'uncorrect'">
-                                                    {{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}
+                                                    {{ (index+1) + '、 ' + item.title + '()' }}
                                                 </h4>
                                             </a-list-item-meta>
                                             <a-checkbox-group v-model="item.answer" disabled>
@@ -108,7 +141,7 @@
                                         <div :id="index">
                                             <a-list-item-meta>
                                                 <h4 slot="title" :class="item.isCorrect ? 'correct' : 'uncorrect'">
-                                                    {{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}
+                                                    {{ (index+1) + '、 ' + item.title }}
                                                 </h4>
                                             </a-list-item-meta>
                                             <a-input
@@ -141,7 +174,7 @@
                                         <div :id="index">
                                             <a-list-item-meta>
                                                 <h4 slot="title" :class="item.isCorrect ? 'correct' : 'uncorrect'">
-                                                    {{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}
+                                                    {{ (index+1) + '、 ' + item.title + '()' }}
                                                 </h4>
                                             </a-list-item-meta>
                                             <a-switch v-model="item.answer" disabled>
@@ -170,7 +203,7 @@
                                         <div :id="index">
                                             <a-list-item-meta>
                                                 <h4 slot="title">
-                                                    {{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}
+                                                    {{ (index+1) + '、 ' + item.title + '()' }}
                                                 </h4>
                                             </a-list-item-meta>
                                             <a-textarea
@@ -232,7 +265,7 @@ export default {
   },
   methods: {
       parseBlanks(blanks) {
-          let regex = new RegExp(/{(.)}/, 'g')
+          let regex = new RegExp(/{()}/, 'g')
           let result = []
           let array = []
           while ((array = regex.exec(blanks))) {
@@ -264,5 +297,16 @@ export default {
 .summary {
     color: red;
     font-weight: bold;
+}
+
+.statistic {
+    color: green;
+    font-weight: bold;
+}
+.statistic >>> .ant-statistic-content {
+    font-size: 48px;
+}
+.statistic span {
+    font-size: 32px;
 }
 </style>

@@ -71,6 +71,29 @@ class Deal(models.Model):
 
 
 
+class Bank_Subject(models.Model):
+    subjectType = (
+        ('zy', '中医'),
+        ('xy', '西医')
+    )
+
+    name = models.CharField(max_length=20)
+    subjectType = models.CharField(max_length=10, choices=subjectType)
+
+    def __str__(self):
+        return self.name
+
+
+
+class Bank_Chapter(models.Model):
+    name = models.CharField(max_length=20)
+    subject = models.ForeignKey('Bank_Subject', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+
 class Bank(models.Model):
     questionType = (
         ('singleA', '单选-题型A'),
@@ -88,12 +111,28 @@ class Bank(models.Model):
     D = models.CharField(max_length=50, blank=True)
     E = models.CharField(max_length=50, blank=True)
     questionType = models.CharField(max_length=10, choices=questionType, default='singleA')
+    isBlankSeq = models.BooleanField(default=True)
     # After sorting, 'A', 'AB' or 'blank'
     answer = models.CharField(max_length=10)
-    bank = models.CharField(max_length=20)
+    chapter = models.ForeignKey('Bank_Chapter', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
+
+
+
+class BankStatistics(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    subject = models.CharField(max_length=20)
+    allQuestions = models.IntegerField()
+    correctQuestions = models.IntegerField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-date',)
+
+    def __str__(self):
+        return self.user.nickname
 
 
 

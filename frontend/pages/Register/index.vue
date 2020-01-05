@@ -166,7 +166,7 @@
                                         />
                                     </a-col>
                                     <a-col :span="12">
-                                        <a-button @click="getCaptcha">获取</a-button>
+                                        <a-button :disabled="isDisableCaptcha" @click="getCaptcha">{{ CaptchaButtonText }}</a-button>
                                     </a-col>
                                     <a-col :span="12">
                                         <a>微信小程序</a>
@@ -244,6 +244,8 @@ export default {
                 },
             },
         },
+        isDisableCaptcha: false,
+        CaptchaButtonText: '获取'
     }
   },
   methods: {
@@ -325,6 +327,20 @@ export default {
                     this.$message.error('发送失败, 请稍后重试或联系站长')
                 }
             })
+
+            this.isDisableCaptcha = true
+            let time = 60
+            var countDown = setInterval(() => {
+                time --
+                if (time == 0) {
+                    this.isDisableCaptcha = false
+                    this.CaptchaButtonText = '获取'
+                    clearInterval(countDown)
+                }
+                else {
+                    this.CaptchaButtonText = time.toString() + '后重新获取'
+                }
+            }, 1000)
         }
         else {
             this.$message.error('请输入您的邮箱')

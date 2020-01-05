@@ -51,9 +51,13 @@
                 <a-menu-item key="organization:6" @click="$router.push({ path: '/organization/subunion' })">院级学生会</a-menu-item>
             </a-menu-item-group>
         </a-sub-menu>
-        <a-menu-item key="bank" @click="$router.push({ path: '/bank' })">
-            <a-icon type="database" /> 题库
-        </a-menu-item>
+
+        <a-sub-menu>
+            <span slot="title"><a-icon type="database" />题库</span>
+            <a-menu-item key="bank:1" @click="$router.push({ path: '/bank' })">进入题库</a-menu-item>
+            <a-menu-item key="bank:2" @click="$router.push({ path: '/bank/statistics' })">查看记录</a-menu-item>
+        </a-sub-menu>
+
         <a-menu-item key="newStudent" @click="$router.push({ path: '/newStudent' })">
             <a-icon type="sound" /> 新生指南
         </a-menu-item>

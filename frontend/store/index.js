@@ -1,5 +1,5 @@
 export const state = () => ({
-  baseUrl: process.env.NODE_ENV == 'production' ? '' : 'http://localhost:8000',
+  baseUrl: process.env.NODE_ENV == 'production' ? 'http://182.92.107.124:8000' : 'http://localhost:8000',
   classes: [{
     value: '中医学院',
     label: '中医学院',

@@ -59,9 +59,11 @@ urlpatterns = [
     path('thumbsUpArticle', views.thumbsUpArticle),
     path('submitArticleComment', views.submitArticleComment),
     # Bank
+    path('getBankSubjects', views.getBankSubjects),
     path('getNumQuestion', views.getNumQuestion),
     path('submitBank', views.submitBank),
     path('handExam', views.handExam),
+    path('getBankStatistics', views.getBankStatistics),
     # Club
     # path('getClubDetail', views.getClubDetail),
     # Hot

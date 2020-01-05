@@ -86,7 +86,7 @@
             </div>
         </div>
         <div style="margin-top: 50px"></div>
-        <!-- anchor 
+        <!-- anchor
         <a-anchor :offsetTop="50" class="anchor">
             <a-anchor-link v-for="index in questions.singleA.length" :key="index" :href="'#' + (index-1)" :title="'第' + index + '题'" />
         </a-anchor> -->
@@ -101,7 +101,7 @@
             <p class="timer">
                 {{ totalSeconds == -1 ? '无限制' : timer.hours() + 'h ' + timer.minutes() + 'm ' + timer.seconds() + 's' }}
             </p>
-            <a-button v-if="totalSeconds != -1" type="primary">暂停</a-button>
+            <a-button v-if="totalSeconds != -1" type="primary" @click="pause">暂停</a-button>
         </div>
         <!-- container -->
         <div class="container">
@@ -122,7 +122,7 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}</h4>
+                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + '()' }}</h4>
                                             </a-list-item-meta>
                                             <a-radio-group v-model="item.answer" buttonStyle="solid">
                                                 <a-radio-button value="A">A. {{ item.A }}</a-radio-button>
@@ -137,7 +137,29 @@
                             </a-tab-pane>
                             <!-- singleB -->
                             <a-tab-pane tab="单选-B" key="singleB">
-                                
+                                <span class="summary">共选取 {{ questions.singleB.length }} 道题目</span>
+                                <a-list
+                                    itemLayout="vertical"
+                                    size="large"
+                                    :pagination="null"
+                                    :dataSource="questions.singleB"
+                                >
+                                    <div slot="footer">题目数据来于<b>HNUCM</b>练习册</div>
+                                    <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
+                                        <div :id="index">
+                                            <a-list-item-meta>
+                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + '()' }}</h4>
+                                            </a-list-item-meta>
+                                            <a-radio-group v-model="item.answer" buttonStyle="solid">
+                                                <a-radio-button value="A">A. {{ item.A }}</a-radio-button>
+                                                <a-radio-button value="B">B. {{ item.B }}</a-radio-button>
+                                                <a-radio-button value="C">C. {{ item.C }}</a-radio-button>
+                                                <a-radio-button value="D">D. {{ item.D }}</a-radio-button>
+                                                <a-radio-button v-if="item.E" value="E">E. {{ item.E }}</a-radio-button>
+                                            </a-radio-group>
+                                        </div>
+                                    </a-list-item>
+                                </a-list>
                             </a-tab-pane>
                             <!-- multiple -->
                             <a-tab-pane tab="多选" key="multiple">
@@ -152,13 +174,13 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}</h4>
+                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + '()' }}</h4>
                                             </a-list-item-meta>
                                             <a-checkbox-group v-model="item.answer">
                                                 <a-checkbox value="A">A. {{ item.A }}</a-checkbox>
-                                                <a-checkbox value="B">A. {{ item.B }}</a-checkbox>
-                                                <a-checkbox value="C">A. {{ item.C }}</a-checkbox>
-                                                <a-checkbox value="D">A. {{ item.D }}</a-checkbox>
+                                                <a-checkbox value="B">B. {{ item.B }}</a-checkbox>
+                                                <a-checkbox value="C">C. {{ item.C }}</a-checkbox>
+                                                <a-checkbox value="D">D. {{ item.D }}</a-checkbox>
                                                 <a-checkbox v-if="item.E" value="E">E. {{ item.E }}</a-checkbox>
                                             </a-checkbox-group>
                                         </div>
@@ -178,7 +200,7 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}</h4>
+                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title }}</h4>
                                             </a-list-item-meta>
                                             <a-input
                                                 v-for="title, index in parseBlanks(item.title)"
@@ -205,7 +227,7 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}</h4>
+                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + '()' }}</h4>
                                             </a-list-item-meta>
                                             <a-switch v-model="item.answer">
                                                 <a-icon type="check" slot="checkedChildren"/>
@@ -228,7 +250,7 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + ' (' + item.bank + ')' }}</h4>
+                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + '()' }}</h4>
                                             </a-list-item-meta>
                                             <a-textarea 
                                                 v-model="item.answer"
@@ -260,6 +282,10 @@ import { mapMutations } from 'vuex'
 import Footer from '~/components/footer.vue'
 import navbar from '~/components/navbar'
 
+window.onbeforeunload = function(event) {
+    event.returnValue = "Will leave this page"
+}
+
 export default {
   components: {
       Footer,
@@ -276,11 +302,17 @@ export default {
   async asyncData({ $axios, store, redirect }) {
     let userBaseInfo = null
     let questions = JSON.parse(JSON.stringify(store.state.bank.questions))
+    let subject = store.state.bank.currentSubject
     let timer = moment.duration(store.state.bank.timer)
 
     // modify the type of questions_blank's answer
     questions.blank.forEach((blank) => {
-        blank.answer = new Array()
+        let num = 0
+        for (let i = 0; i < blank.title.length; i++) {
+            if (blank.title[i] == '{') num ++
+        }
+
+        blank.answer = new Array(num).fill('')
     })
     // modify the type of questions_multiple's answer
     questions.multiple.forEach((multiple) => {
@@ -302,6 +334,7 @@ export default {
     return {
         userBaseInfo: userBaseInfo,
         questions: questions,
+        subject: subject,
         timer: timer,
         totalSeconds: timer.hours() * 3600 + timer.minutes() * 60 + timer.seconds()
     }
@@ -312,7 +345,7 @@ export default {
       }),
 
       parseBlanks(blanks) {
-          let regex = new RegExp(/{(.)}/, 'g')
+          let regex = new RegExp(/{()}/, 'g')
           let result = []
           let array = []
           while ((array = regex.exec(blanks))) {
@@ -322,6 +355,19 @@ export default {
       },
       changeBlank(e, item, index) {
           this.$set(item.answer, index, e.target.value)
+      },
+      pause() {
+          clearInterval(this.timerInterval)
+          this.$confirm({
+              title: '暂停',
+              content: '点击继续答题',
+              onOk: () => {
+                  this.startTimer()
+              },
+              onCancel: () => {
+                  this.startTimer()
+              },
+          })
       },
       submit() {
           this.$confirm({
@@ -334,7 +380,8 @@ export default {
                       multiple: this.questions.multiple,
                       judge: this.questions.judge,
                       blank: this.questions.blank,
-                      qa: this.questions.qa
+                      qa: this.questions.qa,
+                      subject: this.subject
                   }))
                   .then((response) => {
                       this.setQuestions(response.data)
@@ -342,22 +389,38 @@ export default {
                   })
               }
           })
+      },
+      startTimer() {
+          clearInterval(this.timerInterval)
+          this.timerInterval = setInterval(() => {
+              if (this.timer.hours() == 0 && this.timer.minutes() == 0 && this.timer.seconds() == 0) {
+                  this.totalSeconds = -1
+              }
+              else {
+                  this.timer.subtract(1, 's')
+                  // time up
+                  if (this.timer.hours() == 0 && this.timer.minutes() == 0 && this.timer.seconds() == 0) {
+                      clearInterval(this.timerInterval)
+                      this.$message.warning('时间到了')
+                      this.$axios.post('handExam', JSON.stringify({
+                          singleA: this.questions.singleA,
+                          singleB: this.questions.singleB,
+                          multiple: this.questions.multiple,
+                          judge: this.questions.judge,
+                          blank: this.questions.blank,
+                          qa: this.questions.qa
+                  }))
+                  .then((response) => {
+                      this.setQuestions(response.data)
+                      this.$router.push({ path: '/bank/result' })
+                  })
+                }
+            }
+        }, 1000)
       }
   },
   mounted() {
-      clearInterval(this.timerInterval)
-      this.timerInterval = setInterval(() => {
-          if (this.timer.hours() == 0 && this.timer.minutes() == 0 && this.timer.seconds() == 0) {
-              this.totalSeconds = -1
-          }
-          else {
-            this.timer.subtract(1, 's')
-            if (this.timer.hours() == 0 && this.timer.minutes() == 0 && this.timer.seconds() == 0) {
-                clearInterval(this.timerInterval)
-                this.$message.warning('kkk')
-            }
-          }
-      }, 1000)
+      this.startTimer()
       this.loading = false
   },
   destroyed() {
@@ -372,6 +435,7 @@ export default {
     position: fixed;
     right: 60px;
     top: 200px;
+    z-index: 999;
 }
 .floatcard h4 {
     color: red;

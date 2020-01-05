@@ -1,41 +1,27 @@
 export const state = () => ({
     timer: null,
     questions: [],
-    banks: [{
-        key: '中医基础理论',
-        subBanks: [{
-            key: 'zyjcll-1',
-            title: '第一章'
-        },
-        {
-            key: 'zyjcll-2',
-            title: '第二章'
-        }]
-    },
-    {
-        key: '免疫学',
-        subBanks: [{
-            key: 'myx-1',
-            title: '第一章'
-        },
-        {
-            key: 'myx-2',
-            title: '第二章'
-        }]
-    }]
+    subjects: [],
+    currentSubject: ''
 })
 
 export const getters = {
-    getSubBanks: (state) => (bank) => {
-        return state.banks.filter((subBank) => {
-            return subBank.key == bank
-        })[0].subBanks
+    getChapters: (state) => (value) => {
+        return state.subjects.filter((chapter) => {
+            return chapter.key == value
+        })[0].chapters
     }
 }
 
 export const mutations = {
+    setSubjects(state, subjects) {
+        state.subjects = subjects
+    },
     setQuestions(state, questions) {
         state.questions = questions
+    },
+    setCurrentSubject(state, currentSubject) {
+        state.currentSubject = currentSubject
     },
     setTimer(state, timer) {
         state.timer = timer
@@ -43,8 +29,9 @@ export const mutations = {
 }
 
 export const actions = {
-    setBank({ commit }, { questions, timer }) {
+    setBank({ commit }, { questions, timer, subject }) {
         commit('setQuestions', questions)
-        commit('setTimer', timer)
+        commit('setTimer', timer),
+        commit('setCurrentSubject', subject)
     },
 }

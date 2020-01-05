@@ -67,6 +67,8 @@
             <div class="text-left">
                 <div class="text-center notice">
                     <span>题库数据来源于练习册</span>
+                    <br />
+                    <span>推荐使用PC端以获得最佳体验</span>
                 </div>
                 <a-form :form="form_bank" @submit="submitBank">
                     <a-form-item v-bind="formItemLayout">
@@ -92,8 +94,7 @@
                     <a-form-item v-bind="formItemLayout" label="选择题库">
                         <a-select
                             v-decorator="[
-                                'banks',
-                                {
+                                'banks', {
                                     rules: [{ required: true, message: '请至少选择一个题库' }],
                                     getValueFromEvent: selectBank
                                 }
@@ -101,27 +102,27 @@
                         >
                             <a-select-opt-group>
                                 <span slot="label"><a-icon type="heat-map"/>中医类</span>
-                                <a-select-option value="中医基础理论">中医基础理论</a-select-option>
+                                <a-select-option value="金匮要略">金匮要略</a-select-option>
+                                <a-select-option value="中医各家学说">中医各家学说</a-select-option>
                             </a-select-opt-group>
                             <a-select-opt-group>
                                 <span slot="label"><a-icon type="stock"/>西医类</span>
-                                <a-select-option value="免疫学">免疫学</a-select-option>
+                                <a-select-option value="药理学">药理学</a-select-option>
                             </a-select-opt-group>
                         </a-select>
                     </a-form-item>
                     <a-form-item v-bind="formItemLayout" label="选择子章">
                         <a-transfer
                             v-decorator="[
-                                'transfer',
-                                {
+                                'transfer', {
                                     rules: [{ validator: validatorTransfer }],
-                                    getValueFromEvent: transferBanks
+                                    getValueFromEvent: transferChapters
                                 }
                             ]"
-                            :dataSource="subBanks"
+                            :dataSource="chapters"
                             showSearch
-                            :filterOption="subBankFilter"
-                            :targetKeys="targetSubBanks"
+                            :filterOption="chapterFilter"
+                            :targetKeys="targetChapters"
                             :render="item => item.title"
                         >
                         </a-transfer>
@@ -272,8 +273,9 @@ export default {
   data() {
     return {
         form_bank: this.$form.createForm(this),
-        subBanks: [],
-        targetSubBanks: [],
+        subject: '',
+        chapters: [],
+        targetChapters: [],
         maxNumQuestion: 0,
         marks: {
             0: '0',
@@ -303,12 +305,18 @@ export default {
         }
     }
   },
-  async asyncData({ $axios }) {
+  async asyncData({ $axios, store }) {
     let userBaseInfo = null
 
     await $axios.get('getUserBaseInfo')
     .then((response) => {
         userBaseInfo = response.data
+    })
+    
+    // Get subjects and chapters
+    await $axios.get('getBankSubjects')
+    .then((response) => {
+        store.commit('bank/setSubjects', response.data.info)
     })
 
     return {
@@ -320,7 +328,7 @@ export default {
           setBank: 'bank/setBank'
       }),
       validatorTransfer(rule, value, callback) {
-          if (this.targetSubBanks.length == 0) {
+          if (this.targetChapters.length == 0) {
               callback('请至少选择一个子章节')
           }
           callback()
@@ -346,27 +354,37 @@ export default {
           })
       },
       selectBank(value) {
-          this.subBanks = this.getSubBanks(value)
+          this.subject = value
+          this.chapters = this.getChapters(value)
           this.form_bank.setFieldsValue({
               'numQuestion': 0
           })
           this.maxNumQuestion = 0
           return value
       },
-      transferBanks(targetKeys, direction, moveKeys) {
-          this.targetSubBanks = moveKeys
+      transferChapters(targetKeys, direction, moveKeys) {
+          this.targetChapters = targetKeys
           // get quantity of selected banks' question
           this.$axios.post('getNumQuestion', qs.stringify({
-              banks: moveKeys
+              subject: this.subject,
+              chapters: moveKeys
           }, { arrayFormat: 'brackets' }))
           .then((response) => {
-              this.maxNumQuestion = response.data
-              this.form_bank.setFieldsValue({
-                  'numQuestion': response.data
-              })
+              if (direction == 'right') {
+                  this.maxNumQuestion += response.data
+                  this.form_bank.setFieldsValue({
+                      'numQuestion': this.form_bank.getFieldValue('numQuestion') + response.data
+                  })
+              }
+              else {
+                  this.maxNumQuestion -= response.data
+                  this.form_bank.setFieldsValue({
+                      'numQuestion': this.form_bank.getFieldValue('numQuestion') - response.data
+                  })
+              }
           })
       },
-      subBankFilter(inputValue, option) {
+      chapterFilter(inputValue, option) {
           return option.title.indexOf(inputValue) > -1
       },
       submitBank(e) {
@@ -386,7 +404,7 @@ export default {
                   else {
                       this.$axios.post('submitBank', qs.stringify({
                           type: values.type,
-                          banks: this.targetSubBanks,
+                          chapters: this.targetChapters,
                           numQuestion: this.form_bank.getFieldValue('numQuestion'),
                           singleA: values.singleA,
                           singleB: values.singleB,
@@ -406,7 +424,8 @@ export default {
                                       seconds: values.timer ? values.timer.second() : 0,
                                       minutes: values.timer ? values.timer.minute() : 0,
                                       hours: values.timer ? values.timer.hour() : 0
-                                  })
+                                  }),
+                                  'subject': this.subject
                               })
                               this.$router.push({ path: '/bank/bank' })
                           }
@@ -424,7 +443,7 @@ export default {
           banks: state => state.bank.banks
       }),
       ...mapGetters({
-          getSubBanks: 'bank/getSubBanks'
+          getChapters: 'bank/getChapters'
       })
   }
 }

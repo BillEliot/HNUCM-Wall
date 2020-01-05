@@ -830,9 +830,27 @@ def submitDeal(request):
 
 
 @csrf_exempt
+def getBankSubjects(requests):
+    subjects = []
+    for subject in Bank_Subject.objects.all():
+        tempSubject = { 'key': subject.name }
+        tempChapter = []
+        for chapter in Bank_Chapter.objects.filter(subject=subject):
+            tempChapter.append({
+                'key': chapter.name,
+                'title': chapter.name
+            })
+        tempSubject['chapters'] = tempChapter
+        subjects.append(tempSubject)
+    
+    return JsonResponse({ 'info': subjects })
+
+
+
+@csrf_exempt
 def submitBank(request):
     _type = request.POST.get('type')
-    banks = request.POST.getlist('banks[]')
+    chapters = request.POST.getlist('chapters[]')
     numQuestion = int(request.POST.get('numQuestion'))
     freSingleA = float(request.POST.get('singleA')) / 100.0
     freSingleB = float(request.POST.get('singleB')) / 100.0
@@ -849,8 +867,8 @@ def submitBank(request):
     questions_qa = []
     try:
         if _type == 'total':
-            for bank in banks:
-                allQuestions = Bank.objects.filter(bank=bank)
+            for chapter in chapters:
+                allQuestions = Bank_Chapter.objects.get(name=chapter).bank_set.all()
                 singleA = allQuestions.filter(questionType='singleA')
                 singleB = allQuestions.filter(questionType='singleB')
                 multiple = allQuestions.filter(questionType='multiple')
@@ -865,8 +883,8 @@ def submitBank(request):
                 questions_judge.extend(list(judge.values()[0:int(judge.count()*freJudge)]))
                 questions_qa.extend(list(qa.values()[0:int(qa.count()*freQA)]))
         elif _type == 'random':
-            for index, bank in enumerate(banks):
-                allQuestions = Bank.objects.filter(bank=bank)
+            for index, chapter in enumerate(chapters):
+                allQuestions = Bank_Chapter.objects.get(name=chapter).bank_set.all()
                 if index == 0:
                     singleA = allQuestions.filter(questionType='singleA')
                     singleB = allQuestions.filter(questionType='singleB')
@@ -882,6 +900,13 @@ def submitBank(request):
                     judge = judge | allQuestions.filter(questionType='judge')
                     qa = qa | allQuestions.filter(questionType='qa')
             # random all questions
+            singleA = list(singleA.values())
+            singleB = list(singleB.values())
+            multiple = list(multiple.values())
+            blank = list(blank.values())
+            judge = list(judge.values())
+            qa = list(qa.values())
+
             random.shuffle(singleA)
             random.shuffle(singleB)
             random.shuffle(multiple)
@@ -889,12 +914,12 @@ def submitBank(request):
             random.shuffle(judge)
             random.shuffle(qa)
 
-            questions_singleA.extend(list(singleA.values()[0:math.ceil(numQuestion*freSingleA)]))
-            questions_singleB.extend(list(singleB.values()[0:math.ceil(numQuestion*freSingleB)]))
-            questions_multiple.extend(list(multiple.values()[0:math.ceil(numQuestion*freMultiple)]))
-            questions_blank.extend(list(blank.values()[0:math.ceil(numQuestion*freBlank)]))
-            questions_judge.extend(list(judge.values()[0:math.ceil(numQuestion*freJudge)]))
-            questions_qa.extend(list(qa.values()[0:math.ceil(numQuestion*freQA)]))
+            questions_singleA.extend(singleA[0:math.ceil(numQuestion*freSingleA)])
+            questions_singleB.extend(singleB[0:math.ceil(numQuestion*freSingleB)])
+            questions_multiple.extend(multiple[0:math.ceil(numQuestion*freMultiple)])
+            questions_blank.extend(blank[0:math.ceil(numQuestion*freBlank)])
+            questions_judge.extend(judge[0:math.ceil(numQuestion*freJudge)])
+            questions_qa.extend(qa[0:math.ceil(numQuestion*freQA)])
 
         # remove answers
         for question in questions_singleA:
@@ -925,57 +950,122 @@ def submitBank(request):
 
 @csrf_exempt
 def handExam(request):
-    questions = json.loads(request.body)
+    uid = request.session.get('uid', None)
+    subject = request.POST.get('subject')
+
+    questions = json.loads(request.body.decode('utf8')) # Compatible with 3.5 or lower
     singleA = questions['singleA']
     singleB = questions['singleB']
     multiple = questions['multiple']
     judge = questions['judge']
     blank = questions['blank']
     qa = questions['qa']
+    subject = questions['subject']
 
-    try:
-        for question in singleA:
-            answer = Bank.objects.get(id=question['id']).answer
-            if answer == question['answer']:
+    allQuestions = len(singleA) + len(singleB) + len(multiple) + len(judge) + len(blank) + len(qa)
+    correctQuestions = 0
+    #try:
+    for question in singleA:
+        answer = Bank.objects.get(id=question['id']).answer
+        if answer == question['answer']:
+            question['isCorrect'] = True
+            correctQuestions += 1
+        else:
+            question['isCorrect'] = False
+            question['correctAnswer'] = answer
+    for question in singleB:
+        answer = Bank.objects.get(id=question['id']).answer
+        if answer == question['answer']:
+            question['isCorrect'] = True
+            correctQuestions += 1
+        else:
+            question['isCorrect'] = False
+            question['correctAnswer'] = answer
+    for question in multiple:
+        answer = Bank.objects.get(id=question['id']).answer
+        question['answer'].sort()
+        if answer == ''.join(question['answer']):
+            question['isCorrect'] = True
+            correctQuestions += 1
+        else:
+            question['isCorrect'] = False
+            question['correctAnswer'] = answer
+    for question in judge:
+        answer = Bank.objects.get(id=question['id']).answer
+        if answer == str(question['answer']):
+            question['isCorrect'] = True
+            correctQuestions += 1
+        else:
+            question['isCorrect'] = False
+            if answer == 'True':
+                question['correctAnswer'] = True
+            else:
+                question['correctAnswer'] = False
+    for question in blank:
+        answer = Bank.objects.get(id=question['id']).answer
+        if Bank.objects.get(id=question['id']).isBlankSeq:
+            if answer == ';'.join(question['answer']):
                 question['isCorrect'] = True
+                correctQuestions += 1
             else:
                 question['isCorrect'] = False
                 question['correctAnswer'] = answer
-        for question in singleB:
-            pass
-        for question in multiple:
-            answer = Bank.objects.get(id=question['id']).answer
-            question['answer'].sort()
-            if answer == ''.join(question['answer']):
+        else:
+            temp = True
+            for correctAnswer in answer.split(';'):
+                if not correctAnswer in question['answer']:
+                    question['isCorrect'] = False
+                    temp = False
+                    question['correctAnswer'] = answer
+                    break
+            if temp == True:
                 question['isCorrect'] = True
-            else:
-                question['isCorrect'] = False
-                question['correctAnswer'] = answer
-        for question in judge:
-            answer = Bank.objects.get(id=question['id']).answer
-            if answer == question['answer']:
-                question['isCorrect'] = True
-            else:
-                question['isCorrect'] = False
-                question['correctAnswer'] = answer
-        for question in blank:
-            answer = Bank.objects.get(id=question['id']).answer
-            if answer == question['answer']:
-                question['isCorrect'] = True
-            else:
-                question['isCorrect'] = False
-                question['correctAnswer'] = answer
-        
-        return JsonResponse({ 
-            'singleA': singleA,
-            'singleB': singleB,
-            'multiple': multiple,
-            'judge': judge,
-            'blank': blank,
-            'qa': qa
-         })
-    except:
-        return HttpResponse(1)
+                correctQuestions += 1
+    
+    # Statistical Results
+    if uid:
+        user = User.objects.get(id=uid)
+        allBankResults = BankStatistics.objects.all()
+        if allBankResults.count() == 10:
+            allBankResults[0].delete()
+
+        BankStatistics.objects.create(
+            user=user,
+            subject=subject,
+            allQuestions=allQuestions,
+            correctQuestions=correctQuestions
+        )
+
+
+    return JsonResponse({ 
+        'singleA': singleA,
+        'singleB': singleB,
+        'multiple': multiple,
+        'judge': judge,
+        'blank': blank,
+        'qa': qa,
+        'allQuestions': allQuestions,
+        'correctQuestions': correctQuestions
+    })
+    #except:
+        #return HttpResponse(1)
+
+
+
+@csrf_exempt
+def getBankStatistics(request):
+    bankStatisticsList = []
+
+    for statistics in BankStatistics.objects.all():
+        bankStatisticsList.append({
+            'id': statistics.id,
+            'user': { 'uid': statistics.user.id, 'nickname': statistics.user.nickname },
+            'subject': statistics.subject,
+            'allQuestions': statistics.allQuestions,
+            'correctQuestions': statistics.correctQuestions
+        })
+
+    return JsonResponse({ 'info': bankStatisticsList })
 
 
 
@@ -1576,11 +1666,16 @@ def getHelpDetail(request):
 
 @csrf_exempt
 def getNumQuestion(request):
-    banks = request.POST.getlist('banks[]')
+    subject = request.POST.get('subject')
+    strChapters = request.POST.getlist('chapters[]')
+
+    print(subject)
 
     quantity = 0
-    for bank in banks:
-        quantity += Bank.objects.filter(bank=bank).count()
+    subject = Bank_Subject.objects.get(name=subject)
+    for strChapter in strChapters:
+        chapter = Bank_Chapter.objects.filter(subject=subject).get(name=strChapter)
+        quantity += chapter.bank_set.count()
 
     return HttpResponse(quantity)
 
