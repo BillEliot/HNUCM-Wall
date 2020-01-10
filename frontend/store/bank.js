@@ -7,8 +7,8 @@ export const state = () => ({
 
 export const getters = {
     getChapters: (state) => (value) => {
-        return state.subjects.filter((chapter) => {
-            return chapter.key == value
+        return state.subjects.filter((subject) => {
+            return subject.key == value
         })[0].chapters
     }
 }

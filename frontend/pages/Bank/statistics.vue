@@ -19,7 +19,7 @@
     <section class="section">
       <div class="container">
           <a-table :columns="columns" :dataSource="data">
-            <a-tag slot="id" slot-scope="text" :color="randomColor()">{{ text }}</a-tag>
+            <a-tag slot="id" slot-scope="text, record, index" :color="randomColor()">{{ index + 1 }}</a-tag>
             <router-link slot="user" slot-scope="text, record" :to="{ path: '/profile', query: { uid: record.user.uid } }">{{ record.user.nickname }}</router-link>
             <a-tag slot="subject" slot-scope="text" :color="randomColor()">{{ text }}</a-tag>
             <span slot="rate" slot-scope="text, record">{{ (record.correctQuestions / record.allQuestions).toFixed(4) * 100 }}%</span>
@@ -45,34 +45,28 @@ export default {
   },
   data() {
     return {
-        columns: [{
-            key: 'id',
-            dataIndex: 'id',
-            scopedSlots: { customRender: 'id' },
-        }, {
-            title: '用户',
-            key: 'user',
-            scopedSlots: { customRender: 'user' },
-        }, {
-            title: '科目',
-            key: 'subject',
-            dataIndex: 'subject',
-            scopedSlots: { customRender: 'subject' },
-        }, {
-            title: '全部题目',
-            key: 'allQuestions',
-            dataIndex: 'allQuestions',
-            scopedSlots: { customRender: 'tags' },
-        }, {
-            title: '正确题目',
-            key: 'correctQuestions',
-            dataIndex: 'correctQuestions',
-            scopedSlots: { customRender: 'action' },
-        }, {
-            title: '正确率',
-            key: 'rate',
-            scopedSlots: { customRender: 'rate' },
-        }]
+      columns: [{
+        scopedSlots: { customRender: 'id' },
+      }, {
+        title: '用户',
+        scopedSlots: { customRender: 'user' },
+      }, {
+        title: '科目',
+        dataIndex: 'subject',
+        scopedSlots: { customRender: 'subject' },
+      }, {
+        title: '全部题目',
+        dataIndex: 'allQuestions',
+      }, {
+        title: '正确题目',
+        dataIndex: 'correctQuestions',
+      }, {
+        title: '正确率',
+        scopedSlots: { customRender: 'rate' },
+      }, {
+        title: '日期',
+        dataIndex: 'date',
+      }]
     }
   },
   async asyncData({ $axios }) {

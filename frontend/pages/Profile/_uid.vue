@@ -232,7 +232,7 @@
                 <div class="col-md-12">
                     <a-tabs defaultActiveKey="1">
                         <!-- comments -->
-                        <a-tab-pane key="1" v-if="userBaseInfo.uid != -1 && userBaseInfo.uid == $route.query.uid">
+                        <a-tab-pane key="1">
                             <span slot="tab">
                                 <a-icon type="highlight" />留言板
                             </span>
@@ -363,6 +363,48 @@
                                 </a-list-item>
                             </a-list>
                         </a-tab-pane>
+                        <!-- error book -->
+                        <a-tab-pane key="6" v-if="userBaseInfo.uid != -1 && userBaseInfo.uid == $route.query.uid">
+                            <span slot="tab">
+                                <a-icon type="file-text" />错题本
+                            </span>
+                            <a-list
+                                v-if="userProfile.errorBook.length"
+                                :pagination="errorBookPagination"
+                                :dataSource="userProfile.errorBook"
+                                :header="`${userProfile.errorBook.length} 个错题`"
+                                itemLayout="horizontal"
+                            >
+                                <div slot="footer"><b>做错的题目～</b></div>
+                                <a-list-item slot="renderItem" slot-scope="item">
+                                    <div>
+                                        <a-tag color="red">科目：{{ item.subject }}</a-tag>
+                                        <a-tag color="green">章节：{{ item.chapter }}</a-tag>
+                                        <h4>{{ item.title }}</h4>
+                                        <a-tag color="purple" v-if="item.A != ''">A. {{ item.A }}</a-tag>
+                                        <a-tag color="purple" v-if="item.A != ''">B. {{ item.B }}</a-tag>
+                                        <a-tag color="purple" v-if="item.A != ''">C. {{ item.C }}</a-tag>
+                                        <a-tag color="purple" v-if="item.A != ''">D. {{ item.D }}</a-tag>
+                                        <a-tag color="purple" v-if="item.A != ''">E. {{ item.E }}</a-tag>
+                                        <br />
+                                        <a-collapse :bordered="false">
+                                            <a-collapse-panel header="正确答案">
+                                                <p>{{ item.answer }}</p>
+                                            </a-collapse-panel>
+                                        </a-collapse>
+                                        <a-popconfirm
+                                            title="确定从错题本中删除这道题目吗？"
+                                            @confirm="confirm(item.id)"
+                                            okText="是"
+                                            cancelText="否"
+                                        >
+                                            <a-icon slot="icon" type="question-circle-o" style="color: red" />
+                                            <a-button type="danger" size="small" style="margin-top: 10px">删除题目</a-button>
+                                        </a-popconfirm>
+                                    </div>
+                                </a-list-item>
+                            </a-list>
+                        </a-tab-pane>
                     </a-tabs>
                 </div>
             </div>
@@ -412,6 +454,13 @@ export default {
                 }
             },
             helpPagination: {
+                current: 1,
+                pageSize: 10,
+                onChange (page) {
+                    this.current = page
+                }
+            },
+            errorBookPagination: {
                 current: 1,
                 pageSize: 10,
                 onChange (page) {
@@ -625,6 +674,25 @@ export default {
                 message: '申请身份认证',
                 description: '请联系 qq1161142536 / eliotwjz@gmail.com 申请身份认证！',
                 duration: null
+            })
+        },
+        confirm(id) {
+            this.$axios.post('removeErrorBank', qs.stringify({
+                id: id
+            }))
+            .then((response) => {
+                if (response.data == 1) {
+                    this.$message.error('未知错误')
+                }
+                else {
+                    this.userProfile.errorBook.forEach((item, index) => {
+                        if (item.id == id) {
+                            this.userProfile.errorBook.splice(index, 1)
+                            this.$message.success('删除成功')
+                            return true
+                        }
+                    })
+                }
             })
         }
     },

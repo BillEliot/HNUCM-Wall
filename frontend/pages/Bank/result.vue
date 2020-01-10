@@ -55,9 +55,10 @@
                                                 <a-radio-button value="D">D. {{ item.D }}</a-radio-button>
                                                 <a-radio-button v-if="item.E" value="E">E. {{ item.E }}</a-radio-button>
                                             </a-radio-group>
-                                            <div v-if="!item.isCorrect" class="fault-action">
-                                                <h4>正确答案：{{ item.correctAnswer }}</h4>
-                                                <a-button type="primary">加入错题本</a-button>
+                                            <div class="fault-action">
+                                                <h4 v-if="!item.isCorrect">正确答案：{{ item.correctAnswer }}</h4>
+                                                <a-button type="primary" @click="addErrorBook(item.id)">加入错题本</a-button>
+                                                <a-button type="danger" @click="error" class="error">纠错</a-button>
                                             </div>
                                         </div>
                                     </a-list-item>
@@ -87,9 +88,10 @@
                                                 <a-radio-button value="D">D. {{ item.D }}</a-radio-button>
                                                 <a-radio-button v-if="item.E" value="E">E. {{ item.E }}</a-radio-button>
                                             </a-radio-group>
-                                            <div v-if="!item.isCorrect" class="fault-action">
-                                                <h4>正确答案：{{ item.correctAnswer }}</h4>
-                                                <a-button type="primary">加入错题本</a-button>
+                                            <div class="fault-action">
+                                                <h4 v-if="!item.isCorrect">正确答案：{{ item.correctAnswer }}</h4>
+                                                <a-button type="primary" @click="addErrorBook(item.id)">加入错题本</a-button>
+                                                <a-button type="danger" @click="error" class="error">纠错</a-button>
                                             </div>
                                         </div>
                                     </a-list-item>
@@ -114,14 +116,15 @@
                                             </a-list-item-meta>
                                             <a-checkbox-group v-model="item.answer" disabled>
                                                 <a-checkbox value="A">A. {{ item.A }}</a-checkbox>
-                                                <a-checkbox value="B">A. {{ item.B }}</a-checkbox>
-                                                <a-checkbox value="C">A. {{ item.C }}</a-checkbox>
-                                                <a-checkbox value="D">A. {{ item.D }}</a-checkbox>
+                                                <a-checkbox value="B">B. {{ item.B }}</a-checkbox>
+                                                <a-checkbox value="C">C. {{ item.C }}</a-checkbox>
+                                                <a-checkbox value="D">D. {{ item.D }}</a-checkbox>
                                                 <a-checkbox v-if="item.E" value="E">E. {{ item.E }}</a-checkbox>
                                             </a-checkbox-group>
-                                            <div v-if="!item.isCorrect" class="fault-action">
-                                                <h4>正确答案：{{ item.correctAnswer }}</h4>
-                                                <a-button type="primary">加入错题本</a-button>
+                                            <div class="fault-action">
+                                                <h4 v-if="!item.isCorrect">正确答案：{{ item.correctAnswer }}</h4>
+                                                <a-button type="primary" @click="addErrorBook(item.id)">加入错题本</a-button>
+                                                <a-button type="danger" @click="error" class="error">纠错</a-button>
                                             </div>
                                         </div>
                                     </a-list-item>
@@ -152,9 +155,10 @@
                                             >
                                                 <a-icon slot="prefix" type="question" />
                                             </a-input>
-                                            <div v-if="!item.isCorrect" class="fault-action">
-                                                <h4>正确答案：{{ item.correctAnswer }}</h4>
-                                                <a-button type="primary">加入错题本</a-button>
+                                            <div class="fault-action">
+                                                <h4 v-if="!item.isCorrect">正确答案：{{ item.correctAnswer }}</h4>
+                                                <a-button type="primary" @click="addErrorBook(item.id)">加入错题本</a-button>
+                                                <a-button type="danger" @click="error" class="error">纠错</a-button>
                                             </div>
                                         </div>
                                     </a-list-item>
@@ -174,16 +178,17 @@
                                         <div :id="index">
                                             <a-list-item-meta>
                                                 <h4 slot="title" :class="item.isCorrect ? 'correct' : 'uncorrect'">
-                                                    {{ (index+1) + '、 ' + item.title + '()' }}
+                                                    {{ (index+1) + '、 ' + item.title }}
                                                 </h4>
                                             </a-list-item-meta>
                                             <a-switch v-model="item.answer" disabled>
                                                 <a-icon type="check" slot="checkedChildren"/>
                                                 <a-icon type="close" slot="unCheckedChildren"/>
                                             </a-switch>
-                                            <div v-if="!item.isCorrect" class="fault-action">
-                                                <h4>正确答案：{{ item.correctAnswer ? '正确' : '错误' }}</h4>
-                                                <a-button type="primary">加入错题本</a-button>
+                                            <div class="fault-action">
+                                                <h4 v-if="!item.isCorrect">正确答案：{{ item.correctAnswer }}</h4>
+                                                <a-button type="primary" @click="addErrorBook(item.id)">加入错题本</a-button>
+                                                <a-button type="danger" @click="error" class="error">纠错</a-button>
                                             </div>
                                         </div>
                                     </a-list-item>
@@ -203,7 +208,7 @@
                                         <div :id="index">
                                             <a-list-item-meta>
                                                 <h4 slot="title">
-                                                    {{ (index+1) + '、 ' + item.title + '()' }}
+                                                    {{ (index+1) + '、 ' + item.title }}
                                                 </h4>
                                             </a-list-item-meta>
                                             <a-textarea
@@ -212,6 +217,11 @@
                                                 :rows="4"
                                                 disabled
                                             />
+                                            <div class="fault-action">
+                                                <h4>正确答案：{{ item.correctAnswer }}</h4>
+                                                <a-button type="primary" @click="addErrorBook(item.id)">加入错题本</a-button>
+                                                <a-button type="danger" @click="error" class="error">纠错</a-button>
+                                            </div>
                                         </div>
                                     </a-list-item>
                                 </a-list>
@@ -272,6 +282,29 @@ export default {
               result.push(array[1])
           }
           return result
+      },
+      addErrorBook(id) {
+          this.$axios.post('addErrorBook', qs.stringify({
+              id: id
+          }))
+          .then((response) => {
+              if (response.data == 1) {
+                this.$message.warning('这道题目已经在错题本中了，请前往【个人信息】tab页查看')
+              }
+              else if (response.data == 2) {
+                this.$message.error('未知错误')
+              }
+              else {
+                this.$message.success('已添加到错题本，请前往【个人信息】tab页查看')
+              }
+          })
+      },
+      error() {
+          this.$notification.open({
+              message: '纠错',
+              description: '感谢您的错误指正，请您把错误的科目/章节/题目发到【eliotwjz@gmail.com】或者【qq：1161142536】，再次感谢！',
+              icon: <a-icon type="smile" style="color: #108ee9" />,
+          })
       }
   },
   mounted() {
@@ -292,6 +325,10 @@ export default {
     margin-top: 30px;
     color: green;
     font-weight: bold;
+}
+
+.error {
+    float: right
 }
 
 .summary {

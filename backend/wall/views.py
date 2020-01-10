@@ -632,6 +632,21 @@ def getUserProfile(request):
                 'content': _help.content,
                 'date': _help.date
             })
+        # error book
+        errorBook = []
+        for bank in user.errorBook.all():
+            errorBook.append({
+                'id': bank.id,
+                'title': bank.title,
+                'A': bank.A,
+                'B': bank.B,
+                'C': bank.C,
+                'D': bank.D,
+                'E': bank.E,
+                'answer': bank.answer,
+                'subject': bank.chapter.subject.name,
+                'chapter': bank.chapter.name
+            })
 
         return JsonResponse({
             'uid': user.id,
@@ -650,7 +665,8 @@ def getUserProfile(request):
             'loves': loves,
             'loses': loses,
             'deals': deals,
-            'helps': helps
+            'helps': helps,
+            'errorBook': errorBook
         })
     except:
         return HttpResponse(1)
@@ -837,7 +853,7 @@ def getBankSubjects(requests):
         tempChapter = []
         for chapter in Bank_Chapter.objects.filter(subject=subject):
             tempChapter.append({
-                'key': chapter.name,
+                'key': str(chapter.id),
                 'title': chapter.name
             })
         tempSubject['chapters'] = tempChapter
@@ -868,7 +884,7 @@ def submitBank(request):
     try:
         if _type == 'total':
             for chapter in chapters:
-                allQuestions = Bank_Chapter.objects.get(name=chapter).bank_set.all()
+                allQuestions = Bank_Chapter.objects.get(id=int(chapter)).bank_set.all()
                 singleA = allQuestions.filter(questionType='singleA')
                 singleB = allQuestions.filter(questionType='singleB')
                 multiple = allQuestions.filter(questionType='multiple')
@@ -879,12 +895,12 @@ def submitBank(request):
                 questions_singleA.extend(list(singleA.values()[0:int(singleA.count()*freSingleA)]))
                 questions_singleB.extend(list(singleB.values()[0:int(singleB.count()*freSingleB)]))
                 questions_multiple.extend(list(multiple.values()[0:int(multiple.count()*freMultiple)]))
-                questions_blank.extend(list(blank.values()[0:int(blank.count()*freMultiple)]))
+                questions_blank.extend(list(blank.values()[0:int(blank.count()*freBlank)]))
                 questions_judge.extend(list(judge.values()[0:int(judge.count()*freJudge)]))
                 questions_qa.extend(list(qa.values()[0:int(qa.count()*freQA)]))
         elif _type == 'random':
             for index, chapter in enumerate(chapters):
-                allQuestions = Bank_Chapter.objects.get(name=chapter).bank_set.all()
+                allQuestions = Bank_Chapter.objects.get(id=int(chapter)).bank_set.all()
                 if index == 0:
                     singleA = allQuestions.filter(questionType='singleA')
                     singleB = allQuestions.filter(questionType='singleB')
@@ -964,91 +980,98 @@ def handExam(request):
 
     allQuestions = len(singleA) + len(singleB) + len(multiple) + len(judge) + len(blank) + len(qa)
     correctQuestions = 0
-    #try:
-    for question in singleA:
-        answer = Bank.objects.get(id=question['id']).answer
-        if answer == question['answer']:
-            question['isCorrect'] = True
-            correctQuestions += 1
-        else:
-            question['isCorrect'] = False
-            question['correctAnswer'] = answer
-    for question in singleB:
-        answer = Bank.objects.get(id=question['id']).answer
-        if answer == question['answer']:
-            question['isCorrect'] = True
-            correctQuestions += 1
-        else:
-            question['isCorrect'] = False
-            question['correctAnswer'] = answer
-    for question in multiple:
-        answer = Bank.objects.get(id=question['id']).answer
-        question['answer'].sort()
-        if answer == ''.join(question['answer']):
-            question['isCorrect'] = True
-            correctQuestions += 1
-        else:
-            question['isCorrect'] = False
-            question['correctAnswer'] = answer
-    for question in judge:
-        answer = Bank.objects.get(id=question['id']).answer
-        if answer == str(question['answer']):
-            question['isCorrect'] = True
-            correctQuestions += 1
-        else:
-            question['isCorrect'] = False
-            if answer == 'True':
-                question['correctAnswer'] = True
-            else:
-                question['correctAnswer'] = False
-    for question in blank:
-        answer = Bank.objects.get(id=question['id']).answer
-        if Bank.objects.get(id=question['id']).isBlankSeq:
-            if answer == ';'.join(question['answer']):
+    try:
+        for question in singleA:
+            answer = Bank.objects.get(id=question['id']).answer
+            if answer == question['answer']:
                 question['isCorrect'] = True
                 correctQuestions += 1
             else:
                 question['isCorrect'] = False
                 question['correctAnswer'] = answer
-        else:
-            temp = True
-            for correctAnswer in answer.split(';'):
-                if not correctAnswer in question['answer']:
-                    question['isCorrect'] = False
-                    temp = False
-                    question['correctAnswer'] = answer
-                    break
-            if temp == True:
+        for question in singleB:
+            answer = Bank.objects.get(id=question['id']).answer
+            if answer == question['answer']:
                 question['isCorrect'] = True
                 correctQuestions += 1
-    
-    # Statistical Results
-    if uid:
-        user = User.objects.get(id=uid)
-        allBankResults = BankStatistics.objects.all()
-        if allBankResults.count() == 10:
-            allBankResults[0].delete()
+            else:
+                question['isCorrect'] = False
+                question['correctAnswer'] = answer
+        for question in multiple:
+            answer = Bank.objects.get(id=question['id']).answer
+            question['answer'].sort()
+            if answer == ''.join(question['answer']):
+                question['isCorrect'] = True
+                correctQuestions += 1
+            else:
+                question['isCorrect'] = False
+                question['correctAnswer'] = answer
+        for question in judge:
+            answer = Bank.objects.get(id=question['id']).answer
+            if answer == str(question['answer']):
+                question['isCorrect'] = True
+                correctQuestions += 1
+            else:
+                question['isCorrect'] = False
+                if answer == 'True':
+                    question['correctAnswer'] = True
+                else:
+                    question['correctAnswer'] = False
+        for question in blank:
+            answer = Bank.objects.get(id=question['id']).answer
+            if Bank.objects.get(id=question['id']).isBlankSeq:
+                if answer == ';'.join(question['answer']):
+                    question['isCorrect'] = True
+                    correctQuestions += 1
+                else:
+                    question['isCorrect'] = False
+                    question['correctAnswer'] = answer
+            else:
+                temp = True
+                for correctAnswer in answer.split(';'):
+                    if not correctAnswer in question['answer']:
+                        question['isCorrect'] = False
+                        temp = False
+                        question['correctAnswer'] = answer
+                        break
+                if temp == True:
+                    question['isCorrect'] = True
+                    correctQuestions += 1
+        for question in qa:
+            answer = Bank.objects.get(id=question['id']).answer
+            if question['answer'] != '':
+                question['isCorrect'] = True
+                correctQuestions += 1
+            else:
+                question['isCorrect'] = False
+            question['correctAnswer'] = answer
+        # Statistical Results
+        if uid:
+            user = User.objects.get(id=uid)
+            allBankResults = BankStatistics.objects.all()
+            if allBankResults.count() == 10:
+                allBankResults[9].delete()
 
-        BankStatistics.objects.create(
-            user=user,
-            subject=subject,
-            allQuestions=allQuestions,
-            correctQuestions=correctQuestions
-        )
+            BankStatistics.objects.create(
+                user=user,
+                subject=subject,
+                allQuestions=allQuestions,
+                correctQuestions=correctQuestions
+            )
 
 
-    return JsonResponse({ 
-        'singleA': singleA,
-        'singleB': singleB,
-        'multiple': multiple,
-        'judge': judge,
-        'blank': blank,
-        'qa': qa,
-        'allQuestions': allQuestions,
-        'correctQuestions': correctQuestions
-    })
-    #except:
-        #return HttpResponse(1)
+        return JsonResponse({ 
+            'singleA': singleA,
+            'singleB': singleB,
+            'multiple': multiple,
+            'judge': judge,
+            'blank': blank,
+            'qa': qa,
+            'allQuestions': allQuestions,
+            'correctQuestions': correctQuestions
+        })
+    except:
+        return HttpResponse(1)
 
 
 
@@ -1058,14 +1081,54 @@ def getBankStatistics(request):
 
     for statistics in BankStatistics.objects.all():
         bankStatisticsList.append({
-            'id': statistics.id,
+            'key': statistics.id,
             'user': { 'uid': statistics.user.id, 'nickname': statistics.user.nickname },
             'subject': statistics.subject,
             'allQuestions': statistics.allQuestions,
-            'correctQuestions': statistics.correctQuestions
+            'correctQuestions': statistics.correctQuestions,
+            'date': statistics.date.strftime("%Y-%m-%d %H:%M:%S")
         })
 
     return JsonResponse({ 'info': bankStatisticsList })
+
+
+
+@csrf_exempt
+def addErrorBook(request):
+    uid = request.session.get('uid', None)
+    _id = request.POST.get('id')
+
+
+    try:
+        user = User.objects.get(id=uid)
+        bank = Bank.objects.get(id=_id)
+
+        if user.errorBook.filter(id=_id).exists():
+            return HttpResponse(1)
+        else:
+            user.errorBook.add(bank)
+            return HttpResponse(0)
+    except:
+        return HttpResponse(2)
+
+
+
+@csrf_exempt
+def removeErrorBank(request):
+    uid = request.session.get('uid', None)
+    _id = request.POST.get('id')
+
+    try:
+        user = User.objects.get(id=uid)
+        bank = Bank.objects.get(id=_id)
+
+        if user.errorBook.filter(id=_id).exists():
+            user.errorBook.remove(bank)
+            return HttpResponse(0)
+        else:
+            return HttpResponse(1)
+    except:
+        return HttpResponse(1)
 
 
 
@@ -1669,12 +1732,10 @@ def getNumQuestion(request):
     subject = request.POST.get('subject')
     strChapters = request.POST.getlist('chapters[]')
 
-    print(subject)
-
     quantity = 0
     subject = Bank_Subject.objects.get(name=subject)
     for strChapter in strChapters:
-        chapter = Bank_Chapter.objects.filter(subject=subject).get(name=strChapter)
+        chapter = Bank_Chapter.objects.filter(subject=subject).get(id=int(strChapter))
         quantity += chapter.bank_set.count()
 
     return HttpResponse(quantity)

@@ -6,13 +6,18 @@
                     <div class="col-md-2  col-sm-3 col-xs-6">
                         <div class="footer-logo">
                             <div class="footer-logo-text">Eliot Drizzle</div>
-                            <p>I love you, but I can't tell you, you know.</p>
+                            <p>似水, 吾友</p>
+                            <p>Be water, my friend</p>
+                            <p>水のように, 私の友達</p>
+                            <p>물처럼 내 친구</p>
                         </div>
                     </div>
                     <div class="col-md-2 col-sm-3 col-xs-6">
                         <h3>友情链接</h3>
                         <ul class="list-unstyled links">
-                            <li>Eliot's Blog</li>
+                            <li>
+                                <a target="_blank" href="https://billeliot.github.io">Eliot's Blog</a>
+                            </li>
                         </ul>
                     </div>
                     <div class="col-md-2 col-sm-3 col-xs-6">
@@ -24,17 +29,18 @@
                     <div class="col-md-2 col-sm-3 col-xs-6">
                         <h3>分享</h3>
                         <ul class="list-unstyled links">
-                            <li>qq</li>
-                            <li>微信</li>
-                            <li>qq空间</li>
-                            <li>朋友圈</li>
+                            <li>
+                                <a target='_blank' href="http://connect.qq.com/widget/shareqq/index.html?url=http://182.92.107.124&title=湖南中医药大学表白墙&desc=湖南中医药大学表白墙&summary=湖南中医药大学表白墙">qq</a>
+                            </li>
+                            <li>
+                                <a target='_blank' href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://182.92.107.124&title=湖南中医药大学表白墙&desc=湖南中医药大学表白墙&summary=湖南中医药大学表白墙">qq空间</a>
+                            </li>
                         </ul>
                     </div>
                     <div class="col-md-2 col-sm-3 col-xs-6">
                         <h3>联系我</h3>
                         <ul class="list-unstyled links">
                             <li>eliotwjz@gmail.com</li>
-                            <li>qq: 1161142536</li>
                             <li>wechat: ieliot</li>
                         </ul>
                     </div>
@@ -60,6 +66,10 @@ export default {
     padding: 60px 0;
     background-color: #1A252E;
     font-family: 'Source Sans Pro', sans-serif;
+}
+
+.footer a {
+    text-decoration: none;
 }
 
 .footer-logo .footer-logo-text {

@@ -69,6 +69,8 @@
                     <span>题库数据来源于练习册</span>
                     <br />
                     <span>推荐使用PC端以获得最佳体验</span>
+                    <br />
+                    <span>【错题本】位于【个人信息】中tab页</span>
                 </div>
                 <a-form :form="form_bank" @submit="submitBank">
                     <a-form-item v-bind="formItemLayout">
@@ -102,6 +104,7 @@
                         >
                             <a-select-opt-group>
                                 <span slot="label"><a-icon type="heat-map"/>中医类</span>
+                                <a-select-option value="伤寒论">伤寒论</a-select-option>
                                 <a-select-option value="金匮要略">金匮要略</a-select-option>
                                 <a-select-option value="中医各家学说">中医各家学说</a-select-option>
                             </a-select-opt-group>

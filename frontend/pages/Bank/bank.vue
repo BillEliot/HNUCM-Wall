@@ -227,7 +227,7 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + '()' }}</h4>
+                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title }}</h4>
                                             </a-list-item-meta>
                                             <a-switch v-model="item.answer">
                                                 <a-icon type="check" slot="checkedChildren"/>
@@ -250,7 +250,7 @@
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
                                         <div :id="index">
                                             <a-list-item-meta>
-                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title + '()' }}</h4>
+                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title }}</h4>
                                             </a-list-item-meta>
                                             <a-textarea 
                                                 v-model="item.answer"

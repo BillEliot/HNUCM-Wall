@@ -16,6 +16,7 @@ class User(models.Model):
     coin = models.PositiveIntegerField(default=0)
     comments = models.ManyToManyField('Comment', blank=True, related_name='comments')
     messages = models.ManyToManyField('Message', blank=True, related_name='messages')
+    errorBook = models.ManyToManyField('Bank', blank=True, related_name='errorBook')
     isAdmin = models.BooleanField(default=False)
     auth = models.CharField(max_length=50, blank=True, null=True)
 
@@ -32,6 +33,9 @@ class Love(models.Model):
     comments = models.ManyToManyField('Comment', blank=True)
     thumbsUpUser = models.ManyToManyField('User', blank=True)
 
+    class Meta:
+        ordering = ('-date',)
+
 
 
 class Lose(models.Model):
@@ -45,7 +49,7 @@ class Lose(models.Model):
     comments = models.ManyToManyField('Comment', blank=True)
 
     class Meta:
-        ordering = ('-id',)
+        ordering = ('-publicDate',)
     
     def __str__(self):
         return self.name
@@ -64,7 +68,7 @@ class Deal(models.Model):
     comments = models.ManyToManyField('Comment', blank=True)
 
     class Meta:
-        ordering = ('-id',)
+        ordering = ('-date',)
     
     def __str__(self):
         return self.name
@@ -113,7 +117,7 @@ class Bank(models.Model):
     questionType = models.CharField(max_length=10, choices=questionType, default='singleA')
     isBlankSeq = models.BooleanField(default=True)
     # After sorting, 'A', 'AB' or 'blank'
-    answer = models.CharField(max_length=10)
+    answer = models.TextField()
     chapter = models.ForeignKey('Bank_Chapter', on_delete=models.CASCADE)
 
     def __str__(self):
@@ -147,6 +151,9 @@ class Article(models.Model):
     comments = models.ManyToManyField('Comment', blank=True)
     thumbsUpUser = models.ManyToManyField('User', blank=True, related_name="thumbsUp")
 
+    class Meta:
+        ordering = ('-publicDate',)
+
     def __str__(self):
         return self.title
 
@@ -158,6 +165,9 @@ class Help(models.Model):
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
     comments = models.ManyToManyField('Comment', blank=True)
+
+    class Meta:
+        ordering = ('-date',)
 
     def __str__(self):
         return self.title
@@ -187,6 +197,9 @@ class Hot(models.Model):
     content = models.TextField()
     publisher = models.ForeignKey('User', on_delete=models.CASCADE)
     date = models.DateField(auto_now=True)
+
+    class Meta:
+        ordering = ('-date',)
 
     def __str__(self):
         return self.title

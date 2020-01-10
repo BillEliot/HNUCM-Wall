@@ -64,6 +64,8 @@ urlpatterns = [
     path('submitBank', views.submitBank),
     path('handExam', views.handExam),
     path('getBankStatistics', views.getBankStatistics),
+    path('addErrorBook', views.addErrorBook),
+    path('removeErrorBank', views.removeErrorBank),
     # Club
     # path('getClubDetail', views.getClubDetail),
     # Hot
