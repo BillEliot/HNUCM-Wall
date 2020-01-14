@@ -203,6 +203,42 @@ def bindWX(request):
 
 
 @csrf_exempt
+def follow(request):
+    uid = request.session.get('uid', None)
+    uid_follow = request.POST.get('uid')
+
+    try:
+        if uid:
+            user = User.objects.get(id=uid)
+            user_follow = User.objects.get(id=uid_follow)
+            user.following.add(user_follow)
+            return HttpResponse(0)
+        else:
+            return HttpResponse(1)
+    except:
+            return HttpResponse(1)
+
+
+
+@csrf_exempt
+def unFollow(request):
+    uid = request.session.get('uid', None)
+    uid_follow = request.POST.get('uid')
+
+    try:
+        if uid:
+            user = User.objects.get(id=uid)
+            user_follow = User.objects.get(id=uid_follow)
+            user.following.remove(user_follow)
+            return HttpResponse(0)
+        else:
+            return HttpResponse(1)
+    except:
+            return HttpResponse(1)
+
+
+
+@csrf_exempt
 def logout(request):
     del request.session['uid']
     return HttpResponse(0)
@@ -481,7 +517,7 @@ def searchArticle(request):
                 'id': article.id,
                 'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                 'title': article.title,
-                'tags': article.tags.split(';')[:-1],
+                'tags': article.tags.split(';'),
                 'content': article.content,
                 'neededCoin': article.neededCoin,
                 'publicDate': article.publicDate,
@@ -510,7 +546,7 @@ def searchArticleByUser(request):
                 'id': article.id,
                 'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                 'title': article.title,
-                'tags': article.tags.split(';')[:-1],
+                'tags': article.tags.split(';'),
                 'content': article.content,
                 'neededCoin': article.neededCoin,
                 'publicDate': article.publicDate,
@@ -540,12 +576,9 @@ def searchArticleByTag(request):
     for article in allArticles:
         listArticle.append({
             'id': article.id,
-            'uid': article.user.id,
-            'avatar': article.user.avatar.url,
-            'nickname': article.user.nickname,
-            'bio': article.user.bio,
+            'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio },
             'title': article.title,
-            'tags': article.tags.split(';')[:-1],
+            'tags': article.tags.split(';'),
             'content': article.content,
             'neededCoin': article.neededCoin,
             'publicDate': article.publicDate,
@@ -563,6 +596,7 @@ def searchArticleByTag(request):
 
 @csrf_exempt
 def getUserProfile(request):
+    UID = request.session.get('uid', None)
     uid = request.POST.get('uid')
 
     try:
@@ -632,6 +666,18 @@ def getUserProfile(request):
                 'content': _help.content,
                 'date': _help.date
             })
+        # articles
+        articles = []
+        for article in Article.objects.filter(user=user):
+            articles.append({
+                'id': article.id,
+                'title': article.title,
+                'content': article.content,
+                'tags': article.tags.split(';'),
+                'neededCoin': article.neededCoin,
+                'publicDate': article.publicDate,
+                'editDate': article.editDate
+            })
         # error book
         errorBook = []
         for bank in user.errorBook.all():
@@ -647,6 +693,23 @@ def getUserProfile(request):
                 'subject': bank.chapter.subject.name,
                 'chapter': bank.chapter.name
             })
+        # is following
+        isFollowing = False
+        if UID != uid:
+            USER = User.objects.get(id=UID)
+            if user in USER.following.all():
+                isFollowing = True
+        # following list
+        followings = []
+        for following in user.following.all():
+            followings.append({
+                'uid': following.id,
+                'nickname': following.nickname,
+                'avatar': following.avatar.url,
+                'bio': following.bio,
+                'auth': following.auth.split(';') if following.auth else None,
+            })
+
 
         return JsonResponse({
             'uid': user.id,
@@ -666,7 +729,10 @@ def getUserProfile(request):
             'loses': loses,
             'deals': deals,
             'helps': helps,
-            'errorBook': errorBook
+            'articles': articles,
+            'errorBook': errorBook,
+            'isFollowing': isFollowing,
+            'followings': followings
         })
     except:
         return HttpResponse(1)
@@ -741,9 +807,12 @@ def uploadDealImg(request):
 
 @csrf_exempt
 def removeDealImg(request):
-    name = request.POST.get('name')
-    
+    url = request.POST.get('url')
+    name = url[url.rindex('/')+1:]
+
     try:
+        image = Image.objects.get(name=name)
+        image.delete()
         os.remove(generateUploadPath('/img/dealImg/', name))
         return HttpResponse(0)
     except:
@@ -1114,7 +1183,7 @@ def addErrorBook(request):
 
 
 @csrf_exempt
-def removeErrorBank(request):
+def removeErrorBook(request):
     uid = request.session.get('uid', None)
     _id = request.POST.get('id')
 
@@ -1133,10 +1202,24 @@ def removeErrorBank(request):
 
 
 @csrf_exempt
+def clearErrorBook(request):
+    uid = request.session.get('uid', None)
+
+    try:
+        user = User.objects.get(id=uid)
+        user.errorBook.clear()
+
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def submitArticle(request):
-    uid = request.POST.get('uid')
+    uid = request.session.get('uid', None)
     title = request.POST.get('title')
-    tags = request.POST.getlist('tages[]')
+    tags = request.POST.getlist('tags[]')
     content = request.POST.get('content')
     neededCoin = request.POST.get('neededCoin')
 
@@ -1155,6 +1238,48 @@ def submitArticle(request):
 
 
 @csrf_exempt
+def editArticle(request):
+    uid = request.session.get('uid', None)
+    _id = request.POST.get('id')
+    title = request.POST.get('title')
+    tags = request.POST.getlist('tags[]')
+    content = request.POST.get('content')
+    neededCoin = request.POST.get('neededCoin')
+
+    try:
+        article = Article.objects.get(id=_id)
+        if article.user.id == uid:
+            article.title = title
+            article.tags = ';'.join(tags)
+            article.content = content
+            article.neededCoin = neededCoin
+            article.save()
+            return HttpResponse(0)
+        else:
+            return HttpResponse(2)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def removeArticle(request):
+    uid = request.session.get('uid', None)
+    _id = request.POST.get('id')
+
+    try:
+        article = Article.objects.get(id=_id)
+        if article.user.id == uid:
+            article.delete()
+            return HttpResponse(0)
+        else:
+            return HttpResponse(2)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def submitHelp(request):
     uid = request.POST.get('uid')
     title = request.POST.get('title')
@@ -1167,6 +1292,44 @@ def submitHelp(request):
             content = content
         )
         return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def removeHelp(request):
+    uid = request.session.get('uid', None)
+    _id = request.POST.get('id')
+
+    try:
+        _help = Help.objects.get(id=_id)
+        if _help.user.id == uid:
+            _help.delete()
+            return HttpResponse(0)
+        else:
+            return HttpResponse(2)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def editHelp(request):
+    uid = request.session.get('uid', None)
+    _id = request.POST.get('id')
+    title = request.POST.get('title')
+    content = request.POST.get('content')
+
+    try:
+        _help = Help.objects.get(id=_id)
+        if _help.user.id == uid:
+            _help.title = title
+            _help.content = content
+            _help.save()
+            return HttpResponse(0)
+        else:
+            return HttpResponse(2)
     except:
         return HttpResponse(1)
 
@@ -1397,7 +1560,7 @@ def getArticleList(request):
                 'id': article.id,
                 'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                 'title': article.title,
-                'tags': article.tags.split(';')[:-1],
+                'tags': article.tags.split(';'),
                 'content': article.content,
                 'neededCoin': article.neededCoin,
                 'publicDate': article.publicDate,
@@ -1525,6 +1688,7 @@ def getLoveDetail(request):
 
 @csrf_exempt
 def getLoseDetail(request):
+    uid = request.session.get('uid', None)
     _id = request.POST.get('id')
 
     try:
@@ -1539,7 +1703,11 @@ def getLoseDetail(request):
                 'content': comment.content,
                 'date': comment.date
             })
-        
+        # is own lose
+        isOwnLose = False
+        if lose.user.id == uid:
+            isOwnLose = True
+
         return JsonResponse({
             'id': lose.id,
             'isFound': lose.isFound,
@@ -1549,7 +1717,8 @@ def getLoseDetail(request):
             'name': lose.name,
             'description': lose.description,
             'images': list(lose.images.all().values_list('name', flat=True)),
-            'comments': comments
+            'comments': comments,
+            'isOwnLose': isOwnLose
         })
     except:
         return HttpResponse(1)
@@ -1558,6 +1727,7 @@ def getLoseDetail(request):
 
 @csrf_exempt
 def getDealDetail(request):
+    uid = request.session.get('uid', None)
     _id = request.POST.get('id')
 
     try:
@@ -1572,7 +1742,11 @@ def getDealDetail(request):
                 'content': comment.content,
                 'date': comment.date
             })
-        
+        # is own deal
+        isOwnDeal = False
+        if deal.user.id == uid:
+            isOwnDeal = True
+
         return JsonResponse({
             'id': deal.id,
             'isSold': deal.isSold,
@@ -1582,7 +1756,8 @@ def getDealDetail(request):
             'new': deal.new,
             'description': deal.description,
             'images': list(deal.images.all().values_list('name', flat=True)),
-            'comments': comments
+            'comments': comments,
+            'isOwnDeal': isOwnDeal
         })
     except:
         return HttpResponse(1)
@@ -1590,7 +1765,56 @@ def getDealDetail(request):
 
 
 @csrf_exempt
+def removeDeal(request):
+    uid = request.session.get('uid', None)
+    _id = request.POST.get('id')
+
+    try:
+        deal = Deal.objects.get(id=_id)
+        if deal.user.id == uid:
+            deal.delete()
+            return HttpResponse(0)
+        else:
+            return HttpResponse(2)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def editDeal(request):
+    uid = request.session.get('uid', None)
+    _id = request.POST.get('id')
+    name = request.POST.get('name')
+    price = request.POST.get('price')
+    new = request.POST.get('new')
+    description = request.POST.get('description')
+    images = request.POST.getlist('images[]')
+
+    try:
+        deal = Deal.objects.get(id=_id)
+        if deal.user.id == uid:
+            deal.name = name
+            deal.price = price
+            deal.new = new
+            deal.description = description
+
+            deal.images.clear()
+            if images:
+                for image in images:
+                    deal.images.add(Image.objects.create(name='/media/img/dealImg/' + image))
+            
+            return HttpResponse(0)
+        else:
+            return HttpResponse(2)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def getArticleDetail(request):
+    uid = request.session.get('uid', None)
     _id = request.POST.get('id')
 
     try:
@@ -1602,6 +1826,10 @@ def getArticleDetail(request):
             isThumbsUp = article.thumbsUpUser.filter(id=user.id).exists()
         else:
             isThumbsUp = False
+        # is own article
+        isOwnArticle = False
+        if uid == article.user.id:
+            isOwnArticle = True
         # comments
         comments = []
         for comment in article.comments.all():
@@ -1617,13 +1845,15 @@ def getArticleDetail(request):
             'id': article.id,
             'user': { 'uid': article.user.id, 'nickname': article.user.nickname, 'bio': article.user.bio, 'avatar': article.user.avatar.url, 'auth': article.user.auth.split(';') if article.user.auth else None },
             'title': article.title,
-            'tags': article.tags.split(';')[:-1],
+            'tags': article.tags.split(';'),
             'content': article.content,
             'publicDate': article.publicDate,
             'editDate': article.editDate,
+            'neededCoin': article.neededCoin,
             'comments': comments,
             'thumbsUp': article.thumbsUpUser.count(),
-            'isThumbsUp': isThumbsUp
+            'isThumbsUp': isThumbsUp,
+            'isOwnArticle': isOwnArticle
         })
     except:
         return HttpResponse(1)
@@ -1699,6 +1929,7 @@ def thumbsUpArticle(request):
 
 @csrf_exempt
 def getHelpDetail(request):
+    uid = request.session.get('uid', None)
     _id = request.POST.get('id')
 
     try:
@@ -1713,6 +1944,10 @@ def getHelpDetail(request):
                 'content': comment.content,
                 'date': comment.date
             })
+        # is own help
+        isOwnHelp = False
+        if _help.user.id == uid:
+            isOwnHelp = True
 
         return JsonResponse({
             'id': _help.id,
@@ -1720,7 +1955,8 @@ def getHelpDetail(request):
             'title': _help.title,
             'content': _help.content,
             'date': _help.date,
-            'comments': comments
+            'comments': comments,
+            'isOwnHelp': isOwnHelp
         })
     except:
         return HttpResponse(1)
@@ -2103,7 +2339,7 @@ def getLectureList(request):
     try:
         for lecture in Lecture.objects.all():
             lectureDate = lecture.date
-            currentDate = datetime.datetime.now().replace(tzinfo=pytz.timezone('UTC'))
+            currentDate = datetime.datetime.now()
 
             if currentDate < lectureDate:
                 state = 'wait'

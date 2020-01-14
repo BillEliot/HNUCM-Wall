@@ -8,7 +8,7 @@
                 <div class="container">
                     <div class="title-holder">
                         <div class="title-text text-center">
-                            <h1>发布失物</h1>
+                            <h1>编辑失物</h1>
                             <p class="subheading">现在很难过吧(ノへ￣、)</p>
                         </div>
                     </div>
@@ -27,9 +27,9 @@
                         <a-form-item v-bind="formItemLayout" label="丢失时间">
                             <a-date-picker 
                                 v-decorator="[
-                                    'date',
-                                    {
-                                        rules: [{ required: true, message: '请选择丢失日期' }]
+                                    'date', {
+                                        rules: [{ required: true, message: '请选择丢失日期' }],
+                                        //initialValue: this.loseDetail.loseDate
                                     }
                                 ]"
                                 format="YYYY-MM-DD HH:mm:ss"
@@ -43,9 +43,9 @@
                         <a-form-item v-bind="formItemLayout" label="物品名称">
                             <a-input
                                 v-decorator="[
-                                    'name',
-                                    {
-                                        rules: [{ required: true, message: '请输入丢失的物品名称' }]
+                                    'name', {
+                                        rules: [{ required: true, message: '请输入丢失的物品名称' }],
+                                        initialValue: this.loseDetail.name
                                     }
                                 ]"
                                 placeholder="物品名称"
@@ -58,16 +58,17 @@
                                 placeholder="对物品的描述" 
                                 :rows="4"
                                 v-decorator="[
-                                    'description',
-                                    { rules: [{ required: true, message: '描述越详细，越容易找到哦～' }] }
+                                    'description', {
+                                        rules: [{ required: true, message: '描述越详细，越容易找到哦～' }],
+                                        initialValue: this.loseDetail.description
+                                    }
                                 ]"
                             />
                         </a-form-item>
                         <a-form-item v-bind="formItemLayout" label="物品照片">
                             <a-upload
                                 v-decorator="[
-                                    'uploader', 
-                                    {
+                                    'uploader',  {
                                         valuePropName: 'fileList',
                                         getValueFromEvent: uploadImages,
                                     }]"
@@ -143,7 +144,7 @@ export default {
       },
     }
   },
-  async asyncData({ $axios, redirect }) {
+  async asyncData({ $axios, redirect, query }) {
       let userBaseInfo = null
 
       await $axios.get('getUserBaseInfo')
@@ -154,8 +155,22 @@ export default {
           }
       })
       
+      let loseDetail = null
+      await $axios.post('getLoseDetail', qs.stringify({
+          id: query.id
+      }))
+      .then((response) => {
+          if (response.data == 1) {
+              redirect('/lose')
+          }
+          else {
+              loseDetail = response.data
+          }
+      })
+
       return {
-          userBaseInfo: userBaseInfo
+          userBaseInfo: userBaseInfo,
+          loseDetail: loseDetail
       }
   },
   methods: {

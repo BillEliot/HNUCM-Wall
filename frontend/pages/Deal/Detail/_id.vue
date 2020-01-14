@@ -69,7 +69,18 @@
                             <icon-font type="icon-weibo" />
                         </div>
                     </div>
-                    
+                    <div v-if="dealDetail.isOwnDeal" class="text-left" style="margin-top: 10px;">
+                        <a-button type="primary" @click="editDeal">编辑</a-button>
+                        <a-popconfirm
+                            title="确定删除交易吗？"
+                            @confirm="confirm_removeDeal()"
+                            okText="是"
+                            cancelText="否"
+                        >
+                            <a-icon slot="icon" type="question-circle-o" style="color: red" />
+                            <a-button type="danger">删除</a-button>
+                        </a-popconfirm>
+                    </div>
                     <div id="comment" style="margin-top: 50px">
                         <a-list
                             v-if="dealDetail.comments.length"
@@ -130,6 +141,7 @@ export default {
   },
   data() {
     return {
+        moment,
         commenting: false,
         commentContent: null,
         commentPagination: {
@@ -172,7 +184,6 @@ export default {
       }
   },
   methods: {
-      moment,
       randomColor() {
           let color = ['pink', 'red', 'orange', 'green', 'cyan', 'blue', 'purple']
           return color[Math.round(Math.random() * (color.length - 1))]
@@ -211,6 +222,26 @@ export default {
                   }
               })
           }
+      },
+      confirm_removeDeal() {
+          this.$axios.post('removeDeal', qs.stringify({
+              id: this.dealDetail.id
+          }))
+          .then((response) => {
+              if (response.data == 0) {
+                  this.$message.success('删除成功')
+                  this.$router.push({ path: '/deal' })
+              }
+              else if (response.data == 2) {
+                  this.$message.warning('无权删除')
+              }
+              else {
+                  this.$message.error('未知错误')
+              }
+          })
+      },
+      editDeal() {
+          this.$router.push({ path: '/deal/edit', query: { id: this.dealDetail.id } })
       }
   },
   computed: mapState({

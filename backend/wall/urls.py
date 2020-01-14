@@ -19,6 +19,8 @@ urlpatterns = [
     path('getMessage', views.getMessage),
     path('bindWX', views.bindWX),
     path('uploadAvatar', views.uploadAvatar),
+    path('follow', views.follow),
+    path('unFollow', views.unFollow),
     # Admin - User
     path('getUserList', views.getUserList),
     path('getUserDetail', views.getUserDetail),
@@ -49,6 +51,8 @@ urlpatterns = [
     path('removeDealImg', views.removeDealImg),
     path('submitDeal', views.submitDeal),
     path('submitDealComment', views.submitDealComment),
+    path('removeDeal', views.removeDeal),
+    path('editDeal', views.editDeal),
     # Article
     path('searchArticle', views.searchArticle),
     path('searchArticleByUser', views.searchArticleByUser),
@@ -56,6 +60,8 @@ urlpatterns = [
     path('getArticleList', views.getArticleList),
     path('getArticleDetail', views.getArticleDetail),
     path('submitArticle', views.submitArticle),
+    path('editArticle', views.editArticle),
+    path('removeArticle', views.removeArticle),
     path('thumbsUpArticle', views.thumbsUpArticle),
     path('submitArticleComment', views.submitArticleComment),
     # Bank
@@ -65,7 +71,8 @@ urlpatterns = [
     path('handExam', views.handExam),
     path('getBankStatistics', views.getBankStatistics),
     path('addErrorBook', views.addErrorBook),
-    path('removeErrorBank', views.removeErrorBank),
+    path('removeErrorBook', views.removeErrorBook),
+    path('clearErrorBook', views.clearErrorBook),
     # Club
     # path('getClubDetail', views.getClubDetail),
     # Hot
@@ -82,5 +89,7 @@ urlpatterns = [
     path('submitHelp', views.submitHelp),
     path('getHelpList', views.getHelpList),
     path('getHelpDetail', views.getHelpDetail),
-    path('submitHelpComment', views.submitHelpComment)
+    path('submitHelpComment', views.submitHelpComment),
+    path('removeHelp', views.removeHelp),
+    path('editHelp', views.editHelp)
 ]
