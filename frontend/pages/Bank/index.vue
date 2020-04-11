@@ -1,5 +1,17 @@
 <template>
     <div>
+        <a-drawer
+            title="题库更新"
+            placement="right"
+            :closable="false"
+            :visible="visible_update"
+            @close="visible_update = false"
+        >
+            <a-timeline>
+                <a-timeline-item v-for="message in bankUpdateMessage" :key="message">{{ message }}</a-timeline-item>
+            </a-timeline>
+        </a-drawer>
+
         <!-- navbar -->
         <navbar :userBaseInfo="userBaseInfo" />
         <!-- banner -->
@@ -71,6 +83,8 @@
                     <span>推荐使用PC端以获得最佳体验</span>
                     <br />
                     <span>【错题本】位于【个人信息】中tab页</span>
+                    <br />
+                    <a-button type="link" size="small" @click="visible_update = true">查看更新</a-button>
                 </div>
                 <a-form :form="form_bank" @submit="submitBank">
                     <a-form-item v-bind="formItemLayout">
@@ -107,6 +121,7 @@
                                 <a-select-option value="伤寒论">伤寒论</a-select-option>
                                 <a-select-option value="金匮要略">金匮要略</a-select-option>
                                 <a-select-option value="中医各家学说">中医各家学说</a-select-option>
+                                <a-select-option value="温病学">温病学</a-select-option>
                             </a-select-opt-group>
                             <a-select-opt-group>
                                 <span slot="label"><a-icon type="stock"/>西医类</span>
@@ -305,11 +320,14 @@ export default {
                     offset: 6
                 }
             }
-        }
+        },
+        visible_update: false,
+        bankUpdateMessage: []
     }
   },
   async asyncData({ $axios, store }) {
     let userBaseInfo = null
+    let bankUpdateMessage = []
 
     await $axios.get('getUserBaseInfo')
     .then((response) => {
@@ -322,8 +340,14 @@ export default {
         store.commit('bank/setSubjects', response.data.info)
     })
 
+    await $axios.get('getBankUpdateMessage')
+    .then((response) => {
+        bankUpdateMessage = response.data.info
+    })
+
     return {
         userBaseInfo: userBaseInfo,
+        bankUpdateMessage: bankUpdateMessage
     }
   },
   methods: {

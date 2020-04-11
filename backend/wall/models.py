@@ -75,6 +75,18 @@ class Deal(models.Model):
 
 
 
+class Bank_UpdateMessage(models.Model):
+    content = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-date',)
+    
+    def __str__(self):
+        return self.content
+
+
+
 class Bank_Subject(models.Model):
     subjectType = (
         ('zy', '中医'),
@@ -150,6 +162,7 @@ class Article(models.Model):
     editDate = models.DateTimeField(auto_now=True)
     comments = models.ManyToManyField('Comment', blank=True)
     thumbsUpUser = models.ManyToManyField('User', blank=True, related_name="thumbsUp")
+    isAdopted = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('-publicDate',)

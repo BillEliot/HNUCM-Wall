@@ -86,14 +86,14 @@
                                 </span>
                                 <!-- tags -->
                                 <span>
-                                    <a-tag v-for="tag in item.tags" :key="tag">{{ tag }}</a-tag>
+                                    <a-tag v-for="tag in item.tags" :color="randomColor()" :key="tag">{{ tag }}</a-tag>
                                 </span>
                                 <div>
                                     <span>发布时间：{{ moment(item.publicDate).format('lll') }}</span>
                                     <br />
                                     <span>最后编辑：{{ moment(item.publicDate).format('lll') }}</span>
                                 </div>
-                                <a-list-item-meta :description="item.content">
+                                <a-list-item-meta :description="item.content.substring(0,100) + '......'">
                                     <a slot="title" @click="$router.push({ path: '/article/detail', query: { id: item.id } })">{{ item.title }}</a>
                                 </a-list-item-meta>
                                 <div class="avatar-card text-center">

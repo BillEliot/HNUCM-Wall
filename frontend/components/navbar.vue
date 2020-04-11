@@ -68,7 +68,7 @@
             <a-icon type="rocket" /> 关于
         </a-menu-item>
         <!-- auth -->
-        <template v-if="userBaseInfo.uid != -1">
+        <template v-if="userBaseInfo.uid != -1" style="position: absolute; right: 0">
             <a-badge :count="userBaseInfo.unreadCount" class="auth-avatar">
                 <a-avatar :src="baseUrl + userBaseInfo.avatar" />
             </a-badge>
@@ -167,13 +167,13 @@ a {
     }
 
     .auth-avatar {
-        position: absolute;
-        right: 110px;
+        float: right;
+        right: 1%;
         top: 5px;
     }
     .auth-dropdown {
-        position: absolute;
-        right: 10px;
+        float: right;
+        right: 2%;
     }
 }
 </style>

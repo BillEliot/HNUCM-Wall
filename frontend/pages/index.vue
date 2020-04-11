@@ -98,6 +98,30 @@
             </div>
           </div>
         </div>
+        <!-- row_4 -->
+        <div class="row text-center">
+          <div class="col-md-4">
+            <div class="section-item">
+              <a-icon type="highlight" theme="twoTone" class="section-icon" />
+              <h2>安利墙</h2>
+              <p>吃一口安利～</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="section-item">
+              <a-icon type="smile" theme="twoTone" class="section-icon" />
+              <h2>追剧墙</h2>
+              <p>一起追剧吧～</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="section-item">
+              <a-icon type="home" theme="twoTone" class="section-icon" />
+              <h2>组队墙</h2>
+              <p>找找队友吧～</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
     <!-- about us -->

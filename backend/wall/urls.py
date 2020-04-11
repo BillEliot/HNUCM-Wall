@@ -59,6 +59,7 @@ urlpatterns = [
     path('thumbsUpArticle', views.thumbsUpArticle),
     path('submitArticleComment', views.submitArticleComment),
     # Bank
+    path('getBankUpdateMessage', views.getBankUpdateMessage),
     path('getBankSubjects', views.getBankSubjects),
     path('getNumQuestion', views.getNumQuestion),
     path('submitBank', views.submitBank),
