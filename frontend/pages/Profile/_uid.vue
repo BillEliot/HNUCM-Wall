@@ -168,6 +168,27 @@
                 <a-button @click="changePassword" type="primary" html-type="submit">确定</a-button>
             </div>
         </a-drawer>
+        <!-- drawer - following list -->
+        <a-drawer
+            title="关注列表"
+            placement="right"
+            :closable="false"
+            :visible="visibleDrawerFollowing"
+            @close="visibleDrawerFollowing = false"
+        >
+            <div class="row">
+                <div class="col-md-4 col-md-offset-4 col-xs-4 col-xs-offset-4 text-center">
+                    <div v-for="user in userProfile.followings" :key="user.uid">
+                        <a-avatar v-if="user.uid == -1" :size="64" :src="baseUrl + user.avatar" />
+                        <a-avatar v-else :size="64" :src="baseUrl + user.avatar" @click="$router.push({ path: '/profile', query: { uid: user.uid } })" style="cursor: pointer" />
+                        <a v-if="user.uid == -1">{{ user.nickname }}</a>
+                        <a v-else @click="$router.push({ path: '/profile', query: { uid: user.uid } })">{{ user.nickname }}</a>
+                        <p class="bio">{{ user.bio }}</p>
+                        <a-tag v-for="tag in user.auth" :color="randomColor()" :key="tag">{{ tag }}</a-tag>
+                    </div>
+                </div>
+            </div>
+        </a-drawer>
         <!-- navbar -->
         <navbar :userBaseInfo="userBaseInfo" />
         <!-- banner -->
@@ -184,7 +205,15 @@
             </div>
         </div>
         <div style="margin-top: 30px">
-            <a-button class="follow" type="primary"><a-icon type="heart" />关注</a-button>
+            <a-button v-if="userBaseInfo.uid != -1 && userBaseInfo.uid != $route.query.uid && !userProfile.isFollowing" @click="follow($route.query.uid)" type="primary" class="follow">
+                <a-icon type="heart" />关注
+            </a-button>
+            <a-button v-if="userBaseInfo.uid != -1 && userBaseInfo.uid != $route.query.uid && userProfile.isFollowing" @click="unFollow($route.query.uid)" type="dashed" class="follow">
+                <a-icon type="heart" />取消关注
+            </a-button>
+            <a-button @click="visibleDrawerFollowing = true" class="follow" type="primary">
+                <a-icon type="heart" />关注列表
+            </a-button>
             <router-link to="/">
                 <a-button class="back" type="primary"><a-icon type="left" />返回主页</a-button>
             </router-link>
@@ -287,7 +316,7 @@
                                         <a-avatar v-if="item.userTo_uid == -1" slot="avatar" :src="baseUrl + item.userTo_avatar" />
                                         <a-avatar v-else slot="avatar" :src="baseUrl + item.userTo_avatar" @click="$router.push({ path: '/profile', query: { uid: item.userTo_uid } })" />
                                         <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/love/detail', query: { id: item.id } })">To {{ item.userTo_nickname }}</a>
-                                        <p slot="content" class="text-left">{{ item.content }}</p>
+                                        <p slot="content" class="text-left abbr">{{ item.content }}</p>
                                         <span>{{ item.date }}</span>
                                     </a-comment>
                                 </a-list-item>
@@ -311,7 +340,7 @@
                                         <p v-if="item.isFound" slot="avatar" class="found">已找到</p>
                                         <p v-else slot="avatar" class="notfound">未找到</p>
                                         <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/lose/detail', query: { id: item.id } })">{{ item.name }}</a>
-                                        <p slot="content" class="text-left">{{ item.description }}</p>
+                                        <p slot="content" class="text-left abbr">{{ item.description }}</p>
                                         <span>{{ item.date }}</span>
                                     </a-comment>
                                 </a-list-item>
@@ -335,7 +364,7 @@
                                         <p v-if="item.isSold" slot="avatar" class="found">已售出</p>
                                         <p v-else slot="avatar" class="notfound">未售出</p>
                                         <a slot="author" style="font-size: 15px" @click="$router.push({ path: '/deal/detail', query: { id: item.id } })">{{ item.name }}</a>
-                                        <p slot="content" class="text-left">{{ item.description }}</p>
+                                        <p slot="content" class="text-left abbr">{{ item.description }}</p>
                                         <span>{{ item.date }}</span>
                                     </a-comment>
                                 </a-list-item>
@@ -363,11 +392,49 @@
                                 </a-list-item>
                             </a-list>
                         </a-tab-pane>
+                        <!-- article -->
+                        <a-tab-pane key="6">
+                            <span slot="tab">
+                                <a-icon type="question-circle" />TA的文章
+                            </span>
+                            <a-list
+                                v-if="userProfile.articles.length"
+                                :pagination="articlePagination"
+                                :dataSource="userProfile.articles"
+                                :header="`${userProfile.articles.length} 篇文章`"
+                                itemLayout="horizontal"
+                            >
+                                <div slot="footer"><b>TA的文章哦～</b></div>
+                                <a-list-item slot="renderItem" slot-scope="item, index">
+                                    <div>
+                                        <a style="font-size: 15px" @click="$router.push({ path: '/article/detail', query: { id: item.id } })">{{ item.title }}</a>
+                                        <p class="text-left abbr">{{ item.content }}</p>
+                                        <a-tag v-for="tag in item.tags" :color="randomColor()" :key="tag">{{ tag }}</a-tag>
+                                        <br />
+                                        <span>所需硬币：{{ item.neededCoin }}</span>
+                                        <br />
+                                        <span>最后编辑：{{ item.editDate }}</span>
+                                        <br />
+                                        <span>发布日期：{{ item.publicDate }}</span>
+                                    </div>
+                                </a-list-item>
+                            </a-list>
+                        </a-tab-pane>
                         <!-- error book -->
-                        <a-tab-pane key="6" v-if="userBaseInfo.uid != -1 && userBaseInfo.uid == $route.query.uid">
+                        <a-tab-pane key="7" v-if="userBaseInfo.uid != -1 && userBaseInfo.uid == $route.query.uid">
                             <span slot="tab">
                                 <a-icon type="file-text" />错题本
                             </span>
+
+                            <a-popconfirm
+                                title="确定清空错题本吗？"
+                                @confirm="confirm_clearErrorBook()"
+                                okText="是"
+                                cancelText="否"
+                            >
+                                <a-icon slot="icon" type="question-circle-o" style="color: red" />
+                                <a-button type="danger">清空错题本</a-button>
+                            </a-popconfirm>
                             <a-list
                                 v-if="userProfile.errorBook.length"
                                 :pagination="errorBookPagination"
@@ -394,7 +461,7 @@
                                         </a-collapse>
                                         <a-popconfirm
                                             title="确定从错题本中删除这道题目吗？"
-                                            @confirm="confirm(item.id)"
+                                            @confirm="confirm_removeErrorBook(item.id)"
                                             okText="是"
                                             cancelText="否"
                                         >
@@ -460,6 +527,13 @@ export default {
                     this.current = page
                 }
             },
+            articlePagination: {
+                current: 1,
+                pageSize: 10,
+                onChange (page) {
+                    this.current = page
+                }
+            },
             errorBookPagination: {
                 current: 1,
                 pageSize: 10,
@@ -469,6 +543,7 @@ export default {
             },
             visibleDrawerProfile: false,
             visibleDrawerPassword: false,
+            visibleDrawerFollowing: false,
             form_profile: this.$form.createForm(this),
             form_password: this.$form.createForm(this),
             confirmDirty: false,
@@ -676,8 +751,8 @@ export default {
                 duration: null
             })
         },
-        confirm(id) {
-            this.$axios.post('removeErrorBank', qs.stringify({
+        confirm_removeErrorBook(id) {
+            this.$axios.post('removeErrorBook', qs.stringify({
                 id: id
             }))
             .then((response) => {
@@ -692,6 +767,51 @@ export default {
                             return true
                         }
                     })
+                }
+            })
+        },
+        confirm_clearErrorBook() {
+            if (this.userProfile.errorBook.length == 0) {
+                this.$message.warning('错题本已经是空的了～')
+            }
+            else {
+                this.$axios.get('clearErrorBook')
+                .then((response) => {
+                    if (response.data == 1) {
+                        this.$message.error('未知错误')
+                    }
+                    else {
+                        this.userProfile.errorBook = []
+                        this.$message.success('清除成功')
+                    }
+                })
+            }
+        },
+        follow(uid) {
+            this.$axios.post('follow', qs.stringify({
+                uid: uid
+            }))
+            .then((response) => {
+                if (response.data == 1) {
+                    this.$message.error('未知错误')
+                }
+                else {
+                    this.$message.success('关注成功')
+                    this.userProfile.isFollowing = true
+                }
+            })
+        },
+        unFollow(uid) {
+            this.$axios.post('unFollow', qs.stringify({
+                uid: uid
+            }))
+            .then((response) => {
+                if (response.data == 1) {
+                    this.$message.error('未知错误')
+                }
+                else {
+                    this.$message.success('取消关注成功')
+                    this.userProfile.isFollowing = false
                 }
             })
         }
@@ -755,5 +875,11 @@ a:hover {
     cursor: default;
     color: red;
     font-weight: bold;
+}
+
+.abbr {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 </style>

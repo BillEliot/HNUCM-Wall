@@ -8,8 +8,8 @@
                 <div class="container">
                     <div class="title-holder">
                         <div class="title-text text-center">
-                            <h1>发布文章</h1>
-                            <p class="subheading">你的文章很有用</p>
+                            <h1>编辑文章</h1>
+                            <p class="subheading">把文章修改的更好吧～</p>
                         </div>
                     </div>
                 </div>
@@ -19,11 +19,11 @@
         <div class="container article">
             <div class="row">
                 <div class="col-md-12">
-                    <a-input placeholder="输入文章标题" v-model="title">
+                    <a-input placeholder="输入文章标题" v-model="articleDetail.title">
                         <a-icon slot="prefix" type="edit" />
                     </a-input>
                     <a-select
-                        v-model="tags"
+                        v-model="articleDetail.tags"
                         mode="tags"
                         :showArrow="false"
                         placeholder="添加标签"
@@ -32,12 +32,12 @@
                     >
                     </a-select>
                     <no-ssr placeholder='Loading'>
-                        <mavon-editor :toolbars="toolbars" v-model="content" class="editor" />
+                        <mavon-editor :toolbars="toolbars" v-model="articleDetail.content" class="editor" />
                     </no-ssr>
                     <div class="extra">
                         <p>设置阅读本篇文章所需花费的硬币，<b>最低为0个硬币，最高为1000个硬币</b></p>
                         <a-input-number
-                            v-model="neededCoin"
+                            v-model="articleDetail.neededCoin"
                             :min="0"
                             :max="1000"
                             :formatter="value => `${value} 硬币`"
@@ -45,7 +45,7 @@
                             style="width: 150px"
                         />
                     </div>
-                    <a-button type="primary" class="submit" @click="submitArticle">发布文章</a-button>
+                    <a-button type="primary" class="submit" @click="editArticle">发布文章</a-button>
                 </div>
             </div>
         </div>
@@ -68,11 +68,6 @@ export default {
   },
   data() {
     return {
-        title: '',
-        tags: '中医',
-        content: '',
-        neededCoin: 0,
-
         toolbars: {
             bold: true,
             italic: true,
@@ -97,7 +92,7 @@ export default {
         }
     }
   },
-  async asyncData({ $axios, error }) {
+  async asyncData({ $axios, error, query }) {
       let userBaseInfo = null
 
       await $axios.get('getUserBaseInfo')
@@ -108,23 +103,41 @@ export default {
           }
       })
 
+      let articleDetail = null
+      await $axios.post('getArticleDetail', qs.stringify({
+          id: query.id
+      }))
+      .then((response) => {
+          if (response.data == 1) {
+              redirect('/article')
+          }
+          else {
+              articleDetail = response.data
+          }
+      })
+
       return {
-          userBaseInfo: userBaseInfo
+          userBaseInfo: userBaseInfo,
+          articleDetail: articleDetail
       }
   },
   methods: {
-      submitArticle() {
-          if (!!this.title && !!this.content) {
-              this.$axios.post('submitArticle', qs.stringify({
-                  title: this.title,
-                  tags: this.tags,
-                  content: this.content,
-                  neededCoin: this.neededCoin
+      editArticle() {
+          if (!!this.articleDetail.title && !!this.articleDetail.content) {
+              this.$axios.post('editArticle', qs.stringify({
+                  id: this.articleDetail.id,
+                  title: this.articleDetail.title,
+                  tags: this.articleDetail.tags,
+                  content: this.articleDetail.content,
+                  neededCoin: this.articleDetail.neededCoin
               }, { arrayFormat: 'brackets' }))
               .then((response) => {
                   if (response.data == 0) {
-                      this.$message.success('发布成功')
-                      this.$router.push({ path: '/article' })
+                      this.$message.success('编辑成功')
+                      this.$router.push({ path: '/article/detail', query: { 'id': this.articleDetail.id } })
+                  }
+                  else if (response.data == 2) {
+                      this.$message.warning('无权修改')
                   }
                   else {
                       this.$message.error('未知错误')

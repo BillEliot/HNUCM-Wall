@@ -62,7 +62,18 @@
                         <icon-font type="icon-pyq" />
                         <icon-font type="icon-weibo" />
                     </div>
-                    
+                    <div v-if="loseDetail.isOwnLose" class="text-left" style="margin-top: 10px;">
+                        <a-button type="primary" @click="editLose">编辑</a-button>
+                        <a-popconfirm
+                            title="确定删除失物吗？"
+                            @confirm="confirm_removeLose()"
+                            okText="是"
+                            cancelText="否"
+                        >
+                            <a-icon slot="icon" type="question-circle-o" style="color: red" />
+                            <a-button type="danger">删除</a-button>
+                        </a-popconfirm>
+                    </div>
                     <div id="comment" style="margin-top: 50px">
                         <a-list
                             v-if="loseDetail.comments.length"
@@ -123,6 +134,7 @@ export default {
   },
   data() {
     return {
+        moment,
         commenting: false,
         commentContent: null,
         commentPagination: {
@@ -165,7 +177,6 @@ export default {
       }
   },
   methods: {
-      moment,
       randomColor() {
           let color = ['pink', 'red', 'orange', 'green', 'cyan', 'blue', 'purple']
           return color[Math.round(Math.random() * (color.length - 1))]
@@ -204,6 +215,26 @@ export default {
                   }
               })
           }
+      },
+      confirm_removeLose() {
+          this.$axios.post('removeLose', qs.stringify({
+              id: this.loseDetail.id
+          }))
+          .then((response) => {
+              if (response.data == 0) {
+                  this.$message.success('删除成功')
+                  this.$router.push({ path: '/lose' })
+              }
+              else if (response.data == 2) {
+                  this.$message.warning('无权删除')
+              }
+              else {
+                  this.$message.error('未知错误')
+              }
+          })
+      },
+      editLose() {
+          this.$router.push({ path: '/lose/edit', query: { id: this.loseDetail.id } })
       }
   },
   computed: mapState({

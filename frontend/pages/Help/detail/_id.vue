@@ -38,6 +38,18 @@
                             class="editor"
                         />
                     </no-ssr>
+                    <div v-if="helpDetail.isOwnHelp" class="text-left" style="margin-top: 10px;">
+                        <a-button type="primary" @click="editHelp">编辑</a-button>
+                        <a-popconfirm
+                            title="确定删除求助吗？"
+                            @confirm="confirm_removeHelp()"
+                            okText="是"
+                            cancelText="否"
+                        >
+                            <a-icon slot="icon" type="question-circle-o" style="color: red" />
+                            <a-button type="danger">删除</a-button>
+                        </a-popconfirm>
+                    </div>
                     <hr />
                     <div>
                         <!-- icon-share -->
@@ -155,7 +167,6 @@ export default {
       }
   },
   methods: {
-      moment,
       randomColor() {
         let color = ['pink', 'red', 'orange', 'green', 'cyan', 'blue', 'purple']
         return color[Math.round(Math.random() * (color.length - 1))]
@@ -194,6 +205,26 @@ export default {
                   }
               })
           }
+      },
+      confirm_removeHelp() {
+          this.$axios.post('removeHelp', qs.stringify({
+              id: this.helpDetail.id
+          }))
+          .then((response) => {
+              if (response.data == 0) {
+                  this.$message.success('删除成功')
+                  this.$router.push({ path: '/help' })
+              }
+              else if (response.data == 2) {
+                  this.$message.warning('无权删除')
+              }
+              else {
+                  this.$message.error('未知错误')
+              }
+          })
+      },
+      editHelp() {
+          this.$router.push({ path: '/help/edit', query: { id: this.helpDetail.id } })
       }
   },
   computed: mapState({

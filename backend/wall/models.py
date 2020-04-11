@@ -17,6 +17,7 @@ class User(models.Model):
     comments = models.ManyToManyField('Comment', blank=True, related_name='comments')
     messages = models.ManyToManyField('Message', blank=True, related_name='messages')
     errorBook = models.ManyToManyField('Bank', blank=True, related_name='errorBook')
+    followings = models.ManyToManyField('User', blank=True, related_name='following')
     isAdmin = models.BooleanField(default=False)
     auth = models.CharField(max_length=50, blank=True, null=True)
 

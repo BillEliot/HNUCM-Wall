@@ -12,6 +12,8 @@
                             <span class="date">发布时间: {{ moment(articleDetail.publicDate).format("llll") }}</span>
                             <br />
                             <span class="date">最后编辑: {{ moment(articleDetail.editDate).format("llll") }}</span>
+                            <hr />
+                            <span>所需硬币: {{ articleDetail.neededCoin }}</span>
                         </div>
                     </div>
                 </div>
@@ -44,6 +46,18 @@
                             class="editor"
                         />
                     </no-ssr>
+                    <div v-if="articleDetail.isOwnArticle" class="text-left" style="margin-top: 10px;">
+                        <a-button type="primary" @click="editArticle">编辑</a-button>
+                        <a-popconfirm
+                            title="确定删除文章吗？"
+                            @confirm="confirm_removeArticle()"
+                            okText="是"
+                            cancelText="否"
+                        >
+                            <a-icon slot="icon" type="question-circle-o" style="color: red" />
+                            <a-button type="danger">删除</a-button>
+                        </a-popconfirm>
+                    </div>
                     <hr />
                     <div>
                         <!-- icon-left -->
@@ -165,7 +179,6 @@ export default {
       }
   },
   methods: {
-      moment,
       randomColor() {
         let color = ['pink', 'red', 'orange', 'green', 'cyan', 'blue', 'purple']
         return color[Math.round(Math.random() * (color.length - 1))]
@@ -227,6 +240,26 @@ export default {
                   }
               })
           }
+      },
+      editArticle() {
+          this.$router.push({ path: '/article/edit', query: { id: this.articleDetail.id } })
+      },
+      confirm_removeArticle() {
+          this.$axios.post('removeArticle', qs.stringify({
+              id: this.articleDetail.id
+          }))
+          .then((response) => {
+              if (response.data == 0) {
+                  this.$message.success('删除成功')
+                  this.$router.push({ path: '/article' })
+              }
+              else if (response.data == 2) {
+                  this.$message.warning('无权删除')
+              }
+              else {
+                  this.$message.error('未知错误')
+              }
+          })
       }
   },
   computed: mapState({

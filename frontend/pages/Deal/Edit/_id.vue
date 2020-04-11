@@ -8,8 +8,8 @@
                 <div class="container">
                     <div class="title-holder">
                         <div class="title-text text-center">
-                            <h1>发布失物</h1>
-                            <p class="subheading">现在很难过吧(ノへ￣、)</p>
+                            <h1>编辑物品</h1>
+                            <p class="subheading">没有中间商赚差价～</p>
                         </div>
                     </div>
                 </div>
@@ -19,33 +19,14 @@
         <div class="container" style="margin-top: 50px">
             <div class="row">
                 <div class="col-md-12">
-                    <a-button type="primary" @click="$router.push({ path: '/lose' })"><a-icon type="left" />返回</a-button>
-                    <a-form :form="form_lose" @submit="submitLose">
-                        <a-form-item v-bind="formItemLayout" label="注意">
-                            <p class="warning">若您还未完善联系资料(qq, 微信或电话), 请尽快完善, 这样拾取者可迅速联系到您</p>
-                        </a-form-item>
-                        <a-form-item v-bind="formItemLayout" label="丢失时间">
-                            <a-date-picker 
-                                v-decorator="[
-                                    'date',
-                                    {
-                                        rules: [{ required: true, message: '请选择丢失日期' }]
-                                    }
-                                ]"
-                                format="YYYY-MM-DD HH:mm:ss"
-                                :disabledDate="disabledDate"
-                                :disabledTime="disabledTime"
-                                :showTime="{ defaultValue: moment('00:00:00', 'HH:mm:ss') }"
-                            >
-                                <template slot="renderExtraFooter"></template>
-                            </a-date-picker>
-                        </a-form-item>
+                    <a-button type="primary" @click="$router.push({ path: '/deal' })"><a-icon type="left" />返回</a-button>
+                    <a-form :form="form_deal" @submit="submitDeal">
                         <a-form-item v-bind="formItemLayout" label="物品名称">
                             <a-input
                                 v-decorator="[
-                                    'name',
-                                    {
-                                        rules: [{ required: true, message: '请输入丢失的物品名称' }]
+                                    'name', {
+                                        rules: [{ required: true, message: '请输入要交易的物品名称' }],
+                                        initialValue: this.dealDetail.name
                                     }
                                 ]"
                                 placeholder="物品名称"
@@ -53,33 +34,66 @@
                                 <a-icon slot="prefix" type="book" />
                             </a-input>
                         </a-form-item>
+                        <a-form-item v-bind="formItemLayout" label="最低接受价格">
+                            <a-input-number
+                                v-decorator="[
+                                    'price', {
+                                        rules: [
+                                            { required: true, message: '请输入最低接受价格' },
+                                            { type: 'number', message: '价格必须为数字' },
+                                            { validator: validatorPrice}
+                                        ],
+                                        initialValue: this.dealDetail.price
+                                    }
+                                ]"
+                                :formatter="value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                :parser="value => value.replace(/\¥\s?|(,*)/g, '')"
+                                style="width: 250px"
+                            />
+                        </a-form-item>
+                        <a-form-item v-bind="formItemLayout" label="新度">
+                            <a-rate 
+                                v-decorator="[
+                                    'new', {
+                                        rules: [{ required: true, message: '选择一个新度哦～' }],
+                                        initialValue: this.dealDetail.new
+                                    }
+                                ]"
+                                allowHalf
+                                :allowClear="false"
+                            />
+                            <span v-if="form_deal.getFieldValue('new')">{{ form_deal.getFieldValue('new')*2 }} 成新</span>
+                            <span v-else>{{ this.dealDetail.new }} 成新</span>
+                        </a-form-item>
                         <a-form-item v-bind="formItemLayout" label="物品描述">
                             <a-textarea 
-                                placeholder="对物品的描述" 
+                                placeholder="对物品的描述"
                                 :rows="4"
                                 v-decorator="[
-                                    'description',
-                                    { rules: [{ required: true, message: '描述越详细，越容易找到哦～' }] }
+                                    'description', {
+                                        rules: [{ required: true, message: '描述越详细，越容易卖出哦～' }],
+                                        initialValue: this.dealDetail.description
+                                    }
                                 ]"
                             />
                         </a-form-item>
                         <a-form-item v-bind="formItemLayout" label="物品照片">
                             <a-upload
                                 v-decorator="[
-                                    'uploader', 
-                                    {
+                                    'uploader', {
                                         valuePropName: 'fileList',
-                                        getValueFromEvent: uploadImages,
-                                    }]"
+                                        getValueFromEvent: uploadImages
+                                    }
+                                ]"
                                 name="files"
                                 accept='.jpg, .jpeg, .png'
                                 listType="picture-card"
                                 :multiple='true'
                                 :supportServerRender='true'
-                                :action="baseUrl + '/api/uploadLoseImg'"
+                                :action="baseUrl + '/api/uploadDealImg'"
                                 @preview="previewImage"
                             >
-                                <div v-if="!form_lose.getFieldValue('uploader') || (form_lose.getFieldValue('uploader') && form_lose.getFieldValue('uploader').length < 3)">
+                                <div v-if="!form_deal.getFieldValue('uploader') || (form_deal.getFieldValue('uploader') && form_deal.getFieldValue('uploader').length < 3)">
                                     <a-icon type="plus" />
                                     <div>上传</div>
                                 </div>
@@ -104,7 +118,6 @@
 <script>
 import qs from 'qs'
 import { mapState } from 'vuex'
-import moment from 'moment'
 import Footer from '~/components/footer.vue'
 import navbar from '~/components/navbar'
 
@@ -115,8 +128,7 @@ export default {
   },
   data() {
     return {
-      moment,
-      form_lose: this.$form.createForm(this),
+      form_deal: this.$form.createForm(this),
       previewImgVisible: false,
       previewImageUrl: null,
       formItemLayout: {
@@ -143,38 +155,53 @@ export default {
       },
     }
   },
-  async asyncData({ $axios, redirect }) {
+  async asyncData({ $axios, redirect, query }) {
       let userBaseInfo = null
 
       await $axios.get('getUserBaseInfo')
       .then((response) => {
           userBaseInfo = response.data
           if (userBaseInfo.uid == -1) {
-              redirect({ path: '/lose' })
+              redirect({ path: '/deal' })
           }
       })
       
+      let dealDetail = null
+      await $axios.post('getDealDetail', qs.stringify({
+          id: query.id
+      }))
+      .then((response) => {
+          if (response.data == 1) {
+              redirect('/deal')
+          }
+          else {
+              dealDetail = response.data
+          }
+      })
+
       return {
-          userBaseInfo: userBaseInfo
+          userBaseInfo: userBaseInfo,
+          dealDetail: dealDetail
       }
   },
+  mounted() {
+      let fileList = []
+      this.dealDetail.images.forEach((url, index) => {
+          fileList.push({
+              uid: (0-index).toString(),
+              name: (0-index).toString() + '.jpg',
+              status: 'done',
+              url: this.baseUrl + url
+          })
+      })
+      this.form_deal.setFieldsValue({ 'uploader': fileList })
+  },
   methods: {
-      dateRange(start, end) {
-          var result = [];
-          for (let i = start; i < end; i++) {
-              result.push(i)
+      validatorPrice (rule, value, callback) {
+          if (value < 0) {
+              callback('最低价格为 ¥0')
           }
-          return result
-      },
-      disabledDate(current) {
-          return current > moment().endOf('day')
-      },
-      disabledTime() {
-          return {
-              disabledHours: () => this.dateRange(moment().get('hours'), 24),
-              disabledMinutes: () => this.dateRange(moment().get('minutes'), 60),
-              disabledSeconds: () => this.dateRange(moment().get('seconds'), 60),
-          }
+          callback()
       },
       uploadImages(e) {
           let status = e.file.status
@@ -189,8 +216,8 @@ export default {
           } else if (status === 'error') {
               this.$message.error(`${e.file.name} 上传失败`)
           } else if (status === 'removed') {
-              this.$axios.post('removeLoseImg', qs.stringify({
-                  name: e.file.name
+              this.$axios.post('removeDealImg', qs.stringify({
+                  url: e.file.url
               }))
               .then((response) => {
                   if (response.data == 0) {
@@ -207,19 +234,20 @@ export default {
           this.previewImageUrl = file.url || file.thumbUrl
           this.previewImgVisible = true
       },
-      submitLose(e) {
+      editDeal(e) {
           e.preventDefault()
-          this.form_lose.validateFields((err, values) => {
+          this.form_deal.validateFields((err, values) => {
               if (!err) {
                   var images = []
-                  values.uploader.forEach((file) => {
+                  values.uploader.forEach(file => {
                       images.push(file.name)
                   })
 
-                  this.$axios.post('submitLose', qs.stringify({
-                      uid: this.userBaseInfo.uid,
-                      loseDate: values.date.format('YYYY-MM-DD HH:mm:ss'),
+                  this.$axios.post('editDeal', qs.stringify({
+                      id: this.dealDetail.id,
                       name: values.name,
+                      price: values.price,
+                      new: values.new,
                       description: values.description,
                       images: images
                   }, { arrayFormat: 'brackets' }))
@@ -227,9 +255,12 @@ export default {
                       if (response.data == 1) {
                           this.$message.error('未知错误')
                       }
+                      else if (response.data == 2) {
+                          this.$message.warning('无权修改')
+                      }
                       else {
-                          this.$message.success('成功发布失物，祝您早日找回～')
-                          this.$router.push({ path: '/lose' })
+                          this.$message.success('成功修改交易～')
+                          this.$router.push({ path: '/deal/detail', query: { id: this.dealDetail.id } })
                       }
                   })
               }
@@ -245,10 +276,5 @@ export default {
 <style scoped>
 a {
     text-decoration: none
-}
-
-.warning {
-    font-weight: bold;
-    color: red;
 }
 </style>
