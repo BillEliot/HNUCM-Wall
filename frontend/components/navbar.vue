@@ -54,16 +54,18 @@
 
         <a-sub-menu>
             <span slot="title"><a-icon type="database" />题库</span>
-            <a-menu-item key="bank:1" @click="$router.push({ path: '/bank' })">进入题库</a-menu-item>
-            <a-menu-item key="bank:2" @click="$router.push({ path: '/bank/statistics' })">查看记录</a-menu-item>
+            <a-menu-item key="bank:1" @click="$router.push({ path: '/bank/search' })">查题</a-menu-item>
+            <a-menu-item key="bank:2" @click="$router.push({ path: '/bank' })">进入题库</a-menu-item>
+            <a-menu-item key="bank:3" @click="$router.push({ path: '/bank/statistics' })">答题记录</a-menu-item>
         </a-sub-menu>
 
         <a-menu-item key="newStudent" @click="$router.push({ path: '/newStudent' })">
             <a-icon type="sound" /> 新生指南
         </a-menu-item>
-        <a-menu-item key="extension" @click="$router.push({ path: '/extension' })">
-            <a-icon type="rise" /> 推广
-        </a-menu-item>
+        <a-sub-menu>
+            <span slot="title"><a-icon type="rise" />推广</span>
+            <a-menu-item key="extension:1">Survival</a-menu-item>
+        </a-sub-menu>
         <a-menu-item key="about" @click="$router.push({ path: '/about' })">
             <a-icon type="rocket" /> 关于
         </a-menu-item>

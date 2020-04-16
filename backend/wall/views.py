@@ -513,13 +513,12 @@ def searchArticle(request):
     listArticle = []
     try:
         for article in Article.objects.filter(title__contains=name):
-<<<<<<< HEAD
             if article.isAdopted:
                 listArticle.append({
                     'id': article.id,
                     'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                     'title': article.title,
-                    'tags': article.tags.split(';')[:-1],
+                    'tags': article.tags.split(';'),
                     'content': article.content,
                     'neededCoin': article.neededCoin,
                     'publicDate': article.publicDate,
@@ -527,20 +526,6 @@ def searchArticle(request):
                     'comments': article.comments.count(),
                     'thumbsUp': article.thumbsUpUser.count(),
                 })
-=======
-            listArticle.append({
-                'id': article.id,
-                'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
-                'title': article.title,
-                'tags': article.tags.split(';'),
-                'content': article.content,
-                'neededCoin': article.neededCoin,
-                'publicDate': article.publicDate,
-                'editDate': article.editDate,
-                'comments': article.comments.count(),
-                'thumbsUp': article.thumbsUpUser.count(),
-            })
->>>>>>> d69ebf29f298dc36f5f0b187de5a50af4dc309c9
 
         return JsonResponse({
             'list': listArticle,
@@ -558,13 +543,12 @@ def searchArticleByUser(request):
     listArticle = []
     try:
         for article in Article.objects.filter(user__nickname__contains=name):
-<<<<<<< HEAD
             if article.isAdopted:
                 listArticle.append({
                     'id': article.id,
                     'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                     'title': article.title,
-                    'tags': article.tags.split(';')[:-1],
+                    'tags': article.tags.split(';'),
                     'content': article.content,
                     'neededCoin': article.neededCoin,
                     'publicDate': article.publicDate,
@@ -572,20 +556,6 @@ def searchArticleByUser(request):
                     'comments': article.comments.count(),
                     'thumbsUp': article.thumbsUpUser.count(),
                 })
-=======
-            listArticle.append({
-                'id': article.id,
-                'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
-                'title': article.title,
-                'tags': article.tags.split(';'),
-                'content': article.content,
-                'neededCoin': article.neededCoin,
-                'publicDate': article.publicDate,
-                'editDate': article.editDate,
-                'comments': article.comments.count(),
-                'thumbsUp': article.thumbsUpUser.count(),
-            })
->>>>>>> d69ebf29f298dc36f5f0b187de5a50af4dc309c9
 
         return JsonResponse({
             'list': listArticle,
@@ -603,45 +573,30 @@ def searchArticleByTag(request):
     allArticles = Article.objects.all()
     for tag in tags:
         allArticles = allArticles.filter(tags__contains=tag)
-    
-    listArticle = []
-    for article in allArticles:
-<<<<<<< HEAD
-        if article.isAdopted:
-            listArticle.append({
-                'id': article.id,
-                'uid': article.user.id,
-                'avatar': article.user.avatar.url,
-                'nickname': article.user.nickname,
-                'bio': article.user.bio,
-                'title': article.title,
-                'tags': article.tags.split(';')[:-1],
-                'content': article.content,
-                'neededCoin': article.neededCoin,
-                'publicDate': article.publicDate,
-                'editDate': article.editDate,
-                'comments': article.comments.count(),
-                'thumbsUp': article.thumbsUpUser.count(),
-            })
-=======
-        listArticle.append({
-            'id': article.id,
-            'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio },
-            'title': article.title,
-            'tags': article.tags.split(';'),
-            'content': article.content,
-            'neededCoin': article.neededCoin,
-            'publicDate': article.publicDate,
-            'editDate': article.editDate,
-            'comments': article.comments.count(),
-            'thumbsUp': article.thumbsUpUser.count(),
-        })
->>>>>>> d69ebf29f298dc36f5f0b187de5a50af4dc309c9
 
-    return JsonResponse({
-        'list': listArticle,
-        'total': len(listArticle)
-    })
+    listArticle = []
+    try:
+        for article in allArticles:
+            if article.isAdopted:
+                listArticle.append({
+                    'id': article.id,
+                    'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
+                    'title': article.title,
+                    'tags': article.tags.split(';'),
+                    'content': article.content,
+                    'neededCoin': article.neededCoin,
+                    'publicDate': article.publicDate,
+                    'editDate': article.editDate,
+                    'comments': article.comments.count(),
+                    'thumbsUp': article.thumbsUpUser.count(),
+                })
+
+        return JsonResponse({
+            'list': listArticle,
+            'total': len(listArticle)
+        })
+    except:
+        return HttpResponse(1)
 
 
 
@@ -720,15 +675,16 @@ def getUserProfile(request):
         # articles
         articles = []
         for article in Article.objects.filter(user=user):
-            articles.append({
-                'id': article.id,
-                'title': article.title,
-                'content': article.content,
-                'tags': article.tags.split(';'),
-                'neededCoin': article.neededCoin,
-                'publicDate': article.publicDate,
-                'editDate': article.editDate
-            })
+            if article.isAdopted:
+                articles.append({
+                    'id': article.id,
+                    'title': article.title,
+                    'content': article.content,
+                    'tags': article.tags.split(';'),
+                    'neededCoin': article.neededCoin,
+                    'publicDate': article.publicDate,
+                    'editDate': article.editDate
+                })
         # error book
         errorBook = []
         for bank in user.errorBook.all():
@@ -748,7 +704,7 @@ def getUserProfile(request):
         isFollowing = False
         if UID != uid:
             USER = User.objects.get(id=UID)
-            if user in USER.following.all():
+            if user in USER.followings.all():
                 isFollowing = True
         # following list
         followings = []
@@ -979,7 +935,10 @@ def getBankUpdateMessage(requests):
 def getBankSubjects(requests):
     subjects = []
     for subject in Bank_Subject.objects.all():
-        tempSubject = { 'key': subject.name }
+        tempSubject = {
+            'key': subject.name,
+            'subjectType': subject.subjectType
+        }
         tempChapter = []
         for chapter in Bank_Chapter.objects.filter(subject=subject):
             tempChapter.append({
@@ -1271,6 +1230,60 @@ def clearErrorBook(request):
         user.errorBook.clear()
 
         return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def searchQuestion(request):
+    title = request.POST.get('title')
+    questions = []
+    
+    answer = ''
+    try:
+        for question in Bank.objects.filter(title__contains=title):
+            if question.questionType == 'singleA' or question.questionType == 'singleB':
+                if question.answer == 'A':
+                    answer = question.A
+                elif question.answer == 'B':
+                    answer = question.B
+                elif question.answer == 'C':
+                    answer = question.C
+                elif question.answer == 'D':
+                    answer = question.D
+                elif question.answer == 'E':
+                    answer = question.E
+            elif question.questionType == 'multiple':
+                for ans in question.answer:
+                    if ans == 'A':
+                        answer = answer + question.A + '——'
+                    elif ans == 'B':
+                        answer = answer + question.B + '——'
+                    elif ans == 'C':
+                        answer = answer + question.C + '——'
+                    elif ans == 'D':
+                        answer = answer + question.D + '——'
+                    elif ans == 'E':
+                        answer = answer + question.E + '——'
+                answer = answer[:-2]
+            elif question.questionType == 'judge':
+                if question.answer == 'True':
+                    answer = '正确'
+                else:
+                    answer = '错误'
+            else:
+                answer = question.answer
+
+            questions.append({
+                'key': question.id,
+                'title': question.title,
+                'chapter': question.chapter.name,
+                'subject': question.chapter.subject.name,
+                'answer': answer
+            })
+
+        return JsonResponse({ 'info': questions })
     except:
         return HttpResponse(1)
 
@@ -1617,13 +1630,12 @@ def getArticleList(request):
 
     try:
         for article in articles:
-<<<<<<< HEAD
             if article.isAdopted:
                 listArticle.append({
                     'id': article.id,
                     'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                     'title': article.title,
-                    'tags': article.tags.split(';')[:-1],
+                    'tags': article.tags.split(';'),
                     'content': article.content,
                     'neededCoin': article.neededCoin,
                     'publicDate': article.publicDate,
@@ -1631,20 +1643,6 @@ def getArticleList(request):
                     'comments': article.comments.count(),
                     'thumbsUp': article.thumbsUpUser.count(),
                 })
-=======
-            listArticle.append({
-                'id': article.id,
-                'user': { 'uid': article.user.id, 'avatar': article.user.avatar.url, 'nickname': article.user.nickname, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
-                'title': article.title,
-                'tags': article.tags.split(';'),
-                'content': article.content,
-                'neededCoin': article.neededCoin,
-                'publicDate': article.publicDate,
-                'editDate': article.editDate,
-                'comments': article.comments.count(),
-                'thumbsUp': article.thumbsUpUser.count(),
-            })
->>>>>>> d69ebf29f298dc36f5f0b187de5a50af4dc309c9
 
         return JsonResponse({
             'list': listArticle,
@@ -1900,7 +1898,6 @@ def getArticleDetail(request):
             return HttpResponse(1)
 
         # is thumbsUp
-        uid = request.session.get('uid', None)
         if uid:
             user = User.objects.get(id=uid)
             isThumbsUp = article.thumbsUpUser.filter(id=user.id).exists()

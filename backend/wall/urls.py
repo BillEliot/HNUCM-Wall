@@ -74,6 +74,7 @@ urlpatterns = [
     path('addErrorBook', views.addErrorBook),
     path('removeErrorBook', views.removeErrorBook),
     path('clearErrorBook', views.clearErrorBook),
+    path('searchQuestion', views.searchQuestion),
     # Club
     # path('getClubDetail', views.getClubDetail),
     # Hot

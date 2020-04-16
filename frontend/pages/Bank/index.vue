@@ -118,14 +118,11 @@
                         >
                             <a-select-opt-group>
                                 <span slot="label"><a-icon type="heat-map"/>中医类</span>
-                                <a-select-option value="伤寒论">伤寒论</a-select-option>
-                                <a-select-option value="金匮要略">金匮要略</a-select-option>
-                                <a-select-option value="中医各家学说">中医各家学说</a-select-option>
-                                <a-select-option value="温病学">温病学</a-select-option>
+                                <a-select-option v-for="subject in zySubjects" :key="subject" :value="subject">{{ subject }}</a-select-option>
                             </a-select-opt-group>
                             <a-select-opt-group>
                                 <span slot="label"><a-icon type="stock"/>西医类</span>
-                                <a-select-option value="药理学">药理学</a-select-option>
+                                <a-select-option v-for="subject in xySubjects" :key="subject" :value="subject">{{ subject }}</a-select-option>
                             </a-select-opt-group>
                         </a-select>
                     </a-form-item>
@@ -328,6 +325,8 @@ export default {
   async asyncData({ $axios, store }) {
     let userBaseInfo = null
     let bankUpdateMessage = []
+    let zySubjects = []
+    let xySubjects = []
 
     await $axios.get('getUserBaseInfo')
     .then((response) => {
@@ -338,6 +337,14 @@ export default {
     await $axios.get('getBankSubjects')
     .then((response) => {
         store.commit('bank/setSubjects', response.data.info)
+        response.data.info.forEach(subject => {
+            if (subject.subjectType == 'zy') {
+                zySubjects.push(subject.key)
+            }
+            else if (subject.subjectType == 'xy') {
+                xySubjects.push(subject.key)
+            }
+        })
     })
 
     await $axios.get('getBankUpdateMessage')
@@ -347,7 +354,9 @@ export default {
 
     return {
         userBaseInfo: userBaseInfo,
-        bankUpdateMessage: bankUpdateMessage
+        bankUpdateMessage: bankUpdateMessage,
+        zySubjects: zySubjects,
+        xySubjects: xySubjects
     }
   },
   methods: {

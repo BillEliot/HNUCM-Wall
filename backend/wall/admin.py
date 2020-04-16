@@ -1,5 +1,4 @@
 from django.contrib import admin
-<<<<<<< HEAD
 from wall.models import User, Bank, Bank_UpdateMessage, Article
 
 admin.site.site_title = u'湖南中医药大学墙墙 管理页面'
@@ -7,7 +6,6 @@ admin.site.site_header = u'湖南中医药大学墙墙 管理页面'
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ('nickname', 'bio', 'gender', 'email', '_class', 'coin')
-    list_editable = ('bio', 'gender', 'email', '_class')
     list_filter=('gender', '_class')
     search_fields = ('id', 'nickname','email')
 
@@ -26,10 +24,3 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Bank, BankAdmin)
 admin.site.register(Bank_UpdateMessage)
 admin.site.register(Article, ArticleAdmin)
-=======
-from wall.models import Bank, Article
-
-admin.site.register(Bank)
-admin.site.register(Article)
-
->>>>>>> d69ebf29f298dc36f5f0b187de5a50af4dc309c9

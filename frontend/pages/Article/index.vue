@@ -91,7 +91,7 @@
                                 <div>
                                     <span>发布时间：{{ moment(item.publicDate).format('lll') }}</span>
                                     <br />
-                                    <span>最后编辑：{{ moment(item.publicDate).format('lll') }}</span>
+                                    <span>最后编辑：{{ moment(item.editDate).format('lll') }}</span>
                                 </div>
                                 <a-list-item-meta :description="item.content.substring(0,100) + '......'">
                                     <a slot="title" @click="$router.push({ path: '/article/detail', query: { id: item.id } })">{{ item.title }}</a>

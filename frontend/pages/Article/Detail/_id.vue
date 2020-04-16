@@ -34,7 +34,7 @@
                     </div>
                     <!-- tags -->
                     <div class="text-left" style="margin-top: 20px">
-                        <a-tag v-for="tag in articleDetail.tags" :key="tag">{{ tag }}</a-tag>
+                        <a-tag v-for="tag in articleDetail.tags" :color="randomColor()" :key="tag">{{ tag }}</a-tag>
                     </div>
                     <no-ssr placeholder='Loading'>
                         <mavon-editor

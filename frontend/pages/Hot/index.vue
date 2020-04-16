@@ -44,10 +44,9 @@
 
 <script>
 import qs from 'qs'
-import Footer from '~/components/footer.vue'
 import navbar from '~/components/navbar'
+import Footer from '~/components/footer.vue'
 import { mapState } from 'vuex'
-
 
 export default {
   components: {
