@@ -5,11 +5,12 @@ export default {
   ** Headers of the page
   */
   head: {
-    title: '湖南中医药大学墙墙',
+    title: '寻可校园墙',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '湖南中医药大学墙墙' }
+      { hid: 'description', name: 'description', content: '寻可校园墙' },
+      { name: "keywords", content: "湖南中医药大学,校园墙,可可,题库,查题,表白墙,失物招领" }
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }

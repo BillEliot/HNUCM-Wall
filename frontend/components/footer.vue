@@ -47,6 +47,9 @@
                 </div>
             </div>
             <hr />
+            <div class="text-center">
+                <span class="copyright">© 2019~2020 hnucmwall.top 版权所有 ICP证：<a href="http://www.beian.miit.gov.cn" target="_blank">冀ICP备20008221号</a></span>
+            </div>
         </div>
     </div>
 </template>
@@ -117,5 +120,9 @@ export default {
 
 .footer hr{
     border-color: #393939;
+}
+
+.copyright {
+    color: white;
 }
 </style>
