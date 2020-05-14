@@ -38,20 +38,16 @@ export default {
   plugins: [{
     src: '~plugins/AntDesign',
     ssr: true
-  },
-  {
+  },{
     src: '~plugins/VueInfiniteScroll',
     ssr: false
-  },
-  {
+  },{
     src: '~plugins/VueVirtualScroller',
     ssr: true
-  },
-  {
+  },{
     src: '~plugins/mavonEditor',
     ssr: false
-  },
-  {
+  },{
     src: '~plugins/VueAMap',
     ssr: false
   }],
