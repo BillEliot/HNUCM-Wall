@@ -702,7 +702,7 @@ def getUserProfile(request):
             })
         # is following
         isFollowing = False
-        if UID != uid:
+        if UID and UID != uid:
             USER = User.objects.get(id=UID)
             if user in USER.followings.all():
                 isFollowing = True
@@ -962,14 +962,18 @@ def submitBank(request):
     freMultiple = float(request.POST.get('multiple')) / 100.0
     freBlank = float(request.POST.get('blank')) / 100.0
     freJudge = float(request.POST.get('judge')) / 100.0
+    freTerm = float(request.POST.get('term')) / 100.0
     freQA = float(request.POST.get('qa')) / 100.0
+    freCase = float(request.POST.get('case')) / 100.0
     
     questions_singleA = []
     questions_singleB = []
     questions_multiple = []
     questions_blank = []
     questions_judge = []
+    questions_term = []
     questions_qa = []
+    questions_case = []
     try:
         if _type == 'total':
             for chapter in chapters:
@@ -979,14 +983,18 @@ def submitBank(request):
                 multiple = allQuestions.filter(questionType='multiple')
                 blank = allQuestions.filter(questionType='blank')
                 judge = allQuestions.filter(questionType='judge')
+                term = allQuestions.filter(questionType='term')
                 qa = allQuestions.filter(questionType='qa')
+                case = allQuestions.filter(questionType='case')
 
                 questions_singleA.extend(list(singleA.values()[0:int(singleA.count()*freSingleA)]))
                 questions_singleB.extend(list(singleB.values()[0:int(singleB.count()*freSingleB)]))
                 questions_multiple.extend(list(multiple.values()[0:int(multiple.count()*freMultiple)]))
                 questions_blank.extend(list(blank.values()[0:int(blank.count()*freBlank)]))
                 questions_judge.extend(list(judge.values()[0:int(judge.count()*freJudge)]))
+                questions_term.extend(list(term.values()[0:int(term.count()*freTerm)]))
                 questions_qa.extend(list(qa.values()[0:int(qa.count()*freQA)]))
+                questions_case.extend(list(case.values()[0:int(case.count()*freCase)]))
         elif _type == 'random':
             for index, chapter in enumerate(chapters):
                 allQuestions = Bank_Chapter.objects.get(id=int(chapter)).bank_set.all()
@@ -996,35 +1004,45 @@ def submitBank(request):
                     multiple = allQuestions.filter(questionType='multiple')
                     blank = allQuestions.filter(questionType='blank')
                     judge = allQuestions.filter(questionType='judge')
+                    term = allQuestions.filter(questionType='term')
                     qa = allQuestions.filter(questionType='qa')
+                    case = allQuestions.filter(questionType='case')
                 else:
                     singleA = singleA | allQuestions.filter(questionType='singleA')
                     singleB = singleB | allQuestions.filter(questionType='singleB')
                     multiple = multiple | allQuestions.filter(questionType='multiple')
                     blank = blank | allQuestions.filter(questionType='blank')
                     judge = judge | allQuestions.filter(questionType='judge')
+                    term = term | allQuestions.filter(questionType='term')
                     qa = qa | allQuestions.filter(questionType='qa')
+                    case = case | allQuestions.filter(questionType='case')
             # random all questions
             singleA = list(singleA.values())
             singleB = list(singleB.values())
             multiple = list(multiple.values())
             blank = list(blank.values())
             judge = list(judge.values())
+            term = list(term.values())
             qa = list(qa.values())
+            case = list(case.values())
 
             random.shuffle(singleA)
             random.shuffle(singleB)
             random.shuffle(multiple)
             random.shuffle(blank)
             random.shuffle(judge)
+            random.shuffle(term)
             random.shuffle(qa)
+            random.shuffle(case)
 
             questions_singleA.extend(singleA[0:math.ceil(numQuestion*freSingleA)])
             questions_singleB.extend(singleB[0:math.ceil(numQuestion*freSingleB)])
             questions_multiple.extend(multiple[0:math.ceil(numQuestion*freMultiple)])
             questions_blank.extend(blank[0:math.ceil(numQuestion*freBlank)])
             questions_judge.extend(judge[0:math.ceil(numQuestion*freJudge)])
+            questions_term.extend(term[0:math.ceil(numQuestion*freTerm)])
             questions_qa.extend(qa[0:math.ceil(numQuestion*freQA)])
+            questions_case.extend(case[0:math.ceil(numQuestion*freCase)])
 
         # remove answers
         for question in questions_singleA:
@@ -1037,7 +1055,11 @@ def submitBank(request):
             question['answer'] = ''
         for question in questions_judge:
             question['answer'] = ''
+        for question in questions_term:
+            question['answer'] = ''
         for question in questions_qa:
+            question['answer'] = ''
+        for question in questions_case:
             question['answer'] = ''
 
         return JsonResponse({
@@ -1046,7 +1068,9 @@ def submitBank(request):
             'multiple': questions_multiple,
             'blank': questions_blank,
             'judge': questions_judge,
-            'qa': questions_qa
+            'term': questions_term,
+            'qa': questions_qa,
+            'case': questions_case
         })
     except:
         return HttpResponse(1)
@@ -1064,10 +1088,12 @@ def handExam(request):
     multiple = questions['multiple']
     judge = questions['judge']
     blank = questions['blank']
+    term = questions['term']
     qa = questions['qa']
+    case = questions['case']
     subject = questions['subject']
 
-    allQuestions = len(singleA) + len(singleB) + len(multiple) + len(judge) + len(blank) + len(qa)
+    allQuestions = len(singleA) + len(singleB) + len(multiple) + len(judge) + len(blank) + len(term) + len(qa) + len(case)
     correctQuestions = 0
     try:
         for question in singleA:
@@ -1126,7 +1152,23 @@ def handExam(request):
                 if temp == True:
                     question['isCorrect'] = True
                     correctQuestions += 1
+        for question in term:
+            answer = Bank.objects.get(id=question['id']).answer
+            if question['answer'] != '':
+                question['isCorrect'] = True
+                correctQuestions += 1
+            else:
+                question['isCorrect'] = False
+            question['correctAnswer'] = answer
         for question in qa:
+            answer = Bank.objects.get(id=question['id']).answer
+            if question['answer'] != '':
+                question['isCorrect'] = True
+                correctQuestions += 1
+            else:
+                question['isCorrect'] = False
+            question['correctAnswer'] = answer
+        for question in case:
             answer = Bank.objects.get(id=question['id']).answer
             if question['answer'] != '':
                 question['isCorrect'] = True
@@ -1155,7 +1197,9 @@ def handExam(request):
             'multiple': multiple,
             'judge': judge,
             'blank': blank,
+            'term': term,
             'qa': qa,
+            'case': case,
             'allQuestions': allQuestions,
             'correctQuestions': correctQuestions
         })

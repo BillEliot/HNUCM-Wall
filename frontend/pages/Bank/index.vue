@@ -21,7 +21,7 @@
                     <div class="title-holder">
                         <div class="title-text text-center">
                             <h1>题库</h1>
-                            <p class="subheading">伟大的题库～</p>
+                            <p class="subheading">伟大的题库</p>
                         </div>
                     </div>
                 </div>
@@ -75,7 +75,7 @@
                 <hr />
             </div>
             <!-- Main -->
-            <h1 class="title">开始刷题吧～</h1>
+            <h1 class="title">开始刷题吧</h1>
             <div class="text-left">
                 <div class="text-center notice">
                     <span>题库数据来源于练习册</span>
@@ -232,11 +232,32 @@
                                 :marks="marks" 
                             />
                         </a-form-item>
+                        <a-form-item label="名词解释" class="questionPercent">
+                            <a-slider
+                                v-decorator="[
+                                    'term', {
+                                        initialValue: 100
+                                    }
+                                ]"
+                                :tipFormatter="rangeFormatter"
+                                :marks="marks"
+                            />
+                        </a-form-item>
                         <a-form-item label="问答" class="questionPercent">
                             <a-slider
                                 v-decorator="[
-                                    'qa',
-                                    {
+                                    'qa', {
+                                        initialValue: 100
+                                    }
+                                ]"
+                                :tipFormatter="rangeFormatter"
+                                :marks="marks"
+                            />
+                        </a-form-item>
+                        <a-form-item label="病案分析" class="questionPercent">
+                            <a-slider
+                                v-decorator="[
+                                    'case', {
                                         initialValue: 100
                                     }
                                 ]"
@@ -376,17 +397,21 @@ export default {
               'multiple': 100,
               'blank': 100,
               'judge': 100,
-              'qa': 100
+              'term': 100,
+              'qa': 100,
+              'case': 100
           })
       },
       selectRandomBank() {
           this.form_bank.setFieldsValue({
-              'singleA': 17,
-              'singleB': 17,
-              'multiple': 17,
-              'blank': 17,
-              'judge': 16,
-              'qa': 16
+              'singleA': 13,
+              'singleB': 12,
+              'multiple': 13,
+              'blank': 12,
+              'judge': 12,
+              'term': 13,
+              'qa': 13,
+              'case': 12
           })
       },
       selectBank(value) {
@@ -427,14 +452,14 @@ export default {
           e.preventDefault()
           this.form_bank.validateFields((err, values) => {
               if (!err) {
-                  let { singleA,singleB,multiple,blank,judge,qa } = this.form_bank.getFieldsValue(['singleA', 'singleB', 'multiple', 'blank', 'judge', 'qa'])
+                  let { singleA,singleB,multiple,blank,judge,term,qa,_case } = this.form_bank.getFieldsValue(['singleA', 'singleB', 'multiple', 'blank', 'judge', 'term', 'qa', 'case'])
                   if (this.userBaseInfo.uid == -1) {
                       this.$message.warning('先登录吧～')
                   }
-                  else if (values.type == 'random' && singleA+singleB+multiple+blank+judge+qa > 100) {
+                  else if (values.type == 'random' && singleA+singleB+multiple+blank+judge+term+qa+_case > 100) {
                       this.$message.warning('题型占比超过100%, 请检查')
                   }
-                  else if (values.type == 'random' && singleA+singleB+multiple+blank+judge+qa < 100) {
+                  else if (values.type == 'random' && singleA+singleB+multiple+blank+judge+term+qa+_case < 100) {
                       this.$message.warning('题型占比不足100%, 请检查')
                   }
                   else {
@@ -447,7 +472,9 @@ export default {
                           multiple: values.multiple,
                           blank: values.blank,
                           judge: values.judge,
+                          term: values.term,
                           qa: values.qa,
+                          case: values.case
                       }, { arrayFormat: 'brackets' }))
                       .then((response) => {
                           if (response.data == 1) {

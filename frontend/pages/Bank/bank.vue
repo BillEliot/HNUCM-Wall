@@ -57,11 +57,35 @@
                     </a-button>
                 </div>
             </div>
+            <h4>名词解释</h4>
+            <div class="row">
+                <div class="com-md-1 text-center">
+                    <a-button
+                        v-for="question,index in questions.term"
+                        :key="index"
+                        :class="question.answer ? 'answer-finished' : 'answer-unfinished'"
+                    >
+                        {{ index+1 }}
+                    </a-button>
+                </div>
+            </div>
             <h4>问答</h4>
             <div class="row">
                 <div class="com-md-1 text-center">
                     <a-button
                         v-for="question,index in questions.qa"
+                        :key="index"
+                        :class="question.answer ? 'answer-finished' : 'answer-unfinished'"
+                    >
+                        {{ index+1 }}
+                    </a-button>
+                </div>
+            </div>
+            <h4>病案分析</h4>
+            <div class="row">
+                <div class="com-md-1 text-center">
+                    <a-button
+                        v-for="question,index in questions.case"
                         :key="index"
                         :class="question.answer ? 'answer-finished' : 'answer-unfinished'"
                     >
@@ -237,6 +261,30 @@
                                     </a-list-item>
                                 </a-list>
                             </a-tab-pane>
+                            <!-- term -->
+                            <a-tab-pane tab="名词解释" key="term">
+                                <span class="summary">共选取 {{ questions.term.length }} 道题目</span>
+                                <a-list
+                                    itemLayout="vertical"
+                                    size="large"
+                                    :pagination="null"
+                                    :dataSource="questions.term"
+                                >
+                                    <div slot="footer">题目数据来于<b>HNUCM</b>练习册</div>
+                                    <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
+                                        <div :id="index">
+                                            <a-list-item-meta>
+                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title }}</h4>
+                                            </a-list-item-meta>
+                                            <a-textarea 
+                                                v-model="item.answer"
+                                                placeholder="输入您的答案(注意：问答题系统不会进行核验，请对照答案自行校对)"
+                                                :rows="4"
+                                            />
+                                        </div>
+                                    </a-list-item>
+                                </a-list>
+                            </a-tab-pane>
                             <!-- qa -->
                             <a-tab-pane tab="问答" key="qa">
                                 <span class="summary">共选取 {{ questions.qa.length }} 道题目</span>
@@ -245,6 +293,30 @@
                                     size="large"
                                     :pagination="null"
                                     :dataSource="questions.qa"
+                                >
+                                    <div slot="footer">题目数据来于<b>HNUCM</b>练习册</div>
+                                    <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
+                                        <div :id="index">
+                                            <a-list-item-meta>
+                                                <h4 slot="title">{{ (index+1) + '、 ' + item.title }}</h4>
+                                            </a-list-item-meta>
+                                            <a-textarea 
+                                                v-model="item.answer"
+                                                placeholder="输入您的答案(注意：问答题系统不会进行核验，请对照答案自行校对)"
+                                                :rows="4"
+                                            />
+                                        </div>
+                                    </a-list-item>
+                                </a-list>
+                            </a-tab-pane>
+                            <!-- case -->
+                            <a-tab-pane tab="病案分析" key="case">
+                                <span class="summary">共选取 {{ questions.case.length }} 道题目</span>
+                                <a-list
+                                    itemLayout="vertical"
+                                    size="large"
+                                    :pagination="null"
+                                    :dataSource="questions.case"
                                 >
                                     <div slot="footer">题目数据来于<b>HNUCM</b>练习册</div>
                                     <a-list-item slot="renderItem" slot-scope="item, index" key="item.id">
@@ -380,7 +452,9 @@ export default {
                       multiple: this.questions.multiple,
                       judge: this.questions.judge,
                       blank: this.questions.blank,
+                      term: this.questions.term,
                       qa: this.questions.qa,
+                      case: this.questions.case,
                       subject: this.subject
                   }))
                   .then((response) => {
@@ -408,7 +482,9 @@ export default {
                           multiple: this.questions.multiple,
                           judge: this.questions.judge,
                           blank: this.questions.blank,
-                          qa: this.questions.qa
+                          term: this.questions.term,
+                          qa: this.questions.qa,
+                          case: this.questions.case,
                   }))
                   .then((response) => {
                       this.setQuestions(response.data)

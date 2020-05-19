@@ -118,7 +118,9 @@ class Bank(models.Model):
         ('multiple', '多选'),
         ('blank', '填空'),
         ('judge', '判断'),
+        ('term', '名词解释'),
         ('qa', '问答'),
+        ('case', '病案分析')
     )
 
     title = models.CharField(max_length=50)

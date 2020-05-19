@@ -49,6 +49,11 @@
             <hr />
             <div class="text-center">
                 <span class="copyright">© 2019~2020 hnucmwall.top 版权所有 ICP证：<a href="http://www.beian.miit.gov.cn" target="_blank">冀ICP备20008221号</a></span>
+                <br />
+                <span>
+                    <img src="~assets/img/copyright.png">
+                    <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=37010102000760" target="_blank">鲁公网安备 37010102000760号</a>
+                </span>
             </div>
         </div>
     </div>
