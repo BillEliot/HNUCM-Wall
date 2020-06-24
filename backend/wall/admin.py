@@ -1,5 +1,5 @@
 from django.contrib import admin
-from wall.models import User, Bank, Bank_UpdateMessage, Article
+from wall.models import User, Bank, Article, Bank_UpdateMessage, Bank_Chapter, Bank_Subject
 
 admin.site.site_title = u'湖南中医药大学墙墙 管理页面'
 admin.site.site_header = u'湖南中医药大学墙墙 管理页面'
@@ -22,5 +22,7 @@ class ArticleAdmin(admin.ModelAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Bank, BankAdmin)
-admin.site.register(Bank_UpdateMessage)
 admin.site.register(Article, ArticleAdmin)
+admin.site.register(Bank_UpdateMessage)
+admin.site.register(Bank_Chapter)
+admin.site.register(Bank_Subject)

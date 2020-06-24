@@ -1283,7 +1283,7 @@ def clearErrorBook(request):
 def searchQuestion(request):
     title = request.POST.get('title')
     questions = []
-    
+
     answer = ''
     try:
         for question in Bank.objects.filter(title__contains=title):
@@ -1319,13 +1319,16 @@ def searchQuestion(request):
             else:
                 answer = question.answer
 
-            questions.append({
-                'key': question.id,
-                'title': question.title,
-                'chapter': question.chapter.name,
-                'subject': question.chapter.subject.name,
-                'answer': answer
-            })
+            try:
+                questions.append({
+                    'key': question.id,
+                    'title': question.title,
+                    'chapter': question.chapter.name,
+                    'subject': question.chapter.subject.name,
+                    'answer': answer
+                })
+            except:
+                pass
 
         return JsonResponse({ 'info': questions })
     except:

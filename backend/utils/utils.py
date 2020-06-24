@@ -10,7 +10,6 @@ import random, time
 # mail
 sender = 'billeliot@126.com'
 mail_host = 'smtp.126.com'
-mail_port = 465
 mail_user="billeliot@126.com"
 mail_pass="hnucmwall"
 
@@ -27,7 +26,8 @@ def sendCaptcha(receiver, captcha):
     message['Subject'] = Header('【HNUCM】- 墙墙')
 
     try:
-        smtpObj = smtplib.SMTP_SSL(mail_host,mail_port)
+        # When compiling python3 from source code, you need to support SSL
+        smtpObj = smtplib.SMTP_SSL(mail_host, 465)
         smtpObj.login(mail_user,mail_pass)
         smtpObj.sendmail(sender, receiver, message.as_string())
         smtpObj.quit()

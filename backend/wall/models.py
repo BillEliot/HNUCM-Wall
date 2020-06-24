@@ -123,7 +123,7 @@ class Bank(models.Model):
         ('case', '病案分析')
     )
 
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=1000)
     A = models.CharField(max_length=50, blank=True)
     B = models.CharField(max_length=50, blank=True)
     C = models.CharField(max_length=50, blank=True)
