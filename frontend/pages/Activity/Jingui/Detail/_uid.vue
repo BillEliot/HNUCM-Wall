@@ -9,7 +9,7 @@
                     <div class="title-holder">
                         <div class="title-text text-center">
                             <h1>金匮打卡</h1>
-                            <span class="date">发布时间: {{ moment(detail.date).format("llll") }}</span>
+                            <span class="date">打卡时间: {{ moment(detail.date).format("llll") }}</span>
                         </div>
                     </div>
                 </div>

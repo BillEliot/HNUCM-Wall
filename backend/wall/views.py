@@ -424,7 +424,11 @@ def canSignToday_JinGui(request):
 def sign_JinGui(request):
     uid = request.session.get('uid', None)
     content = request.POST.get('content')
-    cover = 'img/JinGui/' + request.POST.get('cover')
+    cover = request.POST.get('cover')
+    if not cover == '':
+        cover = 'img/JinGui/' + cover
+    else:
+        cover = 'img/JinGui/default.png'
 
     try:
         user = User.objects.get(id=uid)
@@ -447,9 +451,18 @@ def sign_JinGui(request):
 
 @csrf_exempt
 def getStatistics_JinGui(request):
+    date = request.POST.get('date')
+    
+    if not date:
+        today = datetime.datetime.now()
+    else:
+        today = datetime.datetime.strptime(date, '%Y-%m-%d')
+    date_1 = today.replace(hour=0, minute=0, second=0, microsecond=0)
+    date_2 = today.replace(day=today.day+1, hour=0, minute=0, second=0, microsecond=0)
+
     listStatistics = []
     try:
-        for item in Activity_JinGui.objects.all():
+        for item in Activity_JinGui.objects.filter(date__range=[date_1, date_2]):
             listStatistics.append({
                 'user': { 'uid': item.user.id, 'avatar': item.user.avatar.url, 'nickname': item.user.nickname, 'bio': item.user.bio },
                 'content': item.content,
@@ -464,11 +477,20 @@ def getStatistics_JinGui(request):
 
 @csrf_exempt
 def getStatistics_JinGui_unsign(request):
+    date = request.POST.get('date')
+    
+    if not date:
+        today = datetime.datetime.now()
+    else:
+        today = datetime.datetime.strptime(date, '%Y-%m-%d')
+    date_1 = today.replace(hour=0, minute=0, second=0, microsecond=0)
+    date_2 = today.replace(day=today.day+1, hour=0, minute=0, second=0, microsecond=0)
+
     listStatistics_unsign = []
     try:
         for user in User.objects.all():
             if u'金匮打卡' in str(user.auth):
-                if not Activity_JinGui.objects.filter(user=user).exists():
+                if not Activity_JinGui.objects.filter(date__range=[date_1, date_2]).filter(user=user).exists():
                     listStatistics_unsign.append({
                         'uid': user.id,
                         'avatar': user.avatar.url,

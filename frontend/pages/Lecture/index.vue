@@ -20,23 +20,25 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 col-sm-12">
-                    <a-table :columns="columns" :dataSource="lectureList">
-                        <!-- author -->
-                        <span slot="author" slot-scope="author">
-                            <a-avatar :src="author.avatar" />
-                            {{ author.nickname }}
-                        </span>
-                        <!-- date -->
-                        <span slot="date" slot-scope="date">
-                            {{ moment(date).format('lll') }}
-                        </span>
-                        <!-- state -->
-                        <span slot="state" slot-scope="state">
-                            <a-tag v-if="state == 'wait'" color="red">未开始</a-tag>
-                            <a-tag v-if="state == 'running'" color="green">进行中</a-tag>
-                            <a-tag v-if="state == 'done'" color="gray">已结束</a-tag>
-                        </span>
-                    </a-table>
+                    <no-ssr placeholder='Loading'>
+                        <a-table :columns="columns" :dataSource="lectureList">
+                            <!-- author -->
+                            <span slot="author" slot-scope="author">
+                                <a-avatar :src="author.avatar" />
+                                {{ author.nickname }}
+                            </span>
+                            <!-- date -->
+                            <span slot="date" slot-scope="date">
+                                {{ moment(date).format('lll') }}
+                            </span>
+                            <!-- state -->
+                            <span slot="state" slot-scope="state">
+                                <a-tag v-if="state == 'wait'" color="red">未开始</a-tag>
+                                <a-tag v-if="state == 'running'" color="green">进行中</a-tag>
+                                <a-tag v-if="state == 'done'" color="gray">已结束</a-tag>
+                            </span>
+                        </a-table>
+                    </no-ssr>
                 </div>
             </div>
         </div>

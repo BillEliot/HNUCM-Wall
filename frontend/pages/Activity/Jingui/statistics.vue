@@ -19,7 +19,16 @@
     <div class="container">
       <div class="row">
         <div class="col-md-12 col-xs-12 text-center">
-          <a-tabs type="card">
+          <span>选择日期</span>
+          <a-date-picker
+            @change="changeDate"
+            format="YYYY-MM-DD"
+            :disabled-date="disabledDate"
+            :default-value="moment()"
+          />
+          <hr />
+          <no-ssr placeholder='Loading'>
+            <a-tabs type="card">
               <a-tab-pane tab="已打卡" key="1" class="text-left">
                 <a-list item-layout="vertical" size="large" :pagination="pagination" :data-source="statisticsList">
                   <div slot="footer">金匮打卡数据统计</div>
@@ -36,6 +45,8 @@
                     </a-list-item-meta>
                     {{ item.content.substring(0,100) + '......' }}
                     <br />
+                    <span class="date">{{ moment(item.date).format("llll") }}</span>
+                    <br />
                     <a @click="$router.push({ path: '/activity/jingui/detail', query: { uid: userBaseInfo.uid } })">详情</a>
                   </a-list-item>
                 </a-list>
@@ -50,7 +61,8 @@
                   </a-list-item>
                 </a-list>
               </a-tab-pane>
-          </a-tabs>
+            </a-tabs>
+          </no-ssr>
         </div>
       </div>
     </div>
@@ -62,6 +74,7 @@
 
 <script>
 import qs from 'qs'
+import moment from 'moment'
 import navbar from '~/components/navbar'
 import Footer from '~/components/footer'
 import { mapState } from 'vuex'
@@ -73,6 +86,7 @@ export default {
   },
   data() {
     return {
+      moment,
       pagination: {
         pageSize: 10
       }
@@ -115,6 +129,23 @@ export default {
     }
   },
   methods: {
+    disabledDate(current) {
+      return current && current > moment().endOf('day');
+    },
+    changeDate(m) {
+      this.$axios.post('getStatistics_JinGui', qs.stringify({
+        date: m.format("YYYY-MM-DD")
+      }))
+      .then((response) => {
+        this.statisticsList = response.data.info
+      })
+      this.$axios.post('getStatistics_JinGui_unsign', qs.stringify({
+        date: m.format("YYYY-MM-DD")
+      }))
+      .then((response) => {
+        this.statisticsList_unsign = response.data.info
+      })
+    }
   },
   computed: mapState({
     baseUrl: state => state.baseUrl
@@ -125,5 +156,9 @@ export default {
 <style scoped>
 a {
   text-decoration: none;
+}
+.date {
+  font-style: italic;
+  color: gray;
 }
 </style>
