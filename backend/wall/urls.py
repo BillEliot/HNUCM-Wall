@@ -21,6 +21,16 @@ urlpatterns = [
     path('uploadAvatar', views.uploadAvatar),
     path('follow', views.follow),
     path('unFollow', views.unFollow),
+    # Activity
+    path('signUp', views.signUp),
+    path('canSign_JinGui', views.canSign_JinGui),
+    path('canSignToday_JinGui', views.canSignToday_JinGui),
+    path('sign_JinGui', views.sign_JinGui),
+    path('getStatistics_JinGui', views.getStatistics_JinGui),
+    path('getStatistics_JinGui_unsign', views.getStatistics_JinGui_unsign),
+    path('uploadImg_JinGui', views.uploadImg_JinGui),
+    path('removeImg_JinGui', views.removeImg_JinGui),
+    path('detail_JinGui', views.detail_JinGui),
     # Admin - User
     path('getUserList', views.getUserList),
     path('getUserDetail', views.getUserDetail),

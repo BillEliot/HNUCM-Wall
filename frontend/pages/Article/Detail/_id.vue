@@ -273,10 +273,6 @@ a {
     text-decoration: none;
 }
 
-.date {
-    color: gray;
-}
-
 .author {
     margin: 10px;
 }

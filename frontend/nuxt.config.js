@@ -50,6 +50,9 @@ export default {
   },{
     src: '~plugins/VueAMap',
     ssr: false
+  },{
+    src: '~plugins/AudioRecorder',
+    ssr: false
   }],
   /*
   ** Nuxt.js modules

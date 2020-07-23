@@ -368,6 +368,163 @@ def searchUser(request):
 
 
 @csrf_exempt
+def signUp(request):
+    uid = request.session.get('uid', None)
+    auth = request.POST.get('auth')
+    
+    try:
+        user = User.objects.get(id=uid)
+        if not user.auth:
+            user.auth = auth
+            user.save()
+            return HttpResponse(0)
+        elif auth not in user.auth:
+            user.auth = user.auth + ';' + auth
+            user.save()
+            return HttpResponse(0)
+        else:
+            return HttpResponse(1)
+    except:
+        return HttpResponse(2)
+
+
+
+@csrf_exempt
+def canSign_JinGui(request):
+    uid = request.session.get('uid', None)
+    auth = request.POST.get('auth')
+
+    try:
+        if auth in User.objects.get(id=uid).auth:
+            return HttpResponse(0)
+        else:
+            return HttpResponse(1)
+    except:
+        return HttpResponse(2)
+
+
+
+@csrf_exempt
+def canSignToday_JinGui(request):
+    uid = request.session.get('uid', None)
+
+    try:
+        user = User.objects.get(id=uid)
+        JinGui = Activity_JinGui.objects.filter(user=user)
+        if JinGui.exists():
+            return HttpResponse(JinGui[0].content)
+        else:
+            return HttpResponse(0)
+    except:
+        return HttpResponse(2)
+
+
+
+@csrf_exempt
+def sign_JinGui(request):
+    uid = request.session.get('uid', None)
+    content = request.POST.get('content')
+    cover = 'img/JinGui/' + request.POST.get('cover')
+
+    try:
+        user = User.objects.get(id=uid)
+        if content == '':
+            return HttpResponse(1)
+        else:
+            if Activity_JinGui.objects.filter(user=user).exists():
+                return HttpResponse(3)
+            
+            Activity_JinGui.objects.create(
+                user = user,
+                content = content,
+                cover = cover
+            )
+            return HttpResponse(0)
+    except:
+        return HttpResponse(2)
+
+
+
+@csrf_exempt
+def getStatistics_JinGui(request):
+    listStatistics = []
+    try:
+        for item in Activity_JinGui.objects.all():
+            listStatistics.append({
+                'user': { 'uid': item.user.id, 'avatar': item.user.avatar.url, 'nickname': item.user.nickname, 'bio': item.user.bio },
+                'content': item.content,
+                'cover': item.cover.url,
+                'date': item.date
+            })
+        return JsonResponse({ 'info': listStatistics })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def getStatistics_JinGui_unsign(request):
+    listStatistics_unsign = []
+    try:
+        for user in User.objects.all():
+            if u'金匮打卡' in str(user.auth):
+                if not Activity_JinGui.objects.filter(user=user).exists():
+                    listStatistics_unsign.append({
+                        'uid': user.id,
+                        'avatar': user.avatar.url,
+                        'nickname': user.nickname,
+                        'bio': user.bio
+                    })
+        return JsonResponse({ 'info': listStatistics_unsign })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def uploadImg_JinGui(request):
+    if request.method == 'POST':
+        file_obj = request.FILES.get('image')
+        name = formatName(file_obj.name)
+        f = open(generateUploadPath('/img/JinGui/', name), 'wb')
+        for chunk in file_obj.chunks():
+            f.write(chunk)
+        f.close()
+
+        return HttpResponse(name)
+
+
+
+@csrf_exempt
+def removeImg_JinGui(request):
+    name = request.POST.get('name')
+    
+    try:
+        os.remove(generateUploadPath('/img/JinGui', name))
+        return HttpResponse(0)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def detail_JinGui(request):
+    uid = request.POST.get('uid')
+
+    try:
+        user = User.objects.get(id=uid)
+        JinGui = Activity_JinGui.objects.get(user=user)
+        return JsonResponse({
+            'user': { 'uid': user.id, 'nickname': user.nickname, 'bio': user.bio, 'avatar': user.avatar.url, 'auth': user.auth.split(';') if user.auth else None },
+            'content': JinGui.content,
+            'date': JinGui.date
+        })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def searchLoveItem(request):
     name = request.POST.get('name')
     _object = request.POST.get('object')

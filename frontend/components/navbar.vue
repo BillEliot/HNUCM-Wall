@@ -35,6 +35,9 @@
             <a-menu-item-group title="讲座">
                 <a-menu-item key="lecture:1" @click="$router.push({ path: '/lecture' })">讲座动态</a-menu-item>
             </a-menu-item-group>
+            <a-menu-item-group title="活动">
+                <a-menu-item key="activity:1" @click="$router.push({ path: '/activity/jingui' })">金匮打卡</a-menu-item>
+            </a-menu-item-group>
         </a-sub-menu>
 
         <a-sub-menu>
