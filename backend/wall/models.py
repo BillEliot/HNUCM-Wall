@@ -241,7 +241,7 @@ class Activity_JinGui(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     content = models.TextField()
     cover = models.ImageField(upload_to='img/JinGui', default='img/JinGui/default.png')
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ('-date',)

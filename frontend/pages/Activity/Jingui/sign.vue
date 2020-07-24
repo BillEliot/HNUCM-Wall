@@ -23,13 +23,13 @@
                 <a-tabs type="card">
                     <a-tab-pane tab="图文打卡" key="1">
                         <no-ssr placeholder='Loading'>
-                            <mavon-editor v-model="content" :editable="canSign" ref=md @imgAdd="$imgAdd" class="editor" />
+                            <mavon-editor v-model="content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel" class="editor" />
                         </no-ssr>
                     </a-tab-pane>
                     <a-tab-pane tab="语音打卡" key="2">
                     </a-tab-pane>
                 </a-tabs>
-                <a-button type="primary" @click="sign" :disabled="!canSign" class="sign">打卡</a-button>
+                <a-button type="primary" @click="sign" class="sign">打卡</a-button>
             </div>
         </div>
     </div>
@@ -55,9 +55,8 @@ export default {
         cover: null
     }
   },
-  async asyncData({ $axios }) {
+  async asyncData({ $axios, error }) {
     let userBaseInfo = null
-    let canSign = true
     let content = ''
 
     await $axios.get('getUserBaseInfo')
@@ -65,20 +64,18 @@ export default {
       userBaseInfo = response.data
     })
 
-    await $axios.get('canSignToday_JinGui')
+    await $axios.get('IsFirstSignToday_JinGui')
     .then((response) => {
-        if (response.data == 0) {
-            canSign = true
+        if (response.data == 1) {
+            error({ statusCode: 500, message: '未知错误' })
         }
         else {
-            canSign = false
             content = response.data
         }
     })
 
     return {
       userBaseInfo: userBaseInfo,
-      canSign: canSign,
       content: content
     }
   },
@@ -92,13 +89,9 @@ export default {
               .then((response) => {
                   if (response.data == 0) {
                       this.$message.success('打卡成功')
-                      this.canSign = false
                   }
                   else if (response.data == 1) {
                       this.$message.warning('说点什么吧~')
-                  }
-                  else if (response.data == 3) {
-                      this.$message.warning('不能重复打卡')
                   }
                   else {
                       this.$message.error('未知错误')
@@ -122,7 +115,20 @@ export default {
                this.$refs.md.$img2Url(pos, this.baseUrl + '/media/img/JinGui/' + response.data)
                this.cover = response.data
            })
-        }
+      },
+      $imgDel(url) {
+          this.$axios.post('removeImg_JinGui', qs.stringify({
+              url: url[0]
+          }))
+          .then((response) => {
+              if (response.data == 0) {
+                  this.$message.success('删除成功')
+              }
+              else {
+                  this.$message.error('未知错误')
+              }
+          })
+      }
     },
   computed: mapState({
       baseUrl: state => state.baseUrl

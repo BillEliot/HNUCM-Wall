@@ -405,18 +405,22 @@ def canSign_JinGui(request):
 
 
 @csrf_exempt
-def canSignToday_JinGui(request):
+def IsFirstSignToday_JinGui(request):
     uid = request.session.get('uid', None)
 
     try:
+        today = datetime.datetime.now()
+        date_1 = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_2 = today.replace(day=today.day+1, hour=0, minute=0, second=0, microsecond=0)
+
         user = User.objects.get(id=uid)
-        JinGui = Activity_JinGui.objects.filter(user=user)
+        JinGui = Activity_JinGui.objects.filter(date__range=[date_1, date_2]).filter(user=user)
         if JinGui.exists():
             return HttpResponse(JinGui[0].content)
         else:
-            return HttpResponse(0)
+            return HttpResponse('')
     except:
-        return HttpResponse(2)
+        return HttpResponse(1)
 
 
 
@@ -435,14 +439,21 @@ def sign_JinGui(request):
         if content == '':
             return HttpResponse(1)
         else:
-            if Activity_JinGui.objects.filter(user=user).exists():
-                return HttpResponse(3)
-            
-            Activity_JinGui.objects.create(
-                user = user,
-                content = content,
-                cover = cover
-            )
+            today = datetime.datetime.now()
+            date_1 = today.replace(hour=0, minute=0, second=0, microsecond=0)
+            date_2 = today.replace(day=today.day+1, hour=0, minute=0, second=0, microsecond=0)
+
+            if Activity_JinGui.objects.filter(date__range=[date_1, date_2]).filter(user=user).exists():
+                jingui = Activity_JinGui.objects.filter(date__range=[date_1, date_2]).get(user=user)
+                jingui.content = content
+                jingui.cover = cover
+                jingui.save()
+            else:
+                Activity_JinGui.objects.create(
+                    user = user,
+                    content = content,
+                    cover = cover
+                )
             return HttpResponse(0)
     except:
         return HttpResponse(2)
@@ -519,10 +530,11 @@ def uploadImg_JinGui(request):
 
 @csrf_exempt
 def removeImg_JinGui(request):
-    name = request.POST.get('name')
-    
+    url = request.POST.get('url')
+    url = '/media/img/JinGui/' + url[url.rfind('/')+1:]
+
     try:
-        os.remove(generateUploadPath('/img/JinGui', name))
+        os.remove(settings.BASE_DIR + url)
         return HttpResponse(0)
     except:
         return HttpResponse(1)

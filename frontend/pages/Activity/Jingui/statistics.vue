@@ -40,14 +40,14 @@
                       :src="baseUrl + item.cover"
                     />
                     <a-list-item-meta :description="item.user.bio">
-                      <a slot="title" @click="$router.push({ path: '/profile', query: { uid: item.user.id } })">{{ item.user.nickname }}</a>
+                      <a slot="title" @click="$router.push({ path: '/profile', query: { uid: item.user.uid } })">{{ item.user.nickname }}</a>
                       <a-avatar slot="avatar" :src="baseUrl + item.user.avatar" />
                     </a-list-item-meta>
                     {{ item.content.substring(0,100) + '......' }}
                     <br />
                     <span class="date">{{ moment(item.date).format("llll") }}</span>
                     <br />
-                    <a @click="$router.push({ path: '/activity/jingui/detail', query: { uid: userBaseInfo.uid } })">详情</a>
+                    <a target="_blank" :href="'/activity/jingui/detail?uid=' + item.user.uid">详情</a>
                   </a-list-item>
                 </a-list>
               </a-tab-pane>

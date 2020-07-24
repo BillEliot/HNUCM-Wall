@@ -24,7 +24,7 @@ urlpatterns = [
     # Activity
     path('signUp', views.signUp),
     path('canSign_JinGui', views.canSign_JinGui),
-    path('canSignToday_JinGui', views.canSignToday_JinGui),
+    path('IsFirstSignToday_JinGui', views.IsFirstSignToday_JinGui),
     path('sign_JinGui', views.sign_JinGui),
     path('getStatistics_JinGui', views.getStatistics_JinGui),
     path('getStatistics_JinGui_unsign', views.getStatistics_JinGui_unsign),
