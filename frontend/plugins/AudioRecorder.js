@@ -1,3 +1,3 @@
 import Vue from "vue"
-//import Recorder from 'js-audio-recorder'
-//Vue.use(Recorder)
+import AudioRecorder from 'vue-audio-recorder'
+Vue.use(AudioRecorder)

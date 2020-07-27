@@ -239,8 +239,9 @@ class Lecture(models.Model):
 
 class Activity_JinGui(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
-    content = models.TextField()
+    content = models.TextField(default=u'元气满满的一天～')
     cover = models.ImageField(upload_to='img/JinGui', default='img/JinGui/default.png')
+    audio = models.FileField(upload_to='audio/JinGui', default='audio/JinGui/default.mp3')
     date = models.DateTimeField(auto_now=True)
 
     class Meta:

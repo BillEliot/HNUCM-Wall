@@ -29,7 +29,22 @@
     background-position: center top;
 }
 
+.page-title-zy {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    display: block;
+    background-image: url(~assets/img/banner_zy.png);
+    background-size: cover;
+    background-position: center top;
+}
+
 .page-title .container {
+    height: 600px;
+}
+
+.page-title-zy .container {
     height: 600px;
 }
 

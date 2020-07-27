@@ -478,6 +478,7 @@ def getStatistics_JinGui(request):
                 'user': { 'uid': item.user.id, 'avatar': item.user.avatar.url, 'nickname': item.user.nickname, 'bio': item.user.bio },
                 'content': item.content,
                 'cover': item.cover.url,
+                'audio': item.audio.url,
                 'date': item.date
             })
         return JsonResponse({ 'info': listStatistics })
@@ -516,15 +517,14 @@ def getStatistics_JinGui_unsign(request):
 
 @csrf_exempt
 def uploadImg_JinGui(request):
-    if request.method == 'POST':
-        file_obj = request.FILES.get('image')
-        name = formatName(file_obj.name)
-        f = open(generateUploadPath('/img/JinGui/', name), 'wb')
-        for chunk in file_obj.chunks():
-            f.write(chunk)
-        f.close()
+    file_obj = request.FILES.get('image')
+    name = formatName(file_obj.name, 'jpg')
+    f = open(generateUploadPath('/img/JinGui/', name), 'wb')
+    for chunk in file_obj.chunks():
+        f.write(chunk)
+    f.close()
 
-        return HttpResponse(name)
+    return HttpResponse(name)
 
 
 
@@ -542,15 +542,54 @@ def removeImg_JinGui(request):
 
 
 @csrf_exempt
+def uploadAudio_JinGui(request):
+    uid = request.session.get('uid', None)
+    try:
+        # Get the audio
+        user = User.objects.get(id=uid)
+        file_obj = request.FILES.get('audio')
+        name = formatName(file_obj.name, 'mp3')
+        f = open(generateUploadPath('/audio/JinGui/', name), 'wb')
+        for chunk in file_obj.chunks():
+            f.write(chunk)
+        f.close()
+        # Sign
+        today = datetime.datetime.now()
+        date_1 = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_2 = today.replace(day=today.day+1, hour=0, minute=0, second=0, microsecond=0)
+
+        if Activity_JinGui.objects.filter(date__range=[date_1, date_2]).filter(user=user).exists():
+            jingui = Activity_JinGui.objects.filter(date__range=[date_1, date_2]).get(user=user)
+            # remove the last audio
+            if os.path.exists(settings.BASE_DIR + jingui.audio.url):
+                os.remove(settings.BASE_DIR + jingui.audio.url)
+            jingui.audio = 'audio/JinGui/' + name
+            jingui.save()
+        else:
+            Activity_JinGui.objects.create(
+                user = user
+            )
+
+        return HttpResponse(name)
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
 def detail_JinGui(request):
     uid = request.POST.get('uid')
+    date = datetime.datetime.strptime(request.POST.get('date'), '%Y-%m-%d')
 
+    date_1 = date.replace(hour=0, minute=0, second=0, microsecond=0)
+    date_2 = date.replace(day=date.day+1, hour=0, minute=0, second=0, microsecond=0)
     try:
         user = User.objects.get(id=uid)
-        JinGui = Activity_JinGui.objects.get(user=user)
+        JinGui = Activity_JinGui.objects.filter(date__range=[date_1, date_2]).get(user=user)
         return JsonResponse({
             'user': { 'uid': user.id, 'nickname': user.nickname, 'bio': user.bio, 'avatar': user.avatar.url, 'auth': user.auth.split(';') if user.auth else None },
             'content': JinGui.content,
+            'audio': JinGui.audio.url,
             'date': JinGui.date
         })
     except:
@@ -941,7 +980,7 @@ def getUserProfile(request):
 def uploadLoveImg(request):
     if request.method == 'POST':
         file_obj = request.FILES.get('files')
-        name = formatName(file_obj.name)
+        name = formatName(file_obj.name, 'jpg')
         f = open(generateUploadPath('/img/loveImg/', name), 'wb')
         for chunk in file_obj.chunks():
             f.write(chunk)
@@ -967,7 +1006,7 @@ def removeLoveImg(request):
 def uploadLoseImg(request):
     if request.method == 'POST':
         file_obj = request.FILES.get('files')
-        name = formatName(file_obj.name)
+        name = formatName(file_obj.name, jpg)
         f = open(generateUploadPath('/img/loseImg/', name), 'wb')
         for chunk in file_obj.chunks():
             f.write(chunk)
@@ -993,7 +1032,7 @@ def removeLoseImg(request):
 def uploadDealImg(request):
     if request.method == 'POST':
         file_obj = request.FILES.get('files')
-        name = formatName(file_obj.name)
+        name = formatName(file_obj.name, 'jpg')
         f = open(generateUploadPath('/img/dealImg/', name), 'wb')
         for chunk in file_obj.chunks():
             f.write(chunk)

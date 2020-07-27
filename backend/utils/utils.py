@@ -37,8 +37,8 @@ def sendCaptcha(receiver, captcha):
 
 
 
-def formatName(name):
-    return name + '_' + str(int(time.time())) + '.jpg'
+def formatName(name, suffix):
+    return name + '_' + str(int(time.time())) + '.' + suffix
 
 
 

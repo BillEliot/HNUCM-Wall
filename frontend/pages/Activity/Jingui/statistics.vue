@@ -4,11 +4,12 @@
     <navbar :userBaseInfo="userBaseInfo" />
     <!-- banner -->
     <div class="main-wrapper">
-        <div class="page-title">
+        <div class="page-title-zy">
             <div class="container">
                 <div class="title-holder">
                     <div class="title-text text-center">
                         <h1>金匮打卡统计</h1>
+                        <a-button type="primary" size="large" @click="$router.push({ path: '/activity/jingui/sign' })">打卡</a-button>
                     </div>
                 </div>
             </div>
@@ -47,7 +48,9 @@
                     <br />
                     <span class="date">{{ moment(item.date).format("llll") }}</span>
                     <br />
-                    <a target="_blank" :href="'/activity/jingui/detail?uid=' + item.user.uid">详情</a>
+                    <a target="_blank" :href="'/activity/jingui/detail?uid=' + item.user.uid + '&date=' + date">详情</a>
+                    <hr />
+                    <audio-player :src="baseUrl + item.audio" />
                   </a-list-item>
                 </a-list>
               </a-tab-pane>
@@ -87,6 +90,7 @@ export default {
   data() {
     return {
       moment,
+      date: moment().format("YYYY-MM-DD"),
       pagination: {
         pageSize: 10
       }
@@ -133,14 +137,15 @@ export default {
       return current && current > moment().endOf('day');
     },
     changeDate(m) {
+      this.date = m.format("YYYY-MM-DD")
       this.$axios.post('getStatistics_JinGui', qs.stringify({
-        date: m.format("YYYY-MM-DD")
+        date: this.date
       }))
       .then((response) => {
         this.statisticsList = response.data.info
       })
       this.$axios.post('getStatistics_JinGui_unsign', qs.stringify({
-        date: m.format("YYYY-MM-DD")
+        date: this.date
       }))
       .then((response) => {
         this.statisticsList_unsign = response.data.info

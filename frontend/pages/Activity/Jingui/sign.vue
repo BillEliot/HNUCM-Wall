@@ -4,12 +4,12 @@
     <navbar :userBaseInfo="userBaseInfo" />
     <!-- banner -->
     <div class="main-wrapper">
-        <div class="page-title">
+        <div class="page-title-zy">
             <div class="container">
                 <div class="title-holder">
                     <div class="title-text text-center">
                         <h1>金匮打卡</h1>
-                        <p class="subheading"></p>
+                        <a-button type="primary" size="large" @click="$router.push({ path: '/activity/jingui/statistics' })">打卡统计</a-button>
                     </div>
                 </div>
             </div>
@@ -25,11 +25,21 @@
                         <no-ssr placeholder='Loading'>
                             <mavon-editor v-model="content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel" class="editor" />
                         </no-ssr>
+                        <a-button type="primary" @click="sign" class="sign">打卡</a-button>
                     </a-tab-pane>
                     <a-tab-pane tab="语音打卡" key="2">
+                        <span class="attention">录音后，点击“Record 1”，点击“下载图标”即可下载录音，点击“保存图标”即可上传打卡</span>
+                        <audio-recorder
+                            upload-url="uploadAudio_JinGui"
+                            filename="JinGui"
+                            format="mp3"
+                            :attempts="1"
+                            :time="2"
+                            :successful-upload="audio_successful"
+                            :failed-upload="audio_failed"
+                        />
                     </a-tab-pane>
                 </a-tabs>
-                <a-button type="primary" @click="sign" class="sign">打卡</a-button>
             </div>
         </div>
     </div>
@@ -52,7 +62,8 @@ export default {
   },
   data() {
     return {
-        cover: null
+        cover: null,
+        isRecording: false
     }
   },
   async asyncData({ $axios, error }) {
@@ -102,6 +113,17 @@ export default {
               this.$message.warning('说点什么吧~')
           }
       },
+      audio_successful(msg) {
+          if (msg.data == 1) {
+              this.$message.error('未知错误')
+          }
+          else {
+              this.$message.success('打卡成功')
+          }
+      },
+      audio_failed(msg) {
+          this.$message.error('未知错误')
+      },
       $imgAdd(pos, $file) {
            var formdata = new FormData()
            formdata.append('image', $file)
@@ -128,7 +150,29 @@ export default {
                   this.$message.error('未知错误')
               }
           })
-      }
+      },
+      record() {
+          if (this.isRecording) {
+              this.isRecording = false
+              rc.pause()
+              .then(() => {
+                  this.$message.success('暂停录音')
+              })
+              .catch((error) => {
+                  this.$message.error(error)
+              })
+          }
+          else {
+              this.isRecording = true
+              rc.start()
+              .then(() => {
+                  this.$message.success('开始录音')
+              })
+              .catch((error) => {
+                  this.$message.error(error)
+              })
+          }
+      },
     },
   computed: mapState({
       baseUrl: state => state.baseUrl
@@ -143,9 +187,15 @@ export default {
     height: 300px;
     z-index: 1
 }
-
+.attention {
+    font-weight: bold;
+    color: red;
+}
 .sign {
     margin-top: 20px;
+    width: 100%;
+}
+.ar {
     width: 100%;
 }
 </style>

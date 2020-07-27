@@ -4,7 +4,7 @@
     <navbar :userBaseInfo="userBaseInfo" />
     <!-- banner -->
     <div class="main-wrapper">
-        <div class="page-title">
+        <div class="page-title-zy">
             <div class="container">
                 <div class="title-holder">
                     <div class="title-text text-center">

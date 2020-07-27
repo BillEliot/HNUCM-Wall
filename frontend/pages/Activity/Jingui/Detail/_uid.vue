@@ -4,7 +4,7 @@
         <navbar :userBaseInfo="userBaseInfo" />
         <!-- banner -->
         <div class="main-wrapper">
-            <div class="page-title">
+            <div class="page-title-zy">
                 <div class="container">
                     <div class="title-holder">
                         <div class="title-text text-center">
@@ -26,8 +26,12 @@
                         <a @click="$router.push({ path: '/profile', query: { uid: detail.user.uid } })">{{ detail.user.nickname }}</a>
                         <br />
                         <a-tag v-for="tag in detail.user.auth" :color="randomColor()" :key="tag">{{ tag }}</a-tag>
-                        <p>{{ detail.user.bio }}</p>
+                        <br />
+                        <span>{{ detail.user.bio }}</span>
                     </div>
+                    <no-ssr>
+                        <audio-player :src="baseUrl + detail.audio" />
+                    </no-ssr>
                     <no-ssr placeholder='Loading'>
                         <mavon-editor
                             v-model="detail.content"
@@ -71,7 +75,8 @@ export default {
 
       let detail = null
       await $axios.post('detail_JinGui', qs.stringify({
-          uid: query.uid
+          uid: query.uid,
+          date: query.date
       }))
       .then((response) => {
           if (response.data == 1) {
@@ -123,7 +128,7 @@ a {
 .author a {
     font-size: 24px;
 }
-.author p {
+.author span {
     color: gray;
 }
 </style>

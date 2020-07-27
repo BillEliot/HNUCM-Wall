@@ -30,6 +30,7 @@ urlpatterns = [
     path('getStatistics_JinGui_unsign', views.getStatistics_JinGui_unsign),
     path('uploadImg_JinGui', views.uploadImg_JinGui),
     path('removeImg_JinGui', views.removeImg_JinGui),
+    path('uploadAudio_JinGui', views.uploadAudio_JinGui),
     path('detail_JinGui', views.detail_JinGui),
     # Admin - User
     path('getUserList', views.getUserList),
