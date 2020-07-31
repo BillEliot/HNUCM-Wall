@@ -78,6 +78,9 @@ export default {
     await $axios.get('IsFirstSignToday_JinGui')
     .then((response) => {
         if (response.data == 1) {
+            error({ statusCode: 500, message: '请登录后打卡' })
+        }
+        else if (response.data == 2) {
             error({ statusCode: 500, message: '未知错误' })
         }
         else {

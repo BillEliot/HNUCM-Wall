@@ -25,6 +25,12 @@ export const state = () => ({
       value: '五年制七班',
       label: '五年制七班',
     }, {
+      value: '五年制十班',
+      label: '五年制十班',
+    }, {
+      value: '八年制拔尖班',
+      label: '八年制拔尖班',
+    }, {
       value: '八年制一班',
       label: '八年制一班',
     }, {
@@ -52,6 +58,9 @@ export const state = () => ({
     }, {
       value: '针灸推拿五班',
       label: '针灸推拿五班',
+    }, {
+      value: '针灸推拿六班',
+      label: '针灸推拿六班',
     }, {
       value: '康复治疗一班',
       label: '康复治疗一班',
@@ -150,7 +159,6 @@ export const state = () => ({
   }, {
     value: '医学院',
     label: '医学院',
-    
   }, {
     value: '药学院',
     label: '药学院',
