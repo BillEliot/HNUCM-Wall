@@ -68,7 +68,7 @@ export default {
         moment
     }
   },
-  async asyncData({ $axios, query, redirect }) {
+  async asyncData({ $axios, query, redirect, error }) {
       if (!query.uid) {
           redirect('/activity/jingui/statistics')
       }
@@ -79,7 +79,7 @@ export default {
           date: query.date
       }))
       .then((response) => {
-          if (response.data == 1) {
+          if (response.data == 2) {
               redirect('/activity/jingui/statistics')
           }
           else {

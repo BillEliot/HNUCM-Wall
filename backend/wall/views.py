@@ -580,7 +580,9 @@ def uploadAudio_JinGui(request):
 
 @csrf_exempt
 def detail_JinGui(request):
-    uid = request.POST.get('uid')
+    uid = request.POST.get('uid', None)
+    if not uid:
+        return HttpResponse(1)
     date = datetime.datetime.strptime(request.POST.get('date'), '%Y-%m-%d')
 
     date_1 = date.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -595,7 +597,7 @@ def detail_JinGui(request):
             'date': JinGui.date
         })
     except:
-        return HttpResponse(1)
+        return HttpResponse(2)
 
 
 
