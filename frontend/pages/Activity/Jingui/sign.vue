@@ -10,6 +10,7 @@
                     <div class="title-text text-center">
                         <h1>金匮打卡</h1>
                         <a-button type="primary" size="large" @click="$router.push({ path: '/activity/jingui/statistics' })">打卡统计</a-button>
+                        <a-button size="large" @click="$router.push({ path: '/activity/jingui/log', query: { uid: userBaseInfo.uid } })">我的打卡</a-button>
                     </div>
                 </div>
             </div>

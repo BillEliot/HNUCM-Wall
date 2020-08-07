@@ -4,8 +4,7 @@ from django.db.models import Count
 from django.conf import settings
 from .models import *
 from utils.utils import *
-from datetime import timedelta
-import os, random, datetime, pytz, math, requests, hashlib
+import os, random, datetime, pytz, math, requests, hashlib, calendar
 import json
 
 
@@ -113,7 +112,7 @@ def login(request):
         user = User.objects.get(email=email)
         if (user.password == password):
             request.session['uid'] = user.id
-            request.session.set_expiry(timedelta(days=7))
+            request.session.set_expiry(datetime.timedelta(days=7))
             return HttpResponse(0)
         else:
             return HttpResponse(2)
@@ -413,7 +412,7 @@ def IsFirstSignToday_JinGui(request):
     try:
         today = datetime.datetime.now()
         date_1 = today.replace(hour=0, minute=0, second=0, microsecond=0)
-        date_2 = (today + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        date_2 = date_1 + datetime.timedelta(days=1)
 
         user = User.objects.get(id=uid)
         JinGui = Activity_JinGui.objects.filter(date__range=[date_1, date_2]).filter(user=user)
@@ -443,7 +442,7 @@ def sign_JinGui(request):
         else:
             today = datetime.datetime.now()
             date_1 = today.replace(hour=0, minute=0, second=0, microsecond=0)
-            date_2 = (today + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            date_2 = date_1 + datetime.timedelta(days=1)
 
             if Activity_JinGui.objects.filter(date__range=[date_1, date_2]).filter(user=user).exists():
                 jingui = Activity_JinGui.objects.filter(date__range=[date_1, date_2]).get(user=user)
@@ -471,7 +470,7 @@ def getStatistics_JinGui(request):
     else:
         today = datetime.datetime.strptime(date, '%Y-%m-%d')
     date_1 = today.replace(hour=0, minute=0, second=0, microsecond=0)
-    date_2 = (today + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    date_2 = date_1 + datetime.timedelta(days=1)
 
     listStatistics = []
     try:
@@ -498,7 +497,7 @@ def getStatistics_JinGui_unsign(request):
     else:
         today = datetime.datetime.strptime(date, '%Y-%m-%d')
     date_1 = today.replace(hour=0, minute=0, second=0, microsecond=0)
-    date_2 = (today + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    date_2 = date_1 + datetime.timedelta(days=1)
 
     listStatistics_unsign = []
     try:
@@ -512,6 +511,30 @@ def getStatistics_JinGui_unsign(request):
                         'bio': user.bio
                     })
         return JsonResponse({ 'info': listStatistics_unsign })
+    except:
+        return HttpResponse(1)
+
+
+
+@csrf_exempt
+def getSignStatus(request):
+    uid = request.POST.get('uid')
+    dates = request.POST.getlist('dates[]')
+
+    signStatus = {}
+    try:
+        user = User.objects.get(id=uid)
+        for date in dates:
+            date_1 = datetime.datetime.strptime(date, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+            date_2 = date_1 + datetime.timedelta(days=1)
+
+            if date_1 > datetime.datetime.today():
+                signStatus[date] = -1
+            elif Activity_JinGui.objects.filter(user=user).filter(date__range=[date_1, date_2]).exists():
+                signStatus[date] = 1
+            else:
+                signStatus[date] = 0
+        return JsonResponse({ 'info': signStatus })
     except:
         return HttpResponse(1)
 
@@ -558,7 +581,7 @@ def uploadAudio_JinGui(request):
         # Sign
         today = datetime.datetime.now()
         date_1 = today.replace(hour=0, minute=0, second=0, microsecond=0)
-        date_2 = (today + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        date_2 = date_1 + datetime.timedelta(days=1)
 
         if Activity_JinGui.objects.filter(date__range=[date_1, date_2]).filter(user=user).exists():
             jingui = Activity_JinGui.objects.filter(date__range=[date_1, date_2]).get(user=user)
@@ -586,7 +609,7 @@ def detail_JinGui(request):
     date = datetime.datetime.strptime(request.POST.get('date'), '%Y-%m-%d')
 
     date_1 = date.replace(hour=0, minute=0, second=0, microsecond=0)
-    date_2 = (today + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    date_2 = date_1 + datetime.timedelta(days=1)
     try:
         user = User.objects.get(id=uid)
         JinGui = Activity_JinGui.objects.filter(date__range=[date_1, date_2]).get(user=user)

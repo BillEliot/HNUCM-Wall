@@ -4,16 +4,17 @@
     <navbar :userBaseInfo="userBaseInfo" />
     <!-- banner -->
     <div class="main-wrapper">
-        <div class="page-title-zy">
-            <div class="container">
-                <div class="title-holder">
-                    <div class="title-text text-center">
-                        <h1>金匮打卡统计</h1>
-                        <a-button type="primary" size="large" @click="$router.push({ path: '/activity/jingui/sign' })">打卡</a-button>
-                    </div>
-                </div>
+      <div class="page-title-zy">
+        <div class="container">
+          <div class="title-holder">
+            <div class="title-text text-center">
+              <h1>金匮打卡统计</h1>
+              <a-button type="primary" size="large" @click="$router.push({ path: '/activity/jingui/sign' })">打卡</a-button>
+              <a-button v-if="userBaseInfo.uid != -1" size="large" @click="$router.push({ path: '/activity/jingui/log', query: { uid: userBaseInfo.uid } })">我的打卡</a-button>
             </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <div style="margin-top: 50px"></div>
@@ -41,8 +42,17 @@
                       :src="baseUrl + item.cover"
                     />
                     <a-list-item-meta :description="item.user.bio">
-                      <a slot="title" @click="$router.push({ path: '/profile', query: { uid: item.user.uid } })">{{ item.user.nickname }}</a>
-                      <a-avatar slot="avatar" :src="baseUrl + item.user.avatar" />
+                      <a-popover slot="title" :title="item.user.nickname">
+                        <div slot="content">
+                          <a @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.user.uid } })">查看打卡记录</a>
+                          <a @click="$router.push({ path: '/profile', query: { uid: item.user.uid } })">查看个人信息</a>
+                        </div>
+                        <a>{{ item.user.nickname }}</a>
+                      </a-popover>
+                      <a-popover slot="avatar" :title="item.user.nickname">
+                        <a slot="content" @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.user.uid } })">查看打卡记录</a>
+                        <a-avatar :src="baseUrl + item.user.avatar" />
+                      </a-popover>
                     </a-list-item-meta>
                     {{ item.content.substring(0,100) + '......' }}
                     <br />
@@ -58,8 +68,18 @@
                 <a-list item-layout="horizontal" :pagination="pagination" :data-source="statisticsList_unsign">
                   <a-list-item slot="renderItem" slot-scope="item, index">
                     <a-list-item-meta :description="item.bio">
-                      <a slot="title" @click="$router.push({ path: '/profile', query: { uid: item.uid } })">{{ item.nickname }}</a>
-                      <a-avatar slot="avatar" :src="baseUrl + item.avatar" />
+                      <a-popover slot="title" :title="item.nickname">
+                        <div slot="content">
+                          <a @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.uid } })">查看打卡记录</a>
+                          <br />
+                          <a @click="$router.push({ path: '/profile', query: { uid: item.uid } })">查看个人信息</a>
+                        </div>
+                        <a>{{ item.nickname }}</a>
+                      </a-popover>
+                      <a-popover slot="avatar" :title="item.nickname">
+                        <a slot="content" @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.uid } })">查看打卡记录</a>
+                        <a-avatar :src="baseUrl + item.avatar" />
+                      </a-popover>
                     </a-list-item-meta>
                   </a-list-item>
                 </a-list>

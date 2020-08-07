@@ -28,6 +28,7 @@ urlpatterns = [
     path('sign_JinGui', views.sign_JinGui),
     path('getStatistics_JinGui', views.getStatistics_JinGui),
     path('getStatistics_JinGui_unsign', views.getStatistics_JinGui_unsign),
+    path('getSignStatus', views.getSignStatus),
     path('uploadImg_JinGui', views.uploadImg_JinGui),
     path('removeImg_JinGui', views.removeImg_JinGui),
     path('uploadAudio_JinGui', views.uploadAudio_JinGui),

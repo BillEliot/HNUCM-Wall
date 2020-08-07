@@ -12,6 +12,7 @@
                         <a-button v-if="!canSign_JinGui" size="large" @click="signUp">报名</a-button>
                         <a-button v-if="canSign_JinGui" type="primary" size="large" @click="sign">打卡</a-button>
                         <a-button type="dashed" size="large" @click="$router.push({ path: '/activity/jingui/statistics' })">打卡统计</a-button>
+                        <a-button v-if="userBaseInfo.uid != -1" size="large" @click="$router.push({ path: '/activity/jingui/log', query: { uid: userBaseInfo.uid } })">我的打卡</a-button>
                     </div>
                 </div>
             </div>
