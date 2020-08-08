@@ -21,71 +21,78 @@
     <div class="container">
       <div class="row">
         <div class="col-md-12 col-xs-12 text-center">
-          <span>选择日期</span>
-          <a-date-picker
-            @change="changeDate"
-            format="YYYY-MM-DD"
-            :disabled-date="disabledDate"
-            :default-value="moment()"
-          />
-          <hr />
-          <no-ssr placeholder='Loading'>
-            <a-tabs type="card">
-              <a-tab-pane tab="已打卡" key="1" class="text-left">
-                <a-list item-layout="vertical" size="large" :pagination="pagination" :data-source="statisticsList">
-                  <div slot="footer">金匮打卡数据统计</div>
-                  <a-list-item slot="renderItem" key="item.user.id" slot-scope="item, index">
-                    <img
-                      slot="extra"
-                      width="272"
-                      alt="logo"
-                      :src="baseUrl + item.cover"
-                    />
-                    <a-list-item-meta :description="item.user.bio">
-                      <a-popover slot="title" :title="item.user.nickname">
-                        <div slot="content">
-                          <a @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.user.uid } })">查看打卡记录</a>
-                          <a @click="$router.push({ path: '/profile', query: { uid: item.user.uid } })">查看个人信息</a>
-                        </div>
-                        <a>{{ item.user.nickname }}</a>
-                      </a-popover>
-                      <a-popover slot="avatar" :title="item.user.nickname">
-                        <a slot="content" @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.user.uid } })">查看打卡记录</a>
-                        <a-avatar :src="baseUrl + item.user.avatar" />
-                      </a-popover>
-                    </a-list-item-meta>
-                    {{ item.content.substring(0,100) + '......' }}
-                    <br />
-                    <span class="date">{{ moment(item.date).format("llll") }}</span>
-                    <br />
-                    <a target="_blank" :href="'/activity/jingui/detail?uid=' + item.user.uid + '&date=' + date">详情</a>
-                    <hr />
-                    <audio-player :src="baseUrl + item.audio" />
-                  </a-list-item>
-                </a-list>
-              </a-tab-pane>
-              <a-tab-pane tab="未打卡" key="2" class="text-left">
-                <a-list item-layout="horizontal" :pagination="pagination" :data-source="statisticsList_unsign">
-                  <a-list-item slot="renderItem" slot-scope="item, index">
-                    <a-list-item-meta :description="item.bio">
-                      <a-popover slot="title" :title="item.nickname">
-                        <div slot="content">
-                          <a @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.uid } })">查看打卡记录</a>
-                          <br />
-                          <a @click="$router.push({ path: '/profile', query: { uid: item.uid } })">查看个人信息</a>
-                        </div>
-                        <a>{{ item.nickname }}</a>
-                      </a-popover>
-                      <a-popover slot="avatar" :title="item.nickname">
-                        <a slot="content" @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.uid } })">查看打卡记录</a>
-                        <a-avatar :src="baseUrl + item.avatar" />
-                      </a-popover>
-                    </a-list-item-meta>
-                  </a-list-item>
-                </a-list>
-              </a-tab-pane>
-            </a-tabs>
-          </no-ssr>
+          <a-tabs type="card">
+            <a-tab-pane tab="每日打卡统计" key="1">
+              <span>选择日期</span>
+              <a-date-picker
+                @change="changeDate"
+                format="YYYY-MM-DD"
+                :disabled-date="disabledDate"
+                :default-value="moment()"
+              />
+              <hr />
+              <no-ssr placeholder='Loading'>
+                <a-tabs type="card">
+                  <a-tab-pane tab="已打卡" key="1-1" class="text-left">
+                    <a-list item-layout="vertical" size="large" :pagination="pagination" :data-source="statisticsList">
+                      <div slot="footer">金匮打卡数据统计</div>
+                      <a-list-item slot="renderItem" key="item.user.id" slot-scope="item, index">
+                        <img
+                          slot="extra"
+                          width="272"
+                          alt="logo"
+                          :src="baseUrl + item.cover"
+                        />
+                        <a-list-item-meta :description="item.user.bio">
+                          <a-popover slot="title" :title="item.user.nickname">
+                            <div slot="content">
+                              <a @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.user.uid } })">查看打卡记录</a>
+                              <a @click="$router.push({ path: '/profile', query: { uid: item.user.uid } })">查看个人信息</a>
+                            </div>
+                            <a>{{ item.user.nickname }}</a>
+                          </a-popover>
+                          <a-popover slot="avatar" :title="item.user.nickname">
+                            <a slot="content" @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.user.uid } })">查看打卡记录</a>
+                            <a-avatar :src="baseUrl + item.user.avatar" />
+                          </a-popover>
+                        </a-list-item-meta>
+                        {{ item.content.substring(0,100) + '......' }}
+                        <br />
+                        <span class="date">{{ moment(item.date).format("llll") }}</span>
+                        <br />
+                        <a target="_blank" :href="'/activity/jingui/detail?uid=' + item.user.uid + '&date=' + date">详情</a>
+                        <hr />
+                        <audio-player :src="baseUrl + item.audio" />
+                      </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                  <a-tab-pane tab="未打卡" key="1-2" class="text-left">
+                    <a-list item-layout="horizontal" :pagination="pagination" :data-source="statisticsList_unsign">
+                      <a-list-item slot="renderItem" slot-scope="item, index">
+                        <a-list-item-meta :description="item.bio">
+                          <a-popover slot="title" :title="item.nickname">
+                            <div slot="content">
+                              <a @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.uid } })">查看打卡记录</a>
+                              <br />
+                              <a @click="$router.push({ path: '/profile', query: { uid: item.uid } })">查看个人信息</a>
+                            </div>
+                            <a>{{ item.nickname }}</a>
+                          </a-popover>
+                          <a-popover slot="avatar" :title="item.nickname">
+                            <a slot="content" @click="$router.push({ path: '/activity/jingui/log', query: { uid: item.uid } })">查看打卡记录</a>
+                            <a-avatar :src="baseUrl + item.avatar" />
+                          </a-popover>
+                        </a-list-item-meta>
+                      </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                </a-tabs>
+              </no-ssr>
+            </a-tab-pane>
+            <a-tab-pane tab="5日打卡统计(不含今天)" key="2">
+
+            </a-tab-pane>
+          </a-tabs>
         </div>
       </div>
     </div>
@@ -120,6 +127,7 @@ export default {
     let userBaseInfo = null
     let statisticsList = []
     let statisticsList_unsign = []
+    let statisticsList_FiveDays = []
 
     await $axios.get('getUserBaseInfo')
     .then((response) => {
@@ -146,10 +154,16 @@ export default {
       }
     })
 
+    await $axios.get('getStatistics_JinGui_FiveDays')
+    .then((response) => {
+      statisticsList_FiveDays = response.data.info
+    })
+
     return {
       userBaseInfo: userBaseInfo,
       statisticsList: statisticsList,
-      statisticsList_unsign: statisticsList_unsign
+      statisticsList_unsign: statisticsList_unsign,
+      statisticsList_FiveDays: statisticsList_FiveDays
     }
   },
   methods: {
