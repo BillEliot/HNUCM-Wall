@@ -1,0 +1,24 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@nuxtjs/axios": "^5.12.5",
+    "ant-design-vue": "^1.6.5",
+    "core-js": "^3.6.5",
+    "js-md5": "^0.7.3",
+    "mavon-editor": "^2.9.1",
+    "nuxt": "^2.14.12",
+    "vue-amap": "^0.5.10",
+    "vue-audio-recorder": "^3.0.1",
+    "vue-infinite-scroll": "^2.0.2",
+    "vue-virtual-scroller": "^1.0.10"
+  },
+  "devDependencies": {}
+}
