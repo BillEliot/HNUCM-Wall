@@ -385,7 +385,7 @@ export default {
       },
       medicineDetail(name) {
           let routeData = this.$router.resolve({ path: '/medicine/detail', query: { name: name } })
-          window.open(routeData.href, '_blank');
+          window.open(routeData.href, '_blank')
       }
   },
   computed: mapState({

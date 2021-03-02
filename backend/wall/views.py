@@ -66,27 +66,27 @@ def register(request):
     bio = request.POST.get('bio')
     gender = request.POST.get('gender')
     _class = request.POST.get('class[0]') + '/' + request.POST.get('class[1]')
-    last_name = request.POST.get('last_name')
-    first_name = request.POST.get('first_name')
+    last_name = request.POST.get('last_name') if request.POST.get('last_name') else ''
+    first_name = request.POST.get('first_name') if request.POST.get('first_name') else ''
     #phone = request.POST.get('phone')
     qq = request.POST.get('qq')
     wechat = request.POST.get('wechat')
     captcha = request.POST.get('captcha')
 
-    # check captcha
-    session_captcha = request.session.get('captcha', None)
-    if not session_captcha or captcha != session_captcha:
-        return JsonResponse({ 'code': 200, 'status': 'error', 'message': '验证码错误' })
-    # check email
-    if User.objects.filter(email=email).exists():
-        return JsonResponse({ 'code': 200, 'status': 'error', 'message': '电子邮件已存在' })
-    # check username
-    if username == 'Anony' or username == 'anony':
-        return JsonResponse({ 'code': 200, 'status': 'error', 'message': '非法昵称' })
-    if User.objects.filter(username=username).exists():
-        return JsonResponse({ 'code': 200, 'status': 'error', 'message': '昵称已存在' })
-
     try:
+        # check captcha
+        session_captcha = request.session.get('captcha', None)
+        if not session_captcha or captcha != session_captcha:
+            return JsonResponse({ 'code': 200, 'status': 'error', 'message': '验证码错误或过期' })
+        # check email
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({ 'code': 200, 'status': 'error', 'message': '电子邮件已存在' })
+        # check username
+        if username == 'Anony' or username == 'anony':
+            return JsonResponse({ 'code': 200, 'status': 'error', 'message': '非法昵称' })
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({ 'code': 200, 'status': 'error', 'message': '昵称已存在' })
+        
         User.objects.create_user(
             username = username,
             first_name = first_name,
@@ -1043,7 +1043,7 @@ def searchArticle(request):
                     'user': { 'id': article.user.id, 'avatar': article.user.avatar.url, 'username': article.user.username, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                     'title': article.title,
                     'tags': article.tags.split(';'),
-                    'content': article.content,
+                    'content': article.content[:50] + '...' if len(article.content) > 50 else article.content,
                     'neededCoin': article.neededCoin,
                     'publicDate': article.publicDate,
                     'editDate': article.editDate,
@@ -1079,7 +1079,7 @@ def searchArticleByUser(request):
                     'user': { 'id': article.user.id, 'avatar': article.user.avatar.url, 'username': article.user.username, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                     'title': article.title,
                     'tags': article.tags.split(';'),
-                    'content': article.content,
+                    'content': article.content[:50] + '...' if len(article.content) > 50 else article.content,
                     'neededCoin': article.neededCoin,
                     'publicDate': article.publicDate,
                     'editDate': article.editDate,
@@ -1119,7 +1119,7 @@ def searchArticleByTag(request):
                     'user': { 'id': article.user.id, 'avatar': article.user.avatar.url, 'username': article.user.username, 'bio': article.user.bio, 'auth': article.user.auth.split(';') if article.user.auth else None },
                     'title': article.title,
                     'tags': article.tags.split(';'),
-                    'content': article.content,
+                    'content': article.content[:50] + '...' if len(article.content) > 50 else article.content,
                     'neededCoin': article.neededCoin,
                     'publicDate': article.publicDate,
                     'editDate': article.editDate,
@@ -2385,6 +2385,9 @@ def getArticleList(request):
         else:
             page = Paginator(Article.objects.all(), 10)
 
+        if page_number > page.num_pages or page.count == 0:
+            return JsonResponse({ 'code': 200, 'status': 'none' })
+
         for article in page.page(page_number).object_list:
             if article.isAdopted:
                 listArticle.append({
@@ -2392,7 +2395,7 @@ def getArticleList(request):
                     'user': { 'id': article.user.id, 'avatar': article.user.avatar.url, 'username': article.user.username, 'bio': article.user.bio, 'auth': article.user.auth.split(';')[:2] if article.user.auth else None },
                     'title': article.title,
                     'tags': article.tags.split(';'),
-                    'content': article.content,
+                    'content': article.content[:50] + '...' if len(article.content) > 50 else article.content,
                     'neededCoin': article.neededCoin,
                     'publicDate': article.publicDate,
                     'editDate': article.editDate,
@@ -3233,6 +3236,102 @@ def deleteLecture(request):
     try:
         Lecture.objects.get(id=_id).delete()
         return JsonResponse({ 'code': 200, 'status': 'success' })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+def getBriefMatchList(request):
+    try:
+        listMatch = []
+        for match in Match.objects.defer('title', 'startDate', 'endDate', 'totalBonus').all()[:5]:
+            startDate = match.startDate
+            endDate = match.endDate
+            currentDate = datetime.datetime.now()
+
+            if currentDate < startDate:
+                state = '未开始'
+            elif currentDate > endDate:
+                state = '已结束'
+            elif currentDate >= startDate and currentDate <= endDate:
+                state = '进行中'
+
+            listMatch.append({
+                'id': match.id,
+                'title': match.title,
+                'state': state,
+                'totalBonus': match.totalBonus
+            })
+
+        return JsonResponse({
+            'code': 200,
+            'status': 'success',
+            'data': listMatch
+        })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+def getMatchList(request):
+    listMatch = []
+    try:
+        for match in Match.objects.all():
+            startDate = match.startDate
+            endDate = match.endDate
+            currentDate = datetime.datetime.now()
+
+            if currentDate < startDate:
+                state = '未开始'
+            elif currentDate > endDate:
+                state = '已结束'
+            elif currentDate >= startDate and currentDate <= endDate:
+                state = '进行中'
+
+            listMatch.append({
+                'id': match.id,
+                'title': match.title,
+                'startDate': match.startDate,
+                'endDate': match.endDate,
+                'state': state,
+                'totalBonus': match.totalBonus
+            })
+        return JsonResponse({ 'code': 200, 'status': 'success', 'data': listMatch })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+def getMatchDetail(request):
+    _id = request.GET.get('id')
+
+    try:
+        match = Match.objects.get(id=_id)
+        files = []
+        for _file in CommonFile.objects.filter(match=match):
+            files.append({
+                'name': _file.name,
+                'type': _file._type,
+                'url': _file._file.url
+            })
+        return JsonResponse({
+            'code': 200,
+            'status': 'success',
+            'data': {
+                'id': match.id,
+                'title': match.title,
+                'description': match.description,
+                'requirement': match.requirement,
+                'prizeDescription': match.prizeDescription,
+                'startDate': match.startDate,
+                'endDate': match.endDate,
+                'totalBonus': match.totalBonus,
+                'files': files
+            }
+        })
     except:
         return JsonResponse({ 'code': 500 })
 

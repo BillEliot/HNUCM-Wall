@@ -76,7 +76,7 @@
                     >
                         <a-list-item slot="renderItem" slot-scope="item, index">
                             <!-- article -->
-                            <a-list-item-meta :description="item.content.substring(0,50) + '......'">
+                            <a-list-item-meta :description="item.content">
                                 <a slot="title" @click="openArticleDetail(item.id)">{{ item.title }}</a>
                             </a-list-item-meta>
                             <!-- tags -->
@@ -180,11 +180,6 @@ export default {
           let routeData = this.$router.resolve({ path: '/article/detail', query: { id: id } })
           window.open(routeData.href, '_blank')
 
-          this.$axios.get('addArticleViewCount', {
-              params: {
-                  id: id
-              }
-          })
           this.articleList.forEach(article => {
               if (article.id == id) {
                   article.viewCount += 1

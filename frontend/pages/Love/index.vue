@@ -41,7 +41,7 @@
         <!-- container -->
         <div class="container">
             <div class="row">
-                <div class="col-md-8 col-md-offset-2 col-xs-12">
+                <div class="col-md-8 col-md-offset-2 col-sm-8">
                     <!-- Top -->
                     <div class="text-center top">
                         <a-row>
@@ -68,12 +68,12 @@
                         <!-- content -->
                         <p class="content">{{ top_love.content }}</p>
                         <div class="text-center">
-                            <a-carousel arrows style="display: inline-block; width: 400px">
+                            <a-carousel arrows class="carousel">
                                 <div
                                     slot="prevArrow"
                                     slot-scope="props"
                                     class="custom-slick-arrow"
-                                    style="left: 10px; zIndex: 1"
+                                    style="left: 10px"
                                 >
                                     <a-icon type="left-circle" />
                                 </div>
@@ -98,7 +98,7 @@
                             </a-col>
                             <a-col :span="8">
                                 <a-button style="width: 100%" type="danger" @click="$router.push({ path: '/love/detail', query: { id: top_love.id } })">
-                                    <a-icon type="heart" />进去看看<a-icon type="heart" />
+                                    进去看看
                                 </a-button>
                             </a-col>
                             <a-col :span="8">
@@ -111,20 +111,20 @@
                     </div>
                     <hr />
                     <!-- filter -->
-                    <div class="filter">
-                        <a-button @click="filterDate">时间<a-icon :type="type_date" /></a-button>
-                        <a-button @click="filterThumbsUp">赞数<a-icon :type="type_thumbsUp" /></a-button>
+                    <div class="filter text-center">
+                        <a-button @click="filterDate" class="col-md-2">时间<a-icon :type="type_date" /></a-button>
+                        <a-button @click="filterThumbsUp" class="col-md-2">赞数<a-icon :type="type_thumbsUp" /></a-button>
                         <a-input-search
                             placeholder="搜索表白人"
                             @search="searchLoveFrom"
                             enterButton
-                            style="width: 30%"
+                            class="col-md-4"
                         />
                         <a-input-search
                             placeholder="搜索被表白人"
                             @search="searchLoveTo"
                             enterButton
-                            style="width: 30%"
+                            class="col-md-4"
                         />
                     </div>
                     <!-- List -->
@@ -164,12 +164,12 @@
                                 <!-- content -->
                                 <p class="content">{{ item.content }}</p>
                                 <div class="text-center">
-                                    <a-carousel arrows style="display: inline-block; width: 400px">
+                                    <a-carousel arrows class="carousel">
                                         <div
                                             slot="prevArrow"
                                             slot-scope="props"
                                             class="custom-slick-arrow"
-                                            style="left: 10px; zIndex: 1"
+                                            style="left: 10px"
                                         >
                                             <a-icon type="left-circle" />
                                         </div>
@@ -194,7 +194,7 @@
                                     </a-col>
                                     <a-col :span="8">
                                         <a-button style="width: 100%" type="primary" @click="$router.push({ path: '/love/detail', query: { id: item.id } })">
-                                            <a-icon type="heart" />进去看看<a-icon type="heart" />
+                                            进去看看
                                         </a-button>
                                     </a-col>
                                     <a-col :span="8">
@@ -460,8 +460,23 @@ a {
   text-align: center;
 }
 
-.filter {
-    margin-bottom: 50px;
+/* md */
+@media screen and (min-width: 992px) {
+    .carousel {
+        display: inline-block;
+        width: 400px;
+    }
+
+    .filter {
+        margin-bottom: 80px
+    }
+}
+
+/* xs */
+@media screen and (max-width: 768px) {
+    .filter {
+        margin-bottom: 30px
+    }
 }
 
 .ant-carousel >>> .custom-slick-arrow {
@@ -469,7 +484,6 @@ a {
   height: 25px;
   font-size: 25px;
   color: #fff;
-  background-color: rgba(31, 45, 61, 0.11);
   opacity: 0.3;
 }
 .ant-carousel >>> .custom-slick-arrow:before {

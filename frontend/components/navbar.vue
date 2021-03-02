@@ -29,12 +29,9 @@
 
         <a-sub-menu>
             <span slot="title"><a-icon type="heat-map" />校园动态</span>
-            <a-menu-item-group title="热点">
-                <a-menu-item key="hot:1" @click="$router.push({ path: '/hot' })">校园热点</a-menu-item>
-            </a-menu-item-group>
-            <a-menu-item-group title="讲座">
-                <a-menu-item key="lecture:1" @click="$router.push({ path: '/lecture' })">讲座动态</a-menu-item>
-            </a-menu-item-group>
+            <a-menu-item key="hot" @click="$router.push({ path: '/hot' })">校园热点</a-menu-item>
+            <a-menu-item key="lecture" @click="$router.push({ path: '/lecture' })">讲座动态</a-menu-item>
+            <a-menu-item key="match" @click="$router.push({ path: '/match' })">比赛动态</a-menu-item>
             <a-menu-item-group title="活动">
                 <a-menu-item key="activity:1" @click="$router.push({ path: '/activity/jingui' })">金匮打卡</a-menu-item>
             </a-menu-item-group>

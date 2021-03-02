@@ -147,6 +147,12 @@ export default {
       if (!query.id) {
           redirect('/article')
       }
+      
+      await $axios.get('addArticleViewCount', {
+          params: {
+              id: query.id
+          }
+      })
 
       let articleDetail = null
       await $axios.get('getArticleDetail', {

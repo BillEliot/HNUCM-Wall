@@ -10,9 +10,9 @@
     <section class="section">
       <div class="container text-center">
         <a-row>
-          <a-col :span="12">
-            <a-tabs type="card" default-active-key="1" class="card-container">
-              <a-tab-pane key="1">
+          <a-col :md="12" :sm="24">
+            <a-tabs type="card" default-active-key="hot" class="card-container">
+              <a-tab-pane key="hot">
                 <span slot="tab">
                   最新热点
                   <a-icon type="heat-map" />
@@ -28,15 +28,34 @@
                   </nuxt-link>
                 </a-list>
               </a-tab-pane>
-              <a-tab-pane key="2">
+              <a-tab-pane key="match">
+                <span slot="tab">
+                  最新比赛
+                  <a-icon type="heat-map" />
+                </span>
+                <a-list size="small" bordered :data-source="briefMatchList" class="text-right">
+                  <a-list-item slot="renderItem" slot-scope="item, index" class="text-left">
+                    <nuxt-link :to="{ path: '/match/detail', query: { id: item.id } }">
+                      {{ (index + 1) + '.' + item.title }} <a-tag>{{ `总奖金: ${item.totalBonus} (元)` }}</a-tag>
+                    </nuxt-link>
+                  </a-list-item>
+                  <nuxt-link to="/match" slot="footer">
+                    更多
+                  </nuxt-link>
+                </a-list>
+              </a-tab-pane>
+              <a-tab-pane key="lecture">
                 <span slot="tab">
                   最新讲座
                   <a-icon type="highlight" />
                 </span>
                 <a-list size="small" bordered :data-source="briefLectureList" class="text-right">
                   <a-list-item slot="renderItem" slot-scope="item, index" class="text-left">
-                    <nuxt-link :to="{ path: '/lecture/detail', query: { id: item.id } }">
-                      {{ `${(index + 1)}. ${item.title} - ${item.lecturer}` }} <a-tag>{{ item.state }}</a-tag>
+                    <nuxt-link :to="{ path: '/lecture' }">
+                      {{ `${(index + 1)}. ${item.title} - ${item.lecturer}` }}
+                      <a-tag v-if="item.state == '未开始'">{{ item.state }}</a-tag>
+                      <a-tag v-else-if="item.state == '进行中'" color="green">{{ item.state }}</a-tag>
+                      <a-tag v-else-if="item.state == '已结束'" color="red">{{ item.state }}</a-tag>
                     </nuxt-link>
                   </a-list-item>
                   <nuxt-link to="/lecture" slot="footer">
@@ -46,7 +65,7 @@
               </a-tab-pane>
             </a-tabs>
           </a-col>
-          <a-col :span="12">
+          <a-col :md="12" :sm="24">
             <a-tabs type="card" default-active-key="1" class="card-container">
               <a-tab-pane key="1">
                 <span slot="tab">
@@ -109,7 +128,7 @@
         <hr />
         <a-card title="墙墙">
           <a-row>
-            <a-col :span="6">
+            <a-col :md="6" :sm="24">
               <div class="section-item">
                 <nuxt-link to="/love">
                   <a-icon type="heart" theme="twoTone" class="section-icon" />
@@ -125,7 +144,7 @@
                 </span>
               </div>
             </a-col>
-            <a-col :span="6">
+            <a-col :md="6" :sm="24">
               <div class="section-item">
                 <nuxt-link to="/lose">
                   <a-icon type="tags" theme="twoTone" class="section-icon" />
@@ -141,7 +160,7 @@
                 </span>
               </div>
             </a-col>
-            <a-col :span="6">
+            <a-col :md="6" :sm="24">
               <div class="section-item">
                 <nuxt-link to="/deal">
                   <a-icon type="dollar" theme="twoTone" class="section-icon" />
@@ -157,7 +176,7 @@
                 </span>
               </div>
             </a-col>
-            <a-col :span="6">
+            <a-col :md="6" :sm="24">
               <div class="section-item">
                 <nuxt-link to="/help">
                   <a-icon type="switcher" theme="twoTone" class="section-icon" />
@@ -177,7 +196,7 @@
         </a-card>
         <a-card title="学习">
           <a-row>
-            <a-col :span="12">
+            <a-col :md="12" :sm="24">
               <div class="section-item">
                 <nuxt-link to="/article">
                   <a-icon type="crown" theme="twoTone" class="section-icon" />
@@ -193,7 +212,7 @@
                 </span>
               </div>
             </a-col>
-            <a-col :span="12">
+            <a-col :md="12" :sm="24">
               <div class="section-item">
                 <nuxt-link to="/bank">
                   <a-icon type="database" theme="twoTone" class="section-icon" />
@@ -230,6 +249,7 @@ export default {
   },
   async asyncData({ $axios }) {
     let briefHotList = []
+    let briefMatchList = []
     let briefLectureList = []
     let briefWallList = []
     let briefArticleList = []
@@ -239,6 +259,12 @@ export default {
     .then((response) => {
       if (response.data.code == 200 && response.data.status == 'success') {
         briefHotList = response.data.data
+      }
+    })
+    await $axios.get('getBriefMatchList')
+    .then((response) => {
+      if (response.data.code == 200 && response.data.status == 'success') {
+        briefMatchList = response.data.data
       }
     })
     await $axios.get('getBriefLectureList')
@@ -336,6 +362,7 @@ export default {
 
     return {
       briefHotList: briefHotList,
+      briefMatchList: briefMatchList,
       briefLectureList: briefLectureList,
       briefWallList: briefWallList,
       briefArticleList: briefArticleList,

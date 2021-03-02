@@ -124,6 +124,10 @@ export const state = () => ({
   }, {
     value: '马克思主义学院',
     label: '马克思主义学院',
+    children: [{
+      value: '马克思主义学院',
+      label: '马克思主义学院',
+    }]
   }, {
     value: '信息科学与工程学院',
     label: '信息科学与工程学院',
@@ -165,33 +169,73 @@ export const state = () => ({
   }, {
     value: '医学院',
     label: '医学院',
+    children: [{
+      value: '医学院',
+      label: '医学院',
+    }]
   }, {
     value: '药学院',
     label: '药学院',
+    children: [{
+      value: '药学院',
+      label: '药学院',
+    }]
   }, {
     value: '湘杏学院',
     label: '湘杏学院',
+    children: [{
+      value: '湘杏学院',
+      label: '湘杏学院',
+    }]
   }, {
     value: '研究生院',
     label: '研究生院',
+    children: [{
+      value: '研究生院',
+      label: '研究生院',
+    }]
   }, {
     value: '国际教育学院',
     label: '国际教育学院',
+    children: [{
+      value: '国际教育学院',
+      label: '国际教育学院',
+    }]
   }, {
     value: '继续教育学院',
     label: '继续教育学院',
+    children: [{
+      value: '继续教育学院',
+      label: '继续教育学院',
+    }]
   }, {
     value: '体育艺术学院',
     label: '体育艺术学院',
+    children: [{
+      value: '体育艺术学院',
+      label: '体育艺术学院',
+    }]
   }, {
     value: '第一中医临床学院',
     label: '第一中医临床学院',
+    children: [{
+      value: '第一中医临床学院',
+      label: '第一中医临床学院',
+    }]
   }, {
     value: '第二中医临床学院',
     label: '第二中医临床学院',
+    children: [{
+      value: '第二中医临床学院',
+      label: '第二中医临床学院',
+    }]
   }, {
     value: '临床医学院',
     label: '临床医学院',
+    children: [{
+      value: '临床医学院',
+      label: '临床医学院',
+    }]
   }]
 })
 

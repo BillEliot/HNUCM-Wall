@@ -19,9 +19,9 @@
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <a-table :columns="columns" :dataSource="hotList" rowKey="title">
-                        <router-link slot="_title" slot-scope="text, record" :to="{ path: '/hot/detail', query: { id: record.id }}">
+                        <nuxt-link slot="_title" slot-scope="text, record" :to="{ path: '/hot/detail', query: { id: record.id }}">
                             {{ text }}
-                        </router-link>
+                        </nuxt-link>
                         <a-tag slot="type" slot-scope="text">{{ text }}</a-tag>
                         <!-- search -->
                         <div
@@ -99,11 +99,10 @@ export default {
         columns: [{
             dataIndex: 'title',
             title: '标题',
-            scopedSlots: { customRender: '_title' },
             scopedSlots: {
+                customRender: '_title',
                 filterDropdown: 'filterDropdown',
-                filterIcon: 'filterIcon',
-                customRender: 'customRender',
+                filterIcon: 'filterIcon'
             },
             onFilter: (value, record) => record.title.toString().toLowerCase().includes(value.toLowerCase()),
             onFilterDropdownVisibleChange: visible => {

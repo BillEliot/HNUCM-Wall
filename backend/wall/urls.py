@@ -154,4 +154,8 @@ urlpatterns = [
     path('getLectureDetail', views.getLectureDetail),
     path('addLecture', views.addLecture),
     path('deleteLecture', views.deleteLecture),
+    # Match
+    path('getBriefMatchList', views.getBriefMatchList),
+    path('getMatchList', views.getMatchList),
+    path('getMatchDetail', views.getMatchDetail),
 ]

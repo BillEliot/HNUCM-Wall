@@ -92,6 +92,7 @@ class Help(models.Model):
 
 
 
+##############################################################
 class Bank_UpdateMessage(models.Model):
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
@@ -198,9 +199,11 @@ class Bank_Result(models.Model):
 
     def __str__(self):
         return self.user.username
+##############################################################
 
 
 
+##############################################################
 class File_UploadHistory(models.Model):
     comment = models.TextField()
     user = models.ForeignKey('User', on_delete=models.CASCADE)
@@ -246,6 +249,25 @@ class File(models.Model):
 
     class Meta:
         ordering = ('-date',)
+
+    def __str__(self):
+        return self.name
+##############################################################
+
+
+
+class CommonFile(models.Model):
+    fileType = (
+        ('word', 'word'),
+        ('excel', 'excel'),
+        ('ppt', 'ppt'),
+        ('pdf', 'pdf')
+    )
+
+    name = models.CharField(max_length=200)
+    _file = models.FileField(upload_to='file/')
+    _type = models.CharField(max_length=20, choices=fileType)
+    match = models.ForeignKey('Match', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name
@@ -453,56 +475,20 @@ class Lecture(models.Model):
 
 
 
-class Activity_JinGui(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
-    content = models.TextField(default=u'元气满满的一天～')
-    cover = models.ImageField(upload_to='img/JinGui', default='img/JinGui/default.png')
-    audio = models.FileField(upload_to='audio/JinGui', default='audio/JinGui/default.mp3')
-    date = models.DateTimeField(auto_now=True)
+class Match(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField(null=True)
+    requirement = models.TextField(null=True)
+    prizeDescription = models.TextField(null=True)
+    startDate = models.DateTimeField()
+    endDate = models.DateTimeField()
+    totalBonus = models.IntegerField(default=0)
 
     class Meta:
-        ordering = ('-date',)
+        ordering = ('-startDate',)
 
-
-
-class Statistics_VirtualDiagnosis(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
-
-    patient_name = models.CharField(max_length=100)
-    patient_gender = models.CharField(max_length=100)
-    patient_age = models.CharField(max_length=100)
-    patient_chiefcomplaint = models.CharField(max_length=200)
-    patient_coldhot = models.CharField(max_length=100)
-    patient_sweat = models.CharField(max_length=100)
-    patient_pain = models.CharField(max_length=100)
-    patient_body = models.CharField(max_length=100)
-    patient_eareye = models.CharField(max_length=100)
-    patient_sleep = models.CharField(max_length=100)
-    patient_flavor = models.CharField(max_length=100)
-    patient_excretion = models.CharField(max_length=100)
-    patient_face = models.CharField(max_length=100)
-    patient_tongue = models.CharField(max_length=100)
-    patient_vein = models.CharField(max_length=100)
-
-    player_diagnosis = models.CharField(max_length=100)
-    player_syndrome = models.TextField()
-    player_method = models.CharField(max_length=100)
-    player_prescription = models.TextField()
-    player_acupoints = models.CharField(max_length=200)
-
-    ref_diagnosis = models.CharField(max_length=100)
-    ref_syndrome = models.TextField()
-    ref_method = models.CharField(max_length=100)
-    ref_prescription = models.TextField()
-    ref_acupoints = models.CharField(max_length=200)
-
-    date = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ('-date',)
-    
     def __str__(self):
-        return self.user.username
+        return self.title
 
 
 
@@ -558,3 +544,58 @@ class Message(models.Model):
 
     class Meta:
         ordering = ('-date',)
+
+
+
+# Pending
+class Activity_JinGui(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    content = models.TextField(default=u'元气满满的一天～')
+    cover = models.ImageField(upload_to='img/JinGui', default='img/JinGui/default.png')
+    audio = models.FileField(upload_to='audio/JinGui', default='audio/JinGui/default.mp3')
+    date = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('-date',)
+
+
+
+# Pending
+class Statistics_VirtualDiagnosis(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+
+    patient_name = models.CharField(max_length=100)
+    patient_gender = models.CharField(max_length=100)
+    patient_age = models.CharField(max_length=100)
+    patient_chiefcomplaint = models.CharField(max_length=200)
+    patient_coldhot = models.CharField(max_length=100)
+    patient_sweat = models.CharField(max_length=100)
+    patient_pain = models.CharField(max_length=100)
+    patient_body = models.CharField(max_length=100)
+    patient_eareye = models.CharField(max_length=100)
+    patient_sleep = models.CharField(max_length=100)
+    patient_flavor = models.CharField(max_length=100)
+    patient_excretion = models.CharField(max_length=100)
+    patient_face = models.CharField(max_length=100)
+    patient_tongue = models.CharField(max_length=100)
+    patient_vein = models.CharField(max_length=100)
+
+    player_diagnosis = models.CharField(max_length=100)
+    player_syndrome = models.TextField()
+    player_method = models.CharField(max_length=100)
+    player_prescription = models.TextField()
+    player_acupoints = models.CharField(max_length=200)
+
+    ref_diagnosis = models.CharField(max_length=100)
+    ref_syndrome = models.TextField()
+    ref_method = models.CharField(max_length=100)
+    ref_prescription = models.TextField()
+    ref_acupoints = models.CharField(max_length=200)
+
+    date = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('-date',)
+    
+    def __str__(self):
+        return self.user.username
