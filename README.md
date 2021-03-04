@@ -34,51 +34,67 @@ pm2 start npm --name "wall" -- run start
 # Deploy nginx
 vim /etc/nginx/nginx.conf
 
-# add
-...
-upstream wall {
-    server 127.0.0.1:3000;
-}
+## comment
+```
+#include /etc/nginx/conf.d/*.conf;
+#include /etc/nginx/sites-enabled/*;
+```
 
-server{
-    listen 80;
+## add
+```
+http{
+    ...
+    #include /etc/nginx/conf.d/*.conf;
+    #include /etc/nginx/sites-enabled/*;
 
-    server_name hnucmwall.top;
-    index index.html index.htm index.php default.html default.htm default.php;
-    location / {
-            proxy_set_header X-Real-Ip $remote_addr;
-            proxy_set_header X-Forward-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Nginx-Proxy true;
-            proxy_pass http://wall;
-            proxy_redirect off;
-    } 
-    location ~ /\.
-    {
-        deny all;
+    upstream wall {
+        server 127.0.0.1:3000;
     }
 
-    access_log  /var/www/logs/wall.log;
-}
+    server{
+        listen 80;
 
-server{
-    listen 8000;
-    server_name localhost;
-    charset utf-8;
-    access_log off;
-    location /media {
-        alias /var/www/ums-develop;
+        server_name hnucmwall.top;
+        index index.html index.htm index.php default.html default.htm default.php;
+        location / {
+                proxy_set_header X-Real-Ip $remote_addr;
+                proxy_set_header X-Forward-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Nginx-Proxy true;
+                proxy_pass http://wall;
+                proxy_redirect off;
+        } 
+        location ~ /\.
+        {
+            deny all;
+        }
+
+        access_log  /var/log/nginx/wall.log;
     }
-    location / {
-        uwsgi_pass  127.0.0.1:8001;
-        include     /etc/nginx/uwsgi_params;
-        client_max_body_size 300M;
+
+    server{
+        listen 8000;
+        server_name localhost;
+        charset utf-8;
+        access_log off;
+        location /media {
+            alias /var/www/ums-develop;
+        }
+        location / {
+            uwsgi_pass  127.0.0.1:8001;
+            include     /etc/nginx/uwsgi_params;
+            client_max_body_size 300M;
+        }
     }
 }
-...
-
+```
 service nginx restart
 
 # Deploy Backend
+zip -r backend.zip backend
+scp backend.zip username@address:/var/www/wall/backend
+
+unzip backend.zip
+
 pip3 install uwsgi
 touch socket.xml && vim socket.xml
 # add
