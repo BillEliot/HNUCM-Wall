@@ -1,4 +1,4 @@
-### Tech Stack
+# Tech Stack
 
 * Vue@2.6.12
 * Nuxt@5.12.5
@@ -6,7 +6,7 @@
 * Django@3.1.7
 * Nginx@1.10.3
 
-### HOW TO START
+# HOW TO START
 
 > dev
 
@@ -19,8 +19,9 @@ cd backend && python3 manager.py runserver
 
 > product
 
+## Deploy frontend
+
 ```
-# Deploy frontend
 cd frontend && npm run build
 zip -r frontend.zip .nuxt static nuxt.config.js package.json
 scp frontend.zip username@address:/var/www/wall/frontend
@@ -30,18 +31,17 @@ unzip frontend.zip
 npm install
 npm install -g pm2
 pm2 start npm --name "wall" -- run start
+```
 
-# Deploy nginx
+## Deploy nginx
+```
 vim /etc/nginx/nginx.conf
 
-## comment
-```
+# comment
 #include /etc/nginx/conf.d/*.conf;
 #include /etc/nginx/sites-enabled/*;
-```
 
-## add
-```
+# add
 http{
     ...
     #include /etc/nginx/conf.d/*.conf;
@@ -86,10 +86,12 @@ http{
         }
     }
 }
-```
-service nginx restart
 
-# Deploy Backend
+service nginx restart
+```
+
+## Deploy Backend
+```
 zip -r backend.zip backend
 scp backend.zip username@address:/var/www/wall/backend
 
@@ -97,7 +99,7 @@ unzip backend.zip
 
 pip3 install uwsgi
 touch socket.xml && vim socket.xml
-# add
+
 <uwsgi>
     <socket>:8001</socket>
     <chdir>.</chdir>
