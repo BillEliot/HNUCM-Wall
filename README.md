@@ -77,7 +77,7 @@ http{
         charset utf-8;
         access_log off;
         location /media {
-            alias /var/www/ums-develop;
+            alias /var/www/wall/backend/media;
         }
         location / {
             uwsgi_pass  127.0.0.1:8001;
