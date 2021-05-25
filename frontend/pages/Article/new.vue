@@ -100,7 +100,7 @@ export default {
       submitArticle() {
           if (!!this.title && !!this.content) {
               this.$axios.post('submitArticle', qs.stringify({
-                  id: this.articleDetail.id,
+                  id: this.isEdit ? this.articleDetail.id : -1,
                   isEdit: this.isEdit,
                   title: this.title,
                   tags: this.tags,

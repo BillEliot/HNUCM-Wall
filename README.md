@@ -37,13 +37,10 @@ pm2 start npm --name "wall" -- run start
 ```
 vim /etc/nginx/nginx.conf
 
-# comment
-#include /etc/nginx/conf.d/*.conf;
-#include /etc/nginx/sites-enabled/*;
-
 # add
 http{
     ...
+    # comment
     #include /etc/nginx/conf.d/*.conf;
     #include /etc/nginx/sites-enabled/*;
 
@@ -103,7 +100,7 @@ touch socket.xml && vim socket.xml
 <uwsgi>
     <socket>:8001</socket>
     <chdir>.</chdir>
-    <module>wall.wsgi:application</module>
+    <module>backend.wsgi:application</module>
     <processes>4</processes>
     <daemonize>uwsgi.log</daemonize>
 </uwsgi>
