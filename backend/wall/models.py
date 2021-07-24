@@ -2,6 +2,15 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
+class Banner(models.Model):
+    imageUrl = models.URLField()
+    linkUrl = models.URLField(blank=True, null=True)
+
+    def __str__(self):
+        return self.imageUrl
+
+
+
 class User(AbstractUser):
     openid = models.CharField(max_length=50, default=0)
     username = models.CharField(max_length=150, unique=True)
@@ -330,15 +339,14 @@ class Medicine(models.Model):
         ('安神药', '安神药'),
         ('平肝息风药', '平肝息风药'),
         ('开窍药', '开窍药'),
-        ('补虚药', '补虚药'),
+        ('补益药', '补益药'),
         ('收涩药', '收涩药'),
         ('涌吐药', '涌吐药'),
-        ('涌吐药', '涌吐药'),
         ('攻毒杀虫止痒药', '攻毒杀虫止痒药'),
-        ('拨毒化腐生肌药', '拨毒化腐生肌药')
+        ('拔毒化腐生肌药', '拔毒化腐生肌药'),
+        ('其他', '其他')
     )
     subMedicineType = (
-        ('/', '/'),
         ('发散风寒药', '发散风寒药'),
         ('发散风热药', '发散风热药'),
         ('清热泻火药', '清热泻火药'),
@@ -352,9 +360,14 @@ class Medicine(models.Model):
         ('祛风寒湿药', '祛风寒湿药'),
         ('祛风湿热药', '祛风湿热药'),
         ('祛风湿强筋骨药', '祛风湿强筋骨药'),
+        ('化湿药', '化湿药'),
         ('利水消肿药', '利水消肿药'),
         ('利尿通淋药', '利尿通淋药'),
         ('利湿退黄药', '利湿退黄药'),
+        ('温里药', '温里药'),
+        ('理气药', '理气药'),
+        ('消食药', '消食药'),
+        ('驱虫药', '驱虫药'),
         ('凉血止血药', '凉血止血药'),
         ('化瘀止血药', '化瘀止血药'),
         ('收敛止血药', '收敛止血药'),
@@ -362,7 +375,7 @@ class Medicine(models.Model):
         ('活血止痛药', '活血止痛药'),
         ('活血调经药', '活血调经药'),
         ('活血疗伤药', '活血疗伤药'),
-        ('破血消癓药', '破血消癓药'),
+        ('活血消癓药', '活血消癓药'),
         ('温化寒痰药', '温化寒痰药'),
         ('清化热痰药', '清化热痰药'),
         ('止咳平喘药', '止咳平喘药'),
@@ -370,38 +383,104 @@ class Medicine(models.Model):
         ('养心安神药', '养心安神药'),
         ('平抑肝阳药', '平抑肝阳药'),
         ('息风止痉药', '息风止痉药'),
+        ('开窍药', '开窍药'),
         ('补气药', '补气药'),
         ('补血药', '补血药'),
         ('补阴药', '补阴药'),
         ('补阳药', '补阳药'),
         ('固表止汗药', '固表止汗药'),
         ('敛肺涩肠药', '敛肺涩肠药'),
-        ('固精缩尿止带药', '固精缩尿止带药')
+        ('固精缩尿止带药', '固精缩尿止带药'),
+        ('涌吐药', '涌吐药'),
+        ('攻毒杀虫止痒药', '攻毒杀虫止痒药'),
+        ('拔毒化腐生肌药', '拔毒化腐生肌药'),
+        ('其他', '其他')
+    )
+    medicineToxicity = (
+        ('无毒', '无毒'),
+        ('小毒', '小毒'),
+        ('有毒', '有毒'),
+        ('大毒', '大毒')
     )
 
     name = models.CharField(max_length=20)
     # e.g. 辛;微苦;温
-    flavor = models.CharField(max_length=50)
+    flavor = models.CharField(max_length=50, blank=True, null=True)
     # e.g. 肺;膀胱
-    channel = models.CharField(max_length=50)
-    function = models.CharField(max_length=200)
-    application = models.CharField(max_length=200)
+    channel = models.CharField(max_length=50, blank=True, null=True)
+    function = models.CharField(max_length=200, blank=True, null=True)
+    application = models.CharField(max_length=200, blank=True, null=True)
     image = models.ImageField(upload_to='img/medicine', default='img/medicine/default.png')
     _type = models.CharField(max_length=20, choices=medicineType)
     subType = models.CharField(max_length=20, choices=subMedicineType)
+    highlight = models.TextField(blank=True, null=True)
+    toxicity = models.CharField(max_length=10, choices=medicineToxicity, default='无毒')
+    relevantMedicine = models.ManyToManyField('Medicine', blank=True)
 
     def __str__(self):
         return self.name
 
 
 
+class Medicine_Recite(models.Model):
+    user = models.OneToOneField('User', on_delete=models.CASCADE)
+    chapters = models.CharField(max_length=300)
+    everydayAmount = models.IntegerField(default=0)
+    totalAmount = models.IntegerField(default=0)
+    isRandom = models.BooleanField(default=True)
+    allUnrecitedMedicine = models.ManyToManyField('Medicine', blank=True, related_name="allUnrecitedMedicine")
+    allReviewMedicine = models.ManyToManyField('Medicine', blank=True, related_name="allReviewedMedicine")
+    todayWillReciteAmount = models.IntegerField(default=0) # Because of the terms' amount of the last day would not up to everydayAmount
+    todayUnrecitedMedicine = models.ManyToManyField('Medicine', blank=True, related_name="todayUnrecitedMedicine")
+    todayWillReviewAmount = models.IntegerField(default=0) # Because of the terms' amount of the last day would not up to everydayAmount
+    todayReviewMedicine = models.ManyToManyField('Medicine', blank=True, related_name="todayReviewMedicine")
+    lastReciteDate = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+
+
+
+class Medicine_Recite_Log(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    date = models.DateField()
+
+    def __str__(self):
+        return self.user.username
+
+
+
 class Prescription(models.Model):
+    prescriptionType = (
+        ('解表剂', '解表剂'),
+        ('泻下剂', '泻下剂'),
+        ('和解剂', '和解剂'),
+        ('清热剂', '清热剂'),
+        ('祛暑剂', '祛暑剂'),
+        ('温里剂', '温里剂'),
+        ('表里双解剂', '表里双解剂'),
+        ('补益剂', '补益剂'),
+        ('固涩剂', '固涩剂'),
+        ('安神剂', '安神剂'),
+        ('开窍剂', '开窍剂'),
+        ('理气剂', '理气剂'),
+        ('理血剂', '理血剂'),
+        ('治风剂', '治风剂'),
+        ('治燥剂', '治燥剂'),
+        ('祛湿剂', '祛湿剂'),
+        ('祛痰剂', '祛痰剂'),
+        ('消导化积剂', '消导化积剂'),
+        ('驱虫剂', '驱虫剂'),
+        ('涌吐剂', '涌吐剂'),
+        ('治痈殇剂', '治痈殇剂')
+    )
+
     name = models.CharField(max_length=20)
-    composition = models.ManyToManyField('Medicine')
+    medicine = models.ManyToManyField('Medicine', blank=True)
+    song = models.CharField(max_length=100)
     function = models.CharField(max_length=50)
     application = models.CharField(max_length=100)
-    song = models.CharField(max_length=100)
-    _type = models.CharField(max_length=50)
+    _type = models.CharField(max_length=50, choices=prescriptionType)
 
     def __str__(self):
         return self.name

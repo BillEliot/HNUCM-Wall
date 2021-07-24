@@ -19,22 +19,38 @@
         <!-- container -->
         <div class="container">
             <div class="row">
-                <div class="text-center col-md-12">
-                    <a-card title="功效" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px' }">
-                        <p class="card-text">
-                            {{ prescriptionDetail.function }}
-                        </p>
-                    </a-card>
-                    <a-card title="组成" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px' }">
-                        <!--<a slot="extra" href="#">More</a>-->
-                        <p class="card-text">
-                        </p>
-                    </a-card>
-                    <a-card title="方歌" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px' }">
-                        <p class="card-text">
-                            {{ prescriptionDetail.song }}
-                        </p>
-                    </a-card>
+                <div class="row">
+                    <div class="text-center col-md-6">
+                        <a-card title="功效" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px', 'color': 'green' }">
+                            <p class="card-text">
+                                {{ prescriptionDetail.function }}
+                            </p>
+                        </a-card>
+                    </div>
+                    <div class="text-center col-md-6">
+                        <a-card title="主治" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px', 'color': 'green' }">
+                            <p class="card-text">
+                                {{ prescriptionDetail.application }}
+                            </p>
+                        </a-card>
+                    </div>
+                </div>
+                <a-divider />
+                <div class="row">
+                    <div class="text-center col-md-6">
+                        <a-card title="方歌" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px', 'color': 'green' }">
+                            <div v-for="p in prescriptionDetail.song.split(',')" :key="p" class="card-text">
+                                {{ p }}
+                            </div>
+                        </a-card>
+                    </div>
+                    <div class="text-center col-md-6">
+                        <a-card title="组成" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px', 'color': 'green' }">
+                            <a v-for="medicine in prescriptionDetail.medicine" :key="medicine" @click="openMedicineDetail(medicine)" class="card-text">
+                                {{ medicine }}
+                            </a>
+                        </a-card>
+                    </div>
                 </div>
             </div>
         </div>
@@ -45,7 +61,6 @@
 </template>
 
 <script>
-import qs from 'qs'
 import { mapState } from 'vuex'
 import navbar from '~/components/navbar'
 import Footer from '~/components/footer'
@@ -69,10 +84,12 @@ export default {
       })
       
       await $axios.get('getPrescriptionDetail', {
-          name: query.name
+          params: {
+              name: query.name
+          }
       })
       .then((response) => {
-          prescriptionDetail = response.data
+          prescriptionDetail = response.data.data
       })
 
       return {
@@ -81,6 +98,10 @@ export default {
       }
   },
   methods: {
+      openMedicineDetail(name) {
+          let routeData = this.$router.resolve({ path: '/medicine/detail', query: { name: name } });
+          window.open(routeData.href, '_blank');
+      }
   },
   computed: mapState({
       baseUrl: state => state.baseUrl
@@ -94,6 +115,6 @@ a {
 }
 
 .card-text {
-    font-size: 18px;
+    font-size: 17px;
 }
 </style>

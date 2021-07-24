@@ -18,22 +18,32 @@
         <div class="container">
             <div class="row">
                 <div class="text-center col-md-12">
-                    <a-card title="定位" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px' }">
-                        <p class="card-text">
-                            {{ acupointDetail.location }}
-                        </p>
-                    </a-card>
-                    <a-card title="功效" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px' }">
-                        <span v-for="(_function, index) in acupointDetail.function.split(';')" :key="index" class="card-text">
-                            {{ _function }}
-                            <br />
-                        </span>
-                    </a-card>
-                    <a-card title="类型" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px' }">
-                        <a-tag v-for="(type, index) in acupointDetail.type.split(';')" :key="index" :color="randomColor()" class="card-text">
-                            {{ type }}
-                        </a-tag>
-                    </a-card>
+                    <div class="row">
+                        <div class="text-center col-md-6">
+                            <a-card title="定位" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px', 'color': 'green' }">
+                                <p class="card-text">
+                                    {{ acupointDetail.location }}
+                                </p>
+                            </a-card>
+                        </div>
+                        <div class="text-center col-md-6">
+                            <a-card title="类型" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px', 'color': 'green' }">
+                                <a-tag v-for="(type, index) in acupointDetail.type.split(';')" :key="index" :color="randomColor()" class="card-text">
+                                    {{ type }}
+                                </a-tag>
+                            </a-card>
+                        </div>
+                    </div>
+                    <a-divider />
+                    <div class="row">
+                        <div class="text-center col-md-6">
+                            <a-card title="主治" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px', 'color': 'green' }">
+                                <div v-for="(_function, index) in acupointDetail.function.split(';')" :key="index" class="card-text">
+                                    {{ _function }}
+                                </div>
+                            </a-card>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -605,7 +605,6 @@ export default {
 .float-card-content {
     max-height: 260px;
     position: relative;
-    overflow: auto;
 }
 span#float-card {
     position: absolute;

@@ -20,35 +20,62 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 col-sm-12 text-center">
-                    <!-- filter -->
-                    <div class="text-left">
-                        <a-tag @click="getAllPrescription('解表剂')">解表剂</a-tag>
-                        <a-tag @click="getAllPrescription('泻下剂')">泻下剂</a-tag>
-                        <a-tag @click="getAllPrescription('和解剂')">和解剂</a-tag>
-                        <a-tag @click="getAllPrescription('清热剂')">清热剂</a-tag>
-                        <a-tag @click="getAllPrescription('祛暑剂')">祛暑剂</a-tag>
-                        <a-tag @click="getAllPrescription('温里剂')">温里剂</a-tag>
-                        <a-tag @click="getAllPrescription('表里双解剂')">表里双解剂</a-tag>
-                        <a-tag @click="getAllPrescription('补益剂')">补益剂</a-tag>
-                        <a-tag @click="getAllPrescription('固涩剂')">固涩剂</a-tag>
-                        <a-tag @click="getAllPrescription('安神剂')">安神剂</a-tag>
-                        <a-tag @click="getAllPrescription('开窍剂')">开窍剂</a-tag>
-                        <a-tag @click="getAllPrescription('理气剂')">理气剂</a-tag>
-                        <a-tag @click="getAllPrescription('理血剂')">理血剂</a-tag>
-                        <a-tag @click="getAllPrescription('治风剂')">治风剂</a-tag>
-                        <a-tag @click="getAllPrescription('治燥剂')">治燥剂</a-tag>
-                        <a-tag @click="getAllPrescription('祛湿剂')">祛湿剂</a-tag>
-                        <a-tag @click="getAllPrescription('祛痰剂')">祛痰剂</a-tag>
-                        <a-tag @click="getAllPrescription('消食剂')">消食剂</a-tag>
-                        <a-tag @click="getAllPrescription('驱虫剂')">驱虫剂</a-tag>
-                        <a-tag @click="getAllPrescription('涌吐剂')">涌吐剂</a-tag>
-                        <a-tag @click="getAllPrescription('治痈殇剂')">治痈殇剂</a-tag>
-                    </div>
+                    <a-select
+                        placeholder="请选择方剂类型"
+                        @change="onChange_selectType"
+                        style="width: 20%"
+                    >
+                        <a-select-option value='解表剂'>解表剂</a-select-option>
+                        <a-select-option value='泻下剂'>泻下剂</a-select-option>
+                        <a-select-option value='和解剂'>和解剂</a-select-option>
+                        <a-select-option value='清热剂'>清热剂</a-select-option>
+                        <a-select-option value='祛暑剂'>祛暑剂</a-select-option>
+                        <a-select-option value='温里剂'>温里剂</a-select-option>
+                        <a-select-option value='表里双解剂'>表里双解剂</a-select-option>
+                        <a-select-option value='补益剂'>补益剂</a-select-option>
+                        <a-select-option value='固涩剂'>固涩剂</a-select-option>
+                        <a-select-option value='安神剂'>安神剂</a-select-option>
+                        <a-select-option value='开窍剂'>开窍剂</a-select-option>
+                        <a-select-option value='理气剂'>理气剂</a-select-option>
+                        <a-select-option value='理血剂'>理血剂</a-select-option>
+                        <a-select-option value='治风剂'>治风剂</a-select-option>
+                        <a-select-option value='治燥剂'>治燥剂</a-select-option>
+                        <a-select-option value='祛湿剂'>祛湿剂</a-select-option>
+                        <a-select-option value='祛痰剂'>祛痰剂</a-select-option>
+                        <a-select-option value='消食剂'>消食剂</a-select-option>
+                        <a-select-option value='驱虫剂'>驱虫剂</a-select-option>
+                        <a-select-option value='涌吐剂'>涌吐剂</a-select-option>
+                        <a-select-option value='治痈殇剂'>治痈殇剂</a-select-option>
+                    </a-select>
+                    <a-button type="link" @click="$router.push({ path: '/prescription/search' })">没找到想要的？来直接搜索吧！</a-button>
                     <hr />
-                    <p class="text-center description">
-                        {{ allPrescription.description }}
-                    </p>
-                    <prescription :allPrescription="allPrescription.allPrescription"></prescription>
+                    <!--------------------------------------------------------------------->
+                    <div v-for="i in Math.ceil(allPrescription.length / 3)" :key="i" class="row text-center" style="margin-top: 20px;">
+                        <div v-if="allPrescription.length - (i-1)*3 >= 3">
+                            <div v-for="j in 3" :key="j" class="col-md-4">
+                                <a-card hoverable :title="allPrescription[(i-1)*3+j-1].name" @click="prescriptionDetail(allPrescription[(i-1)*3+j-1].name)" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px' }">
+                                    <a-card title="功效" :headStyle="{ 'font-weight': 'bold' }">
+                                        <p>{{ allPrescription[(i-1)*3+j-1].function }}</p>
+                                    </a-card>
+                                    <a-card title="主治" :headStyle="{ 'font-weight': 'bold' }">
+                                        <p>{{ allPrescription[(i-1)*3+j-1].application }}</p>
+                                    </a-card>
+                                </a-card>
+                            </div>
+                        </div>
+                        <div v-else>
+                            <div  v-for="j in allPrescription.length - (i-1)*3" :key="j" class="col-md-4">
+                                <a-card hoverable :title="allPrescription[(i-1)*3+j-1].name" @click="prescriptionDetail(allPrescription[(i-1)*3+j-1].name)" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px' }">
+                                    <a-card title="功效" :headStyle="{ 'font-weight': 'bold' }">
+                                        <p>{{ allPrescription[(i-1)*3+j-1].function }}</p>
+                                    </a-card>
+                                    <a-card title="主治" :headStyle="{ 'font-weight': 'bold' }">
+                                        <p>{{ allPrescription[(i-1)*3+j-1].application }}</p>
+                                    </a-card>
+                                </a-card>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -59,7 +86,6 @@
 </template>
 
 <script>
-import qs from 'qs'
 import Footer from '~/components/footer.vue'
 import navbar from '~/components/navbar'
 import { mapState } from 'vuex'
@@ -74,7 +100,6 @@ export default {
   },
   data() {
     return {
-        page: 1
     }
   },
   async asyncData({ $axios }) {
@@ -92,7 +117,7 @@ export default {
         }
     })
     .then((response) => {
-        allPrescription = response.data
+        allPrescription = response.data.data
     })
 
     return {
@@ -108,8 +133,26 @@ export default {
               }
           })
           .then((response) => {
-            this.allPrescription = response.data
+              if (response.data.code == 200 && response.data.status == 'success') {
+                  this.allPrescription = response.data.data
+              }
           })
+      },
+      onChange_selectType(value) {
+          this.$axios.get('getAllPrescription', {
+              params: {
+                  type: value,
+              }
+          })
+          .then((response) => {
+              if (response.data.code == 200 && response.data.status == 'success') {
+                  this.allPrescription = response.data.data
+              }
+          })
+      },
+      prescriptionDetail(name) {
+          let routeData = this.$router.resolve({ path: '/prescription/detail', query: { name: name } });
+          window.open(routeData.href, '_blank');
       }
   },
   computed: mapState({

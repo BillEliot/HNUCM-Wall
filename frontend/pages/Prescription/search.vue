@@ -19,16 +19,35 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12 col-sm-12 text-center">
-                <a-spin :spinning="spinning">
-                    <a-auto-complete
-                        v-model="searchKeyword"
-                        :dataSource="completeResult"
-                        size="large"
-                        @search="autoComplete"
-                        placeholder="输入方剂名"
-                        class="auto-complete"
-                    />
-                    <a-button type="primary" @click="search" size="large" class="search">搜索</a-button>
+              <a-spin :spinning="spinning">
+                  <a-auto-complete
+                    v-model="searchKeyword"
+                    :dataSource="completeResult"
+                    size="large"
+                    @search="autoComplete"
+                    placeholder="输入方剂名"
+                    class="auto-complete"
+                  />
+                  <a-button type="primary" @click="search" size="large" class="search">搜索</a-button>
+                  <hr />
+                  <!-------------------------------------------------------------------------------->
+                  <a-table
+                    :columns="columns"
+                    :dataSource="searchResult"
+                    :rowKey="record => record.name"
+                    :bordered="true"
+                    :pagination="false"
+                    class="table"
+                  >
+                    <router-link
+                      slot="action"
+                      slot-scope="text, record"
+                      target="_blank"
+                      :to="{ path: '/prescription/detail', query: { name: record.name } }"
+                    >
+                      详细
+                    </router-link>
+                  </a-table>
                 </a-spin>
             </div>
         </div>
@@ -52,6 +71,19 @@ export default {
       spinning: false,
       searchKeyword: '',
       completeResult: [],
+      columns: [{
+        title: '方剂',
+        dataIndex: 'name',
+      }, {
+        title: '功效',
+        dataIndex: 'function'
+      }, {
+        title: '类型',
+        dataIndex: 'type',
+      }, {
+        title: '操作',
+        scopedSlots: { customRender: 'action' }
+      }],
     }
   },
   async asyncData({ $axios }) {
@@ -69,7 +101,18 @@ export default {
   methods: {
     search() {
       if (!!this.searchKeyword) {
-        this.$router.push({ path: '/prescription/searchResult', query: { keyword: this.searchKeyword } })
+        this.spinning = true
+        this.$axios.get('searchPrescription', {
+          params: {
+            keyword: this.searchKeyword
+          }
+        })
+        .then((response) => {
+          if (response.data.code == 200 && response.data.status == 'success') {
+            this.spinning = false
+            this.searchResult = response.data.data
+          }
+        })
       }
       else {
         this.$message.warning('输入些关键字吧～')

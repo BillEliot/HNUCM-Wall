@@ -1,10 +1,7 @@
 <template>
   <div>
     <a-carousel autoplay class="carousel">
-      <div style="cursor:pointer" @click="confirm_VirtualDiagnosis" >
-        <img style="width:100%;" src="~assets/img/banner_virtualdiagnosis.png">
-      </div>
-      <img src="https://s2.ax1x.com/2019/05/26/VV8t9s.jpg">
+      <img v-for="banner, index in banners" :key="index" :src="banner.imageUrl" @click="imageLink(banner.linkUrl)">
     </a-carousel>
     <!---------------------------------------------------->
     <section class="section">
@@ -248,6 +245,15 @@ export default {
     }
   },
   async asyncData({ $axios }) {
+    let banners = []
+
+    await $axios.get('getBanners')
+    .then((response) => {
+      if (response.data.code == 200 && response.data.status == 'success') {
+        banners = response.data.data
+      }
+    })
+    // --------------------------------------------------------------------
     let briefHotList = []
     let briefMatchList = []
     let briefLectureList = []
@@ -361,6 +367,8 @@ export default {
     })
 
     return {
+      banners:banners,
+
       briefHotList: briefHotList,
       briefMatchList: briefMatchList,
       briefLectureList: briefLectureList,
@@ -377,14 +385,10 @@ export default {
     }
   },
   methods: {
-    confirm_VirtualDiagnosis() {
-      this.$confirm({
-        title: '下载【虚拟门诊】',
-        content: '虚拟门诊利用虚拟现实技术，提供真实的门诊接诊环境，您之后可以在【虚拟仿真->查看记录(虚拟门诊)】里查看您的接诊记录，是否要下载？(提取码: 7mrx)',
-        onOk() {
-            window.open('https://pan.baidu.com/s/1cgM0tvrYj9eENRspyxuZmg', '_blank')
-        }
-      })
+    imageLink(url) {
+      if (url != '') {
+        window.open(url, '_blank')
+      }
     }
   },
   computed: mapState({
@@ -430,6 +434,7 @@ a {
 }
 .carousel {
   height: 300px;
+  margin-top: 3em;
 }
 .carousel img {
   height: 300px;

@@ -1,8 +1,8 @@
 <template>
-    <div>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6 col-md-offset-3">
+    <div class="container">
+        <a-row type="flex" justify="center" align="middle">
+            <a-col :lg="14" :md="18" :sm="18" :xs="24">
+                <a-spin :spinning="spinning">
                     <div class="fh5co-form">
                         <a-row type="flex" class="text-center">
                             <a-col :span="6">
@@ -12,7 +12,7 @@
                             </a-col>
                             <a-col :span="6" :offset="12">
                                 <a-button type="primary" @click="$router.push({ path: '/login' })">
-                                    手机登录<a-icon type="right" />
+                                    登录<a-icon type="right" />
                                 </a-button>
                             </a-col>
                         </a-row>
@@ -287,22 +287,18 @@
                             </a-form-item>
                         </a-form>
                     </div>
-                </div>
-            </div>
-        </div>
-        <Footer />
+                </a-spin>
+            </a-col>
+        </a-row>
     </div>
 </template>
 
 <script>
 import qs from 'qs'
 import { mapState } from 'vuex'
-import Footer from '~/components/footer.vue'
 
 export default {
-  components: {
-      Footer
-  },
+  layout: 'common',
   data () {
     return {
         form_register: this.$form.createForm(this),
@@ -331,7 +327,8 @@ export default {
             },
         },
         isDisableCaptcha: false,
-        CaptchaButtonText: '获取'
+        CaptchaButtonText: '获取',
+        spinning: false
     }
   },
   async asyncData({ store, redirect }) {
@@ -367,6 +364,7 @@ export default {
     },
     */
     register(e) {
+        this.spinning = true
         e.preventDefault()
         this.form_register.validateFields((err, values) => {
             if (!err) {
@@ -385,6 +383,7 @@ export default {
                     captcha: values.captcha
                 }))
                 .then((response) => {
+                    this.spinning = false
                     if (response.data.code == 200 && response.data.status == 'success') {
                         this.$message.success('注册成功')
                         this.$router.push({ path: '/login' })

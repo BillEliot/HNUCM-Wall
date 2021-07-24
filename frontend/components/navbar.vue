@@ -64,18 +64,17 @@
                 <a-menu-item key="file:1" @click="$router.push({ path: '/file' })">学习资料文件</a-menu-item>
             </a-menu-item-group>
             <a-menu-item-group title="中药">
-                <a-menu-item key="medicine:1" @click="$router.push({ path: '/medicine' })">中药库</a-menu-item>
-                <a-menu-item key="medicine:2" @click="$router.push({ path: '/medicine/search' })">查中药</a-menu-item>
+                <a-menu-item key="medicine:1" @click="$router.push({ path: '/medicine/search' })">查中药</a-menu-item>
+                <a-menu-item key="medicine:2" @click="$router.push({ path: '/medicine' })">中药库</a-menu-item>
+                <a-menu-item key="medicine:3" @click="$router.push({ path: '/medicine/recite' })">背中药</a-menu-item>
             </a-menu-item-group>
-            <!--
             <a-menu-item-group title="方剂">
-                <a-menu-item key="prescription:1" @click="$router.push({ path: '/prescription' })">方剂库</a-menu-item>
-                <a-menu-item key="prescription:2" @click="$router.push({ path: '/prescription/search' })">查方剂</a-menu-item>
+                <a-menu-item key="prescription:1" @click="$router.push({ path: '/prescription/search' })">查方剂</a-menu-item>
+                <a-menu-item key="prescription:2" @click="$router.push({ path: '/prescription' })">方剂库</a-menu-item>
             </a-menu-item-group>
-            -->
             <a-menu-item-group title="经络">
-                <a-menu-item key="acupuncture:1" @click="$router.push({ path: '/acupuncture' })">经络库</a-menu-item>
-                <a-menu-item key="acupuncture:2" @click="$router.push({ path: '/acupuncture/search' })">查穴位</a-menu-item>
+                <a-menu-item key="acupuncture:1" @click="$router.push({ path: '/acupuncture/search' })">查穴位</a-menu-item>
+                <a-menu-item key="acupuncture:2" @click="$router.push({ path: '/acupuncture' })">经络库</a-menu-item>
             </a-menu-item-group>
         </a-sub-menu>
 

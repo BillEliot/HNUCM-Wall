@@ -2,9 +2,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    #l login_required
+    # login_required
     path('not_login', views.not_login),
     # Common
+    path('getBanners', views.getBanners),
     path('uploadImage', views.uploadImage),
     path('removeImage', views.removeImage),
     path('uploadImg_markdown', views.uploadImg_markdown),
@@ -127,6 +128,20 @@ urlpatterns = [
     path('getMedicineDetail', views.getMedicineDetail),
     path('searchMedicine', views.searchMedicine),
     path('autoComplete_searchMedicine', views.autoComplete_searchMedicine),
+    path('IsSetMedicineReciteSetting', views.IsSetMedicineReciteSetting),
+    path('getNumMedicine', views.getNumMedicine),
+    path('getPlanChapters_Medicine', views.getPlanChapters_Medicine),
+    path('submitReciteSetting_Medicine', views.submitReciteSetting_Medicine),
+    path('getReciteMedicine', views.getReciteMedicine),
+    path('recite_remember_medicine', views.recite_remember_medicine),
+    path('recite_forget_medicine', views.recite_forget_medicine),
+    path('recite_forgetUndo_medicine', views.recite_forgetUndo_medicine),
+    path('recite_trash_medicine', views.recite_trash_medicine),
+    path('recite_trashMore_medicine', views.recite_trashMore_medicine),
+    path('recite_restore_medicine', views.recite_restore_medicine),
+    path('canSign_reciteMedicine', views.canSign_reciteMedicine),
+    path('sign_reciteMedicine', views.sign_reciteMedicine),
+    path('getSignLog_reciteMedicine', views.getSignLog_reciteMedicine),
     # Prescription
     path('getAllPrescription', views.getAllPrescription),
     path('getPrescriptionDetail', views.getPrescriptionDetail),

@@ -16,7 +16,7 @@
                         <h3>友情链接</h3>
                         <ul class="list-unstyled links">
                             <li><a target="_blank" href="https://billeliot.github.io">Eliot's Blog</a></li>
-                            <li><a target="_blank" href="http://dtcm.hnucm.edu.cn">中医术语中英对照查询系统</a></li>
+                            <li><a target="_blank" href="https://www.medai.vip">中医术语中英对照查询系统</a></li>
                             <li><a target="_blank" href="http://jwmis.hnucm.edu.cn">湖南中医药大学教务管理系统</a></li>
                             <li><a target="_blank" href="https://www.hnucm.edu.cn">湖南中医药大学</a></li>
                             <li><a target="_blank" href="https://www.sdutcm.edu.cn">山东中医药大学</a></li>

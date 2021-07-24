@@ -129,25 +129,30 @@
                                     rules: [{ validator: validatorTransfer }]
                                 }
                             ]"
+                            v-if="this.subject != '科目'"
+                            :key="forceUpdateTree"
                             checkable
                             show-line
                             :selectable="false"
                             :default-expanded-keys="['root']"
                             @check="selectChapter"
-                            v-if="this.subject != '科目'"
                             class="select-chapter"
                         >
                             <a-tree-node key="root" :title="this.subject">
                                 <a-tree-node v-if="hasTestPaper" key="testPaper">
                                     <span slot="title" style="color: #A52A2A">模拟试卷</span>
-                                    <a-tree-node v-for="chapter, index in this.chapters" v-if="chapter.isTestPaper" :key="chapter.key">
-                                        <a-icon slot="switcherIcon" type="carry-out" />
-                                        <span slot="title" style="color: #FF8C00">{{ chapter.title }}</span>
+                                    <template v-for="chapter in this.chapters">
+                                        <a-tree-node  v-if="chapter.isTestPaper" :key="chapter.key">
+                                            <a-icon slot="switcherIcon" type="carry-out" />
+                                            <span slot="title" style="color: #FF8C00">{{ chapter.title }}</span>
+                                        </a-tree-node>
+                                    </template>
+                                </a-tree-node>
+                                <template v-for="chapter in this.chapters">
+                                    <a-tree-node  v-if="!chapter.isTestPaper" :key="chapter.key">
+                                        <span slot="title" style="color: #1890ff">{{ chapter.title }}</span>
                                     </a-tree-node>
-                                </a-tree-node>
-                                <a-tree-node v-for="chapter, index in this.chapters" v-if="!chapter.isTestPaper" :key="chapter.key">
-                                    <span slot="title" style="color: #1890ff">{{ chapter.title }}</span>
-                                </a-tree-node>
+                                </template>
                             </a-tree-node>
                         </a-tree>
                     </a-form-item>
@@ -345,7 +350,8 @@ export default {
             }
         },
         visible_update: false,
-        bankUpdateMessage: []
+        bankUpdateMessage: [],
+        forceUpdateTree: 0
     }
   },
   async asyncData({ $axios, store }) {
@@ -416,16 +422,17 @@ export default {
       selectBank(value) {
           this.subject = value
           this.chapters = this.getChapters(value)
-          let isHasTestPaper = this.chapters.some((chapter) => {
+          let _hasTestPaper = this.chapters.some((chapter) => {
               return chapter.isTestPaper == true
           })
-          if (isHasTestPaper) this.hasTestPaper = true
+          if (_hasTestPaper) this.hasTestPaper = true
           else this.hasTestPaper = false
 
           this.form_bank.setFieldsValue({
               'numQuestion': 0
           })
           this.maxNumQuestion = 0
+          this.forceUpdateTree += 1
           return value
       },
       selectChapter(checkedKey) {
@@ -434,26 +441,26 @@ export default {
               'numQuestion': 0
           })
           this.maxNumQuestion = 0
-          for (let i = checkedKey.length - 1; i>=0; i--) {
+          for (let i = checkedKey.length - 1; i >= 0; i--) {
               if (checkedKey[i] != 'root' && checkedKey[i] != 'testPaper') {
                   this.targetChapters.push(checkedKey[i])
-                  // get quantity of selected banks' question
-                  this.$axios.get('getNumQuestion', {
-                      params: {
-                          subject: this.subject,
-                          chapters: this.targetChapters
-                      }
-                  })
-                  .then((response) => {
-                      if (response.data.code == 200 && response.data.status == 'success') {
-                          this.maxNumQuestion += response.data
-                          this.form_bank.setFieldsValue({
-                              'numQuestion': this.form_bank.getFieldValue('numQuestion') + response.data.data
-                          })
-                      }
-                  })
               }
           }
+          // get quantity of selected banks' question
+          this.$axios.get('getNumQuestion', {
+              params: {
+                  subject: this.subject,
+                  chapters: this.targetChapters
+              }
+          })
+          .then((response) => {
+              if (response.data.code == 200 && response.data.status == 'success') {
+                  this.maxNumQuestion = response.data.data
+                  this.form_bank.setFieldsValue({
+                      'numQuestion': response.data.data
+                  })
+              }
+          })
       },
       chapterFilter(inputValue, option) {
           return option.title.indexOf(inputValue) > -1

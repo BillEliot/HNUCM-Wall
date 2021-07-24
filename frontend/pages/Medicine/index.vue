@@ -29,15 +29,15 @@
                         :options="medicineType"
                         placeholder="请选择中药类型"
                         @change="onChange_selectType"
-                        style="width: 70%"
+                        style="width: 20%"
                     >
                     </a-cascader>
                     <a-select
                         v-show="select == 'flavor'"
                         mode="multiple"
                         placeholder="请选择性味"
-                        style="width: 70%"
                         @change="onChange_selectFlavor"
+                        style="width: 20%"
                     >
                         <a-select-option value="寒">寒</a-select-option>
                         <a-select-option value="热">热</a-select-option>
@@ -53,8 +53,8 @@
                         v-show="select == 'channel'"
                         mode="multiple"
                         placeholder="请选择归经"
-                        style="width: 70%"
                         @change="onChange_selectChannel"
+                        style="width: 20%"
                     >
                         <a-select-option value="心">心</a-select-option>
                         <a-select-option value="肝">肝</a-select-option>
@@ -62,12 +62,12 @@
                         <a-select-option value="肺">肺</a-select-option>
                         <a-select-option value="肾">肾</a-select-option>
                     </a-select>
-                    <a-button type="link" @click="$router.push({ path: '/medicine/search' })" style="float: right">没找到想要的？来直接搜索吧！</a-button>
+                    <a-button type="link" @click="$router.push({ path: '/medicine/search' })">没找到想要的？来直接搜索吧！</a-button>
                     <hr />
                     <!--------------------------------------------------------------------->
-                    <div v-for="i in Math.ceil(allMedicine.length / 3)" class="row text-center" style="margin-top: 20px;">
+                    <div v-for="i in Math.ceil(allMedicine.length / 3)" :key="i" class="row text-center" style="margin-top: 20px;">
                         <div v-if="allMedicine.length - (i-1) * 3 >= 3">
-                            <div v-for="j in 3" class="col-md-4">
+                            <div v-for="j in 3" :key="j" class="col-md-4">
                                 <a-card hoverable @click="medicineDetail(allMedicine[(i - 1) * 3 + j - 1].name)" class="medicine-card">
                                     <img slot="cover" :src="baseUrl + allMedicine[(i - 1) * 3 + j - 1].image" />
                                     <a-card-meta :title="allMedicine[(i - 1) * 3 + j - 1].name"></a-card-meta>
@@ -75,7 +75,7 @@
                             </div>
                         </div>
                         <div v-else>
-                            <div  v-for="j in allMedicine.length - (i - 1) * 3" class="col-md-4">
+                            <div  v-for="j in allMedicine.length - (i - 1) * 3" :key="j" class="col-md-4">
                                 <a-card hoverable @click="medicineDetail(allMedicine[(i - 1) * 3 + j - 1].name)" class="medicine-card">
                                     <img slot="cover" :src="baseUrl + allMedicine[(i - 1) * 3 + j - 1].image" />
                                     <a-card-meta :title="allMedicine[(i-1) * 3 + j - 1].name"></a-card-meta>
@@ -90,7 +90,6 @@
 </template>
 
 <script>
-import qs from 'qs'
 import { mapState } from 'vuex'
 
 export default {
@@ -156,8 +155,8 @@ export default {
             value: '化湿药',
             label: '化湿药',
             children: [{
-                value: '/',
-                label: '/'
+                value: '化湿药',
+                label: '化湿药'
             }]
         }, {
             value: '利水渗湿药',
@@ -176,29 +175,29 @@ export default {
             value: '温里药',
             label: '温里药',
             children: [{
-                value: '/',
-                label: '/'
+                value: '温里药',
+                label: '温里药'
             }]
         }, {
             value: '理气药',
             label: '理气药',
             children: [{
-                value: '/',
-                label: '/'
+                value: '理气药',
+                label: '理气药'
             }]
         }, {
             value: '消食药',
             label: '消食药',
             children: [{
-                value: '/',
-                label: '/'
+                value: '消食药',
+                label: '消食药'
             }]
         }, {
             value: '驱虫药',
             label: '驱虫药',
             children: [{
-                value: '/',
-                label: '/'
+                value: '驱虫药',
+                label: '驱虫药'
             }]
         }, {
             value: '止血药',
@@ -229,8 +228,8 @@ export default {
                 value: '活血疗伤药',
                 label: '活血疗伤药'
             }, {
-                value: '破血消癓药',
-                label: '破血消癓药'
+                value: '活血消癓药',
+                label: '活血消癓药'
             }]
         }, {
             value: '化痰止咳平喘药',
@@ -269,12 +268,12 @@ export default {
             value: '开窍药',
             label: '开窍药',
             children: [{
-                value: '/',
-                label: '/'
+                value: '开窍药',
+                label: '开窍药'
             }]
         }, {
-            value: '补虚药',
-            label: '补虚药',
+            value: '补益药',
+            label: '补益药',
             children: [{
                 value: '补气药',
                 label: '补气药'
@@ -305,22 +304,29 @@ export default {
             value: '涌吐药',
             label: '涌吐药',
             children: [{
-                value: '/',
-                label: '/'
+                value: '涌吐药',
+                label: '涌吐药'
             }]
         }, {
             value: '攻毒杀虫止痒药',
             label: '攻毒杀虫止痒药',
             children: [{
-                value: '/',
-                label: '/'
+                value: '攻毒杀虫止痒药',
+                label: '攻毒杀虫止痒药'
             }]
         }, {
-            value: '拨毒化腐生肌药',
-            label: '拨毒化腐生肌药',
+            value: '拔毒化腐生肌药',
+            label: '拔毒化腐生肌药',
             children: [{
-                value: '/',
-                label: '/'
+                value: '拔毒化腐生肌药',
+                label: '拔毒化腐生肌药'
+            }]
+        }, {
+            value: '其他',
+            label: '其他',
+            children: [{
+                value: '其他',
+                label: '其他'
             }]
         }],
         select: 'type'

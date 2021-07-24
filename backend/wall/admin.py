@@ -26,6 +26,14 @@ class ArticleAdmin(admin.ModelAdmin):
     list_filter=('tags', 'isAdopted')
     search_fields = ('title',)
 
+class MedicineAdmin(admin.ModelAdmin):
+    list_display = ('name', '_type', 'subType')
+    search_fields = ('name',)
+
+class PrescriptionAdmin(admin.ModelAdmin):
+    list_display = ('name', '_type')
+    filter_horizontal = ('medicine',)
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Bank, BankAdmin)
 admin.site.register(Love, LoveAdmin)
@@ -37,6 +45,7 @@ admin.site.register(CommonFile)
 admin.site.register(File)
 admin.site.register(File_Subject)
 #admin.site.register(Activity_JinGui)
-admin.site.register(Medicine)
-admin.site.register(Prescription)
+admin.site.register(Medicine, MedicineAdmin)
+admin.site.register(Prescription, PrescriptionAdmin)
 admin.site.register(Match)
+admin.site.register(Banner)

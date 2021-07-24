@@ -1,5 +1,6 @@
+from django.db.models.fields import DateField
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, requires_csrf_token
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required, permission_required
@@ -16,6 +17,23 @@ import json
 @csrf_exempt
 def not_login(request):
     return JsonResponse({ 'code': 302, 'path': '/login' })
+
+
+
+@csrf_exempt
+def getBanners(request):
+    data = []
+    for banner in Banner.objects.all():
+        data.append({
+            'imageUrl': banner.imageUrl,
+            'linkUrl': banner.linkUrl
+        })
+
+    return JsonResponse({
+        'code': 200,
+        'status': 'success',
+        'data': data
+    })
 
 
 
@@ -109,7 +127,7 @@ def register(request):
 
 # Pending
 @csrf_exempt
-def registerWX(requests):
+def registerWX(request):
     openid = requests.POST.get('openid')
     email = request.POST.get('email')
     password = request.POST.get('password')
@@ -2959,7 +2977,7 @@ def submitHelpComment(request):
         comment = Comment.objects.create(user=request.user, content=content, _help=_help)
         # message
         message = Message.objects.create(
-            user=requestuser,
+            user=request.user,
             _type='comment',
             _from='help',
             messageID=_id,
@@ -3671,7 +3689,10 @@ def getMedicineDetail(request):
                 'application': medicine.application,
                 'image': medicine.image.url,
                 'type': medicine._type,
-                'subType': medicine.subType
+                'subType': medicine.subType,
+                'highlight': medicine.highlight,
+                'toxicity': medicine.toxicity,
+                'relevantMedicine': ';'.join(list(medicine.relevantMedicine.all().values_list('name', flat=True)))
             }
         })
     except:
@@ -3731,22 +3752,499 @@ def autoComplete_searchMedicine(request):
 
 
 @csrf_exempt
+def IsSetMedicineReciteSetting(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'code': 200,
+            'status': 'false'
+        })
+    if not Medicine_Recite.objects.filter(user=request.user).exists():
+        return JsonResponse({
+            'code': 200,
+            'status': 'false'
+        })
+    
+    recite = Medicine_Recite.objects.get(user=request.user)
+    # a new day
+    if datetime.date.today() > recite.lastReciteDate:
+        recite.lastReciteDate = datetime.date.today()
+        # recite
+        if recite.allUnrecitedMedicine.count() > int(recite.everydayAmount):
+            recite.todayWillReciteAmount = recite.everydayAmount
+            recite.todayUnrecitedMedicine.set(recite.allUnrecitedMedicine.all()[:int(recite.everydayAmount)])
+        else:
+            recite.todayWillReciteAmount = recite.allUnrecitedMedicine.count()
+            recite.todayUnrecitedMedicine.set(recite.allUnrecitedMedicine.all())
+        # review
+        randomAllReviewMedicine = list(recite.allReviewMedicine.all())
+        random.shuffle(randomAllReviewMedicine)
+        if recite.allReviewMedicine.count() > int(recite.everydayAmount) / 2:
+            recite.todayWillReviewAmount = int(recite.everydayAmount / 2)
+            recite.todayReviewMedicine.set(randomAllReviewMedicine[:int(recite.everydayAmount / 2)])
+        else:
+            recite.todayWillReviewAmount = recite.allReviewMedicine.count()
+            recite.todayReviewMedicine.set(randomAllReviewMedicine)
+        recite.save()
+
+    
+
+    return JsonResponse({
+            'code': 200,
+            'status': 'true',
+            'data': {
+                'signDays': Medicine_Recite_Log.objects.filter(user=request.user).count(),
+                'chapters': recite.chapters,
+                'recitedAmount': recite.totalAmount - recite.allUnrecitedMedicine.count(),
+                'everydayAmount': recite.everydayAmount,
+                'totalAmount': recite.totalAmount,
+                'todayWillReciteAmount': recite.todayWillReciteAmount,
+                'todayWillReviewAmount': recite.todayWillReviewAmount,
+                'todayUnlearnedAmount': recite.todayUnrecitedMedicine.count() + recite.todayReviewMedicine.count()
+            }
+        })
+
+
+
+@csrf_exempt
+def getNumMedicine(request):
+    strChapters = request.GET.getlist('chapters[]')
+
+    try:
+        quantity = 0
+        for strChapter in strChapters:
+            quantity += Medicine.objects.filter(_type=strChapter).count()
+
+        return JsonResponse({
+            'code': 200,
+            'status': 'success',
+            'data': quantity
+        })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+@login_required
+def getPlanChapters_Medicine(request):
+    recite = Medicine_Recite.objects.get(user=request.user)
+
+    maxChapters = 0
+    for chapter in recite.chapters.split(';'):
+        maxChapters += Medicine.objects.filter(_type=chapter).count()
+
+    return JsonResponse({
+        'code': 200,
+        'status': 'success',
+        'data': {
+            'chapters': recite.chapters.split(';'),
+            'maxChapters': maxChapters,
+            'currentAmount': recite.everydayAmount,
+            'isRandom': recite.isRandom
+        }
+    })
+
+
+
+@csrf_exempt
+@login_required
+def submitReciteSetting_Medicine(request):
+    chapters = request.POST.getlist('chapters[]')
+    amount = int(request.POST.get('amount'))
+    isRandom = True if request.POST.get('isRandom') == 'true' else False
+
+    isChangeChapter = False
+    try:
+        # Create or Update
+        if not Medicine_Recite.objects.filter(user=request.user).exists():
+            recite = Medicine_Recite.objects.create(user=request.user)
+        else:
+            recite = Medicine_Recite.objects.get(user=request.user)
+            if recite.chapters == ';'.join(chapters):
+                isChangeChapter = False
+                recite.everydayAmount = amount
+            else:
+                isChangeChapter = True
+                recite.allUnrecitedMedicine.clear()
+                recite.allReviewMedicine.clear()
+
+            recite.todayUnrecitedMedicine.clear()
+            recite.todayReviewMedicine.clear()
+
+        if isChangeChapter:
+            for chapter in chapters:
+                recite.allUnrecitedMedicine.add(*Medicine.objects.filter(_type=chapter))
+
+            recite.totalAmount = recite.allUnrecitedMedicine.count()
+
+        recite.isRandom = isRandom
+        recite.chapters = ';'.join(chapters)
+        recite.everydayAmount = amount
+
+        # recite
+        if isRandom:
+            randomAllUnrecitedMedicine = list(recite.allUnrecitedMedicine.all())
+            random.shuffle(randomAllUnrecitedMedicine)
+            recite.allUnrecitedMedicine.set(randomAllUnrecitedMedicine)
+        else:
+            recite.allUnrecitedMedicine.clear()
+            for chapter in chapters:
+                recite.allUnrecitedMedicine.add(*Medicine.objects.filter(_type=chapter))
+                randomAllUnrecitedMedicine = recite.allUnrecitedMedicine.all()
+        
+        if recite.allUnrecitedMedicine.count() > int(recite.everydayAmount):
+            recite.todayWillReciteAmount = recite.everydayAmount
+            recite.todayUnrecitedMedicine.set(randomAllUnrecitedMedicine[:int(recite.everydayAmount)])
+        else:
+            recite.todayWillReciteAmount = recite.allUnrecitedMedicine.count()
+            recite.todayUnrecitedMedicine.set(randomAllUnrecitedMedicine)
+
+        # review
+        randomAllReviewMedicine = list(recite.allReviewMedicine.all())
+        random.shuffle(randomAllReviewMedicine)
+        if recite.allReviewMedicine.count() > int(recite.everydayAmount) / 2:
+            recite.todayWillReviewAmount = recite.everydayAmount / 2
+            recite.todayReviewMedicine.set(randomAllReviewMedicine[:int(recite.everydayAmount / 2)])
+        else:
+            recite.todayWillReviewAmount = recite.allReviewMedicine.count()
+            recite.todayReviewMedicine.set(randomAllReviewMedicine)
+        recite.save()
+        
+        return JsonResponse({
+            'code': 200,
+            'status': 'success'
+        })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+@login_required
+def getReciteMedicine(request):
+    recite = Medicine_Recite.objects.get(user=request.user)
+
+    try:
+        data = []
+        # Check date first
+        if recite.lastReciteDate < datetime.date.today():
+            return JsonResponse({
+                'code': 200,
+                'status': 'nextDay'
+            })
+
+        # Review first
+        if recite.todayReviewMedicine.count() > 0:
+            medicines = [reciteThrough.medicine for reciteThrough in recite.todayReviewMedicine.through.objects.filter(medicine_recite=recite).order_by('id')]
+            M = medicines[:10] if recite.todayReviewMedicine.count() >= 10 else medicines
+
+            for medicine in M:
+                data.append({
+                    'name': medicine.name,
+                    'flavor': medicine.flavor,
+                    'channel': medicine.channel,
+                    'function': medicine.function,
+                    'application': medicine.application,
+                    'type': medicine._type,
+                    'subType': medicine.subType,
+                    'highlight': medicine.highlight,
+                    'toxicity': medicine.toxicity,
+                    'isReview': True
+                })
+        # Then new medicine
+        else:
+            medicines = [reciteThrough.medicine for reciteThrough in recite.todayUnrecitedMedicine.through.objects.filter(medicine_recite=recite).order_by('id')]
+            M = medicines[:10] if recite.todayUnrecitedMedicine.count() >= 10 else medicines
+
+            for medicine in M:
+                data.append({
+                    'name': medicine.name,
+                    'flavor': medicine.flavor,
+                    'channel': medicine.channel,
+                    'function': medicine.function,
+                    'application': medicine.application,
+                    'type': medicine._type,
+                    'subType': medicine.subType,
+                    'highlight': medicine.highlight,
+                    'toxicity': medicine.toxicity,
+                    'isReview': False
+                })
+        
+        return JsonResponse({
+            'code': 200,
+            'status': 'success',
+            'bank': data,
+            'todayReviewAmount': recite.todayWillReviewAmount - recite.todayReviewMedicine.count(),
+            'todayReciteAmount': recite.todayWillReciteAmount - recite.todayUnrecitedMedicine.count()
+        })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+@login_required
+def recite_remember_medicine(request):
+    name = request.POST.get('name')
+    isReview = True if request.POST.get('isReview') == 'true' else False
+
+    try:
+        recite = Medicine_Recite.objects.get(user=request.user)
+        medicine = Medicine.objects.get(name=name)
+
+        if isReview:
+            # today
+            recite.todayReviewMedicine.remove(medicine)
+        else:
+            # all
+            recite.allUnrecitedMedicine.remove(medicine)
+            recite.allReviewMedicine.add(medicine)
+            # today
+            recite.todayUnrecitedMedicine.remove(medicine)
+        
+        return JsonResponse({
+            'code': 200,
+            'status': 'success'
+        })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+@login_required
+def recite_forget_medicine(request):
+    name = request.POST.get('name')
+    isReview = True if request.POST.get('isReview') == 'true' else False
+
+    try:
+        recite = Medicine_Recite.objects.get(user=request.user)
+        medicine = Medicine.objects.get(name=name)
+
+        if not isReview:
+            # all
+            recite.allReviewMedicine.add(medicine)
+            recite.allUnrecitedMedicine.remove(medicine)
+            # today
+            recite.todayUnrecitedMedicine.remove(medicine)
+            recite.todayReviewMedicine.add(medicine)
+            recite.todayWillReviewAmount = recite.todayWillReviewAmount + 1
+
+            recite.save()
+        
+        return JsonResponse({
+            'code': 200,
+            'status': 'success'
+        })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+@login_required
+def recite_forgetUndo_medicine(request):
+    name = request.POST.get('name')
+    isReview = True if request.POST.get('isReview') == 'true' else False
+
+    try:
+        recite = Medicine_Recite.objects.get(user=request.user)
+        medicine = Medicine.objects.get(name=name)
+        
+        # today
+        recite.todayReviewMedicine.add(medicine)
+        if not isReview:
+            recite.todayWillReviewAmount = recite.todayWillReviewAmount + 1
+
+        recite.save()
+        
+        return JsonResponse({
+            'code': 200,
+            'status': 'success'
+        })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+@login_required
+def recite_trash_medicine(request):
+    name = request.POST.get('name')
+    isReview = True if request.POST.get('isReview') == 'true' else False
+
+    try:
+        recite = Medicine_Recite.objects.get(user=request.user)
+        medicine = Medicine.objects.get(name=name)
+
+        #all
+        recite.allUnrecitedMedicine.remove(medicine)
+        recite.allReviewMedicine.remove(medicine)
+        
+        #today
+        if isReview:
+            recite.todayReviewMedicine.remove(medicine)
+        else:
+            recite.todayUnrecitedMedicine.remove(medicine)
+        
+        return JsonResponse({
+            'code': 200,
+            'status': 'success'
+        })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+@login_required
+def recite_trashMore_medicine(request):
+    name = request.POST.get('name')
+
+    try:
+        recite = Medicine_Recite.objects.get(user=request.user)
+        medicine = Medicine.objects.get(name=name)
+
+        #all
+        recite.allReviewMedicine.remove(medicine)
+        
+        return JsonResponse({
+            'code': 200,
+            'status': 'success'
+        })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+@login_required
+def recite_restore_medicine(request):
+    name = request.POST.get('name')
+    isReview = True if request.POST.get('isReview') == 'true' else False
+
+    try:
+        recite = Medicine_Recite.objects.get(user=request.user)
+        medicine = Medicine.objects.get(name=name)
+
+        #today
+        if isReview:
+            recite.allReviewMedicine.add(medicine)
+            recite.todayReviewMedicine.add(medicine)
+        else:
+            recite.allUnrecitedMedicine.add(medicine)
+            recite.todayUnrecitedMedicine.add(medicine)
+        
+        return JsonResponse({
+            'code': 200,
+            'status': 'success'
+        })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
+@login_required
+def canSign_reciteMedicine(request):
+    recite = Medicine_Recite.objects.get(user=request.user)
+
+    # Not enter the home page first whereas log page directly
+    if not Medicine_Recite.objects.filter(user=request.user, lastReciteDate=datetime.date.today()).exists():
+        return JsonResponse({
+            'code': 200,
+            'status': 'false',
+            'signDays': Medicine_Recite_Log.objects.filter(user=request.user).count()
+        })
+
+    if Medicine_Recite_Log.objects.filter(user=request.user).filter(date=datetime.date.today()).exists():
+        return JsonResponse({
+            'code': 200,
+            'status': 'done',
+            'signDays': Medicine_Recite_Log.objects.filter(user=request.user).count()
+        })
+
+    if recite.todayUnrecitedMedicine.count() == 0 and recite.todayReviewMedicine.count() == 0:
+        return JsonResponse({
+            'code': 200,
+            'status': 'true',
+            'signDays': Medicine_Recite_Log.objects.filter(user=request.user).count()
+        })
+    else:
+        return JsonResponse({
+            'code': 200,
+            'status': 'false',
+            'signDays': Medicine_Recite_Log.objects.filter(user=request.user).count()
+        })
+
+
+
+@csrf_exempt
+@login_required
+def sign_reciteMedicine(request):
+    recite = Medicine_Recite.objects.get(user=request.user)
+    if recite.todayUnrecitedMedicine.count() == 0 and recite.todayReviewMedicine.count() == 0:
+        if Medicine_Recite_Log.objects.filter(date=datetime.date.today()).exists():
+            return JsonResponse({
+                'code': 200,
+                'status': 'warning',
+                'message': '您已经打过卡了'
+            })
+        else:
+            Medicine_Recite_Log.objects.create(user=request.user, date=datetime.date.today())
+            return JsonResponse({
+                'code': 200,
+                'status': 'success',
+            })
+    else:
+        return JsonResponse({
+            'code': 200,
+            'status': 'error',
+            'message': '不具备打卡资格'
+        })
+
+
+
+@csrf_exempt
+@login_required
+def getSignLog_reciteMedicine(request):
+    dates = request.POST.getlist('dates[]')
+    
+    try:
+        signLog = {}
+        for date in dates:
+            if Medicine_Recite_Log.objects.filter(user=request.user).filter(date=datetime.datetime.strptime(date, "%Y-%m-%d")).exists():
+                signLog[date] = True
+            else:
+                signLog[date] = False
+        
+        return JsonResponse({
+                'code': 200,
+                'status': 'success',
+                'data': signLog
+            })
+    except:
+        return JsonResponse({ 'code': 500 })
+
+
+
+@csrf_exempt
 def getAllPrescription(request):
     _type = request.GET.get('type')
 
     allPrescription = []
-    for prescription in Prescription.objects.filter(_type=PrescriptionType.objects.get(name=_type)):
+    for prescription in Prescription.objects.filter(_type=_type):
         allPrescription.append({
             'name': prescription.name,
-            'function': prescription.function
+            'function': prescription.function,
+            'application': prescription.application
         })
-    PrescriptionInfo = {
-        'description': PrescriptionType.objects.get(name=_type).description,
-        'allPrescription': allPrescription
-    }
 
-
-    return JsonResponse(PrescriptionInfo)
+    return JsonResponse({
+        'code': 200,
+        'status': 'success',
+        'data': allPrescription
+    })
 
 
 
@@ -3760,14 +4258,21 @@ def getPrescriptionDetail(request):
         name = ue_json['name']
 
     prescription = Prescription.objects.get(name=name)
+
     prescriptionDetail = {
         'name': prescription.name,
-        'function': prescription.function,
         'song': prescription.song,
-        'type': prescription._type.name
+        'medicine': [medicineThrough.medicine.name for medicineThrough in prescription.medicine.through.objects.filter(prescription=prescription).order_by('id')],
+        'function': prescription.function,
+        'application': prescription.application,
+        'type': prescription._type
     }
 
-    return JsonResponse(prescriptionDetail)
+    return JsonResponse({
+        'code': 200,
+        'status': 'success',
+        'data': prescriptionDetail
+    })
 
 
 
@@ -3775,16 +4280,23 @@ def getPrescriptionDetail(request):
 def searchPrescription(request):
     keyword = request.GET.get('keyword')
 
-    info = []
-    if keyword != '':
-        for prescription in Prescription.objects.filter(name__contains=keyword):
-            info.append({
-                'name': prescription.name,
-                'function': prescription.function,
-                'type': prescription._type.name
-            })
-    
-    return JsonResponse({ 'info': info })
+    try:
+        _list = []
+        if keyword != '':
+            for prescription in Prescription.objects.filter(name__contains=keyword):
+                _list.append({
+                    'name': prescription.name,
+                    'function': prescription.function,
+                    'type': prescription._type
+                })
+        
+        return JsonResponse({
+            'code': 200,
+            'status': 'success',
+            'data': _list
+        })
+    except:
+        return JsonResponse({ 'code': 500 })
 
 
 

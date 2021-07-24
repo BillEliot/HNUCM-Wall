@@ -22,7 +22,7 @@
                         <a-select-option value="channel">按经脉</a-select-option>
                         <a-select-option value="type">按类型</a-select-option>
                     </a-select>
-                    <a-select v-show="select == 'channel'" placeholder="请选择经脉" style="width: 70%" @change="getAllAcupoint_Channel">
+                    <a-select v-show="select == 'channel'" placeholder="请选择经脉" style="width: 20%" @change="getAllAcupoint_Channel">
                         <a-select-option value='手太阴肺经'>手太阴肺经</a-select-option>
                         <a-select-option value='手阳明大肠经'>手阳明大肠经</a-select-option>
                         <a-select-option value='足阳明胃经'>足阳明胃经</a-select-option>
@@ -38,7 +38,7 @@
                         <a-select-option value='任脉'>任脉</a-select-option>
                         <a-select-option value='督脉'>督脉</a-select-option>
                     </a-select>
-                    <a-select v-show="select == 'type'" placeholder="请选择穴位类型" style="width: 70%" @change="getAllAcupoint_Type">
+                    <a-select v-show="select == 'type'" placeholder="请选择穴位类型" style="width: 20%" @change="getAllAcupoint_Type">
                         <a-select-option value='井穴'>井穴</a-select-option>
                         <a-select-option value='荥穴'>荥穴</a-select-option>
                         <a-select-option value='输穴'>输穴</a-select-option>
@@ -54,17 +54,17 @@
                         <a-select-option value='八脉交会穴'>八脉交会穴</a-select-option>
                         <a-select-option value='交会穴'>交会穴</a-select-option>
                     </a-select>
-                    <a-button type="link" @click="$router.push({ path: '/acupuncture/search' })" style="float: right">没找到想要的？来直接搜索吧！</a-button>
+                    <a-button type="link" @click="$router.push({ path: '/acupuncture/search' })">没找到想要的？来直接搜索吧！</a-button>
                     <hr />
                     <!--------------------------------------------------------------------->
-                    <div v-for="i in Math.ceil(allAcupoint.length / 3)" class="row text-center" style="margin-top: 20px;">
+                    <div v-for="i in Math.ceil(allAcupoint.length / 3)" :key="i" class="row text-center" style="margin-top: 20px;">
                         <div v-if="allAcupoint.length - (i-1)*3 >= 3">
-                            <div v-for="j in 3" class="col-md-4">
+                            <div v-for="j in 3" :key="j" class="col-md-4">
                                 <a-card hoverable :title="allAcupoint[(i-1)*3+j-1].name" @click="acupointDetail(allAcupoint[(i-1)*3+j-1].name)" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px' }">
-                                    <a-card title="位置">
+                                    <a-card title="位置" :headStyle="{ 'font-weight': 'bold' }">
                                         <p>{{ allAcupoint[(i-1)*3+j-1].location }}</p>
                                     </a-card>
-                                    <a-card title="类型">
+                                    <a-card title="类型" :headStyle="{ 'font-weight': 'bold' }">
                                         <a-tag v-for="(type, index) in allAcupoint[(i-1)*3+j-1]._type.split(';')" :key="index" :color="randomColor()">
                                             {{ type }}
                                         </a-tag>
@@ -73,12 +73,12 @@
                             </div>
                         </div>
                         <div v-else>
-                            <div  v-for="j in allAcupoint.length - (i-1)*3" class="col-md-4">
+                            <div  v-for="j in allAcupoint.length - (i-1)*3" :key="j" class="col-md-4">
                                 <a-card hoverable :title="allAcupoint[(i-1)*3+j-1].name" @click="acupointDetail(allAcupoint[(i-1)*3+j-1].name)" :headStyle="{ 'font-weight': 'bold', 'font-size': '24px' }">
-                                    <a-card title="位置">
+                                    <a-card title="位置" :headStyle="{ 'font-weight': 'bold' }">
                                         <p>{{ allAcupoint[(i-1)*3+j-1].location }}</p>
                                     </a-card>
-                                    <a-card title="类型">
+                                    <a-card title="类型" :headStyle="{ 'font-weight': 'bold' }">
                                         <a-tag v-for="(type, index) in allAcupoint[(i-1)*3+j-1]._type.split(';')" :key="index" :color="randomColor()">
                                             {{ type }}
                                         </a-tag>
