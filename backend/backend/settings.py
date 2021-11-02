@@ -125,7 +125,7 @@ EMAIL_USE_SSL = True
 EMAIL_HOST = 'smtpdm.aliyun.com'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'no-reply@mail.hnucmwall.top'
-EMAIL_HOST_PASSWORD = 'SuXiaoMo8299502'
+EMAIL_HOST_PASSWORD = ''
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
