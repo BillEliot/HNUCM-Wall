@@ -76,6 +76,11 @@ http{
         location /media {
             alias /var/www/wall/backend/media;
         }
+        # django admin css.
+        # python manage.py collectstatic
+        location /static {
+            alias /var/www/dtcm/backend/static;
+        }
         location / {
             uwsgi_pass  127.0.0.1:8001;
             include     /etc/nginx/uwsgi_params;
